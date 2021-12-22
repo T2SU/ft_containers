@@ -1,0 +1,13 @@
+*.o
+*.out
+cmake-build-debug/
+.idea
+.vscode
+.DS_Store
+*.dSYM
+*.id0
+*.id1
+*.idb
+*.nam
+*.til
+*.i64
