@@ -1,19 +1,19 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   IteratorWrapper.hpp                               :+:      :+:    :+:   */
+/*   wrapper.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/12/22 18:57:28 by smun              #+#    #+#             */
-/*   Updated: 2021/12/22 21:53:40 by smun             ###   ########.fr       */
+/*   Created: 2021/12/22 22:48:46 by smun              #+#    #+#             */
+/*   Updated: 2021/12/22 22:48:49 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef IteratorWrapper_HPP
-# define IteratorWrapper_HPP
+#ifndef WRAPPER_HPP
+# define WRAPPER_HPP
 
-# include "iterator_base.hpp"
+# include "base.hpp"
 
 namespace ft
 {

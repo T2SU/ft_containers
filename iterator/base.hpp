@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   iterator_base.hpp                                  :+:      :+:    :+:   */
+/*   base.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 18:58:18 by smun              #+#    #+#             */
-/*   Updated: 2021/12/22 18:59:09 by smun             ###   ########.fr       */
+/*   Updated: 2021/12/22 22:48:34 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef ITERATOR_BASE_HPP
-# define ITERATOR_BASE_HPP
+#ifndef BASE_HPP
+# define BASE_HPP
 
 # include <cstddef>
 

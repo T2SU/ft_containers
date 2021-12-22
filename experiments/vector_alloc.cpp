@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <algorithm>
 
 int main()
 {
@@ -9,6 +10,7 @@ int main()
 	std::vector<int> vi2 = vi;
 
 	std::allocator<int> al;
+	std::pair<int, int> dd;
 
 	std::cout << vi.size() << "/" << vi.capacity() << std::endl;
 	vi.push_back(5);

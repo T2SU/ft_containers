@@ -1,19 +1,19 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   iterator_manipulator.hpp                           :+:      :+:    :+:   */
+/*   manipulator.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 19:00:42 by smun              #+#    #+#             */
-/*   Updated: 2021/12/22 19:01:28 by smun             ###   ########.fr       */
+/*   Updated: 2021/12/22 22:48:26 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef ITERATOR_MANIPULATOR_HPP
-# define ITERATOR_MANIPULATOR_HPP
+#ifndef MANIPULATOR_HPP
+# define MANIPULATOR_HPP
 
-# include "iterator_base.hpp"
+# include "base.hpp"
 
 namespace ft
 {

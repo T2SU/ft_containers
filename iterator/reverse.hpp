@@ -1,19 +1,19 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   reverse_iterator.hpp                               :+:      :+:    :+:   */
+/*   reverse.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 18:59:30 by smun              #+#    #+#             */
-/*   Updated: 2021/12/22 21:57:39 by smun             ###   ########.fr       */
+/*   Updated: 2021/12/22 22:47:56 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef REVERSE_ITERATOR_HPP
-# define REVERSE_ITERATOR_HPP
+#ifndef REVERSE_HPP
+# define REVERSE_HPP
 
-# include "iterator_base.hpp"
+# include "base.hpp"
 
 namespace ft
 {
