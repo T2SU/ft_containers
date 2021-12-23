@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 10:56:57 by smun              #+#    #+#             */
-/*   Updated: 2021/12/22 23:10:06 by smun             ###   ########.fr       */
+/*   Updated: 2021/12/24 00:45:01 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define VECTOR_HPP
 
 # include <memory>
+# include "iterator.hpp"
 # include "algorithm.hpp"
 
 namespace ft
@@ -31,10 +32,13 @@ namespace ft
 		typedef typename allocator_type::difference_type	difference_type;
 		typedef typename allocator_type::pointer			pointer;
 		typedef typename allocator_type::const_pointer		const_pointer;
-		typedef typename iterator_wrapper<pointer>			iterator;
-		typedef typename iterator_wrapper<const_pointer>	const_iterator;
-		typedef typename reverse_iterator<iterator>			reverse_iterator;
-		typedef typename reverse_iterator<const_iterator>	const_reverse_iterator;
+		typedef ft::IteratorWrapper<pointer>				iterator;
+		typedef ft::IteratorWrapper<const_pointer>			const_iterator;
+		typedef ft::reverse_iterator<iterator>				reverse_iterator;
+		typedef ft::reverse_iterator<const_iterator>		const_reverse_iterator;
+
+	private:
+		size_type	RecommendedSize(size_type n) const;
 
 	protected:
 		pointer			_begin_ptr;
@@ -44,7 +48,7 @@ namespace ft
 		allocator_type	_allocator;
 
 	public:
-		/* Constructors */
+		/* Default Constructor */
 		vector()
 		: _begin_ptr(nullptr)
 		, _end_ptr(nullptr)
@@ -54,12 +58,14 @@ namespace ft
 		{
 		}
 
+		/* Copy Constructor */
 		vector(const vector& other)
 		: _allocator(other.get_allocator())
 		{
-			ConstructBy(other.begin(), other.end());
+			assign(other.begin(), other.end());
 		}
 
+		/* Parameterized Constructor (Allocator) */
 		explicit
 		vector(const Allocator& alloc)
 		: _begin_ptr(nullptr)
@@ -70,6 +76,7 @@ namespace ft
 		{
 		}
 
+		/* Parameterized Constructor (Assignment and Allocator) */
 		explicit
 		vector(size_type count, const T& value = T(), const Allocator& alloc = Allocator())
 		: _begin_ptr(nullptr)
@@ -81,6 +88,7 @@ namespace ft
 			assign(count, value);
 		}
 
+		/* Parameterized Constructor (Source iterator and Allocator) */
 		template <typename InputIt>
 		vector(InputIt first, InputIt last, const Allocator& alloc = Allocator())
 		: _begin_ptr(nullptr)
@@ -104,20 +112,32 @@ namespace ft
 
 
 		/* Operators */
-		vector&					operator=(const vector& other);
-		bool					operator==(const vector<T, Allocator>& rhs) const;
-		bool					operator!=(const vector<T, Allocator>& rhs) const;
-		bool					operator<(const vector<T, Allocator>& rhs) const;
-		bool					operator<=(const vector<T, Allocator>& rhs) const;
-		bool					operator>(const vector<T, Allocator>& rhs) const;
-		bool					operator>=(const vector<T, Allocator>& rhs) const;
+		vector&		operator=(const vector& other)
+		{
+			if (this == &another)
+				return *this;
+			assign(other.begin(), other.end());
+			return *this;
+		}
 
 
 		/* Replacement */
-		void					assign(size_type count, const T& value);
+		void	assign(size_type count, const T& value)
+		{
+			clear();
+			EnsureStorage(count);
+			ft::fill(begin(), count, value);
+		}
 
 		template <typename InputIt>
-		void					assign(InputIt first, InputIt last);
+		void	assign(InputIt first, InputIt last)
+		{
+			clear();
+			const difference_type count = ft::distance(first, last);
+			EnsureStorage(count);
+			ft::move(first, last, begin());
+			_end_ptr = begin() + count;
+		}
 
 
 		/* Get Allocator */
@@ -127,126 +147,243 @@ namespace ft
 		/* Accessors */
 		reference				at(size_type pos)
 		{
-			if (pos >= size())
+			if (pos >= size()) // undefined exception at (pos < 0)
 				throw std::out_of_range("vector<T, Alloc>::at(size_t pos)"
-										" 'pos' exceeds container's size");
+										" 'pos' out of bound");
 			return _begin_ptr[n];
 		}
 
 		const_reference			at(size_type pos) const
 		{
-			if (pos >= size())
+			if (pos >= size()) // undefined exception at (pos < 0)
 				throw std::out_of_range("vector<T, Alloc>::at(size_t pos)"
-										" 'pos' exceeds container's size");
+										" 'pos' out of bound");
 			return _begin_ptr[n];
 		}
 
-		reference				operator[](size_type pos)			{}
-		const_reference			operator[](size_type pos)	const	{}
-		reference				front()								{}
-		const_reference			front()						const	{}
-		reference				back()								{}
-		const_reference			back()						const	{}
-		T*						data()								{}
-		const T*				data()						const	{}
+		reference				operator[](size_type pos)
+		{
+			// not defined exceptions at any cases.
+			// Accessing a nonexistent element through this operator is undefined behavior.
+			return _begin_ptr[n];
+		}
+
+		const_reference			operator[](size_type pos) const
+		{
+			// not defined exceptions at any cases.
+			// Accessing a nonexistent element through this operator is undefined behavior.
+			return _begin_ptr[n];
+		}
+
+		reference				front()			{ return _begin_ptr[0];	}
+		const_reference			front()	const	{ return _begin_ptr[0];	}
+		reference				back()			{ return _end_ptr[-1];	}
+		const_reference			back()	const	{ return _end_ptr[-1];	}
+		T*						data()			{ return _begin_ptr;	}
+		const T*				data()	const	{ return _begin_ptr;	}
 
 
 		/* Iterators */
 		iterator				begin()				{ return iterator(_begin_ptr);				}
-		const_iterator			begin()		const	{ return const_iterator(_begin_ptr);			}
-		iterator				end()				{ return iterator(_end_ptr);					}
+		const_iterator			begin()		const	{ return const_iterator(_begin_ptr);		}
+		iterator				end()				{ return iterator(_end_ptr);				}
 		const_iterator			end()		const	{ return const_iterator(_end_ptr);			}
-		reverse_iterator		rbegin()			{ return reverse_iterator(_end_ptr);			}
+		reverse_iterator		rbegin()			{ return reverse_iterator(_end_ptr);		}
 		const_reverse_iterator	rbegin()	const	{ return const_reverse_iterator(_end_ptr);	}
 		reverse_iterator		rend()				{ return reverse_iterator(_begin_ptr);		}
-		const_reverse_iterator	rend()		const	{ return const_reverse_iterator(_begin_ptr);	}
+		const_reverse_iterator	rend()		const	{ return const_reverse_iterator(_begin_ptr);}
 
 
 		/* Capacity */
-		bool					empty()		const	{ return begin() == end(); }
-		size_type				size()		const	{ return static_cast<size_type>(_end_ptr - _begin_ptr); }
-		size_type				max_size()	const	{ return allocator.max_size(); }
-		size_type				capacity()	const	{ return _cap; }
-		void					reserve(size_type new_cap)
-		{
-			if (new_cap <= capacity())
-				return;
-			Allocate(new_cap);
-		}
+		bool					empty()		const			{ return begin() == end(); }
+		size_type				size()		const			{ return static_cast<size_type>(_end_ptr - _begin_ptr); }
+		size_type				max_size()	const			{ return allocator.max_size(); }
+		size_type				capacity()	const			{ return _cap; }
+		void					reserve(size_type new_cap)	{ EnsureStorage(new_cap); }
 
 
 		/* Modifiers */
-		void					clear();
-		iterator				insert(iterator pos, const T& value);
-		void					insert(iterator pos, size_type count, const T& value);
+		void		clear()
+		{
+			for (pointer p = _begin_ptr; p != _end_ptr; ++p)
+				_allocator.destroy(p);
+			_end_ptr = _begin_ptr;
+		}
+
+		iterator	insert(iterator pos, const T& value)
+		{
+			const difference_type idx = ft::distance(begin(), pos);
+			EnsureStorage(RecommendedSize(size() + 1));
+			MoveElements(idx, idx + 1);
+			*mbegin = value;
+			return mbegin;
+		}
+
+		void		insert(iterator pos, size_type count, const T& value)
+		{
+			const difference_type idx = ft::distance(begin(), pos);
+			EnsureStorage(RecommendedSize(size() + count));
+			MoveElements(idx, idx + count);
+			ft::fill(mbegin, count, value);
+		}
 
 		template <typename InputIt>
-		void					insert(iterator pos, InputIt first, InputIt last);
+		void		insert(iterator pos, InputIt first, InputIt last)
+		{
+			const difference_type idx = ft::distance(begin(), pos);
+			const typename iterator_traits<InputIt>::difference_type count = ft::distance(first, last);
+			EnsureStorage(RecommendedSize(size() + count));
+			MoveElements(idx, idx + count);
+			ft::move(first, last, ft::next(begin(), idx));
+		}
 
-		iterator				erase(iterator pos);
-		iterator				erase(iterator first, iterator last);
+		iterator	erase(iterator pos)
+		{
+			return erase(pos, ft::next(pos));
+		}
 
-		void					push_back(const T& value);
-		void					pop_back();
-		void					resize(size_type count);
-		void					resize(size_type count, T value = T());
-		void					swap(vector& other);
+		iterator	erase(iterator first, iterator last)
+		{
+			if (size() == 0)
+				return end();
+			DestoryElements(first, last);
+			MoveElements(last, end(), first);
+			return last;
+		}
+
+		void		push_back(const T& value)
+		{
+			insert(end(), value);
+		}
+
+		void		pop_back()
+		{
+			erase(end());
+		}
+
+		void		resize(size_type count)
+		{
+			resize(count, T());
+		}
+
+		void		resize(size_type count, T value = T())
+		{
+			size_type sizediff = count - size();
+			if (count > capacity())
+				EnsureStorage(count);
+			if (count > size())
+				ft::fill(end(), count - size(), value);
+			else if (count < size())
+				erase(ft::prev(end(), size() - count), end());
+		}
+
+		void		swap(vector& other)
+		{
+			ft::swap(_begin_ptr, other._begin_ptr);
+			ft::swap(_end_ptr, other._end_ptr);
+			ft::swap(_end_cap, other._end_cap);
+			ft::swap(_cap, other._cap);
+			ft::swap(_allocator, other._allocator);
+		}
 
 	private:
-		size_type				RecommendedSize(size_type desired) const
+		size_type	RecommendedSize(size_type n) const
 		{
-			const size_type ms = max_size();
-			if (desired > ms)
-				throw std::length_error("vector<T, Alloc>::RecommendedSize(size_t d)"
-										" 'd' exceeds maximum supported size");
 			const size_type cap = capacity();
 			if (cap >= ms / 2)
 				return ms;
-			return max(2 * cap, desired);
+			return ft::max(2 * cap, n);
 		}
 
-		void					Allocate(size_type n)
+		void	Allocate(size_type n, bool allocateWhenOnlyNecessary = false)
 		{
+			if (allocateWhenOnlyNecessary)
+				if (n <= capacity())
+					return;
 			pointer nptr = _allocator.allocate(n);
-			_begin_ptr = nptr;
-			_end_ptr = nptr; ++_end_ptr;
-			_end_cap = _begin_ptr + n;
+			_begin_ptr = _end_ptr = nptr;
+			_end_cap = &_begin_ptr[n];
 			_cap = n;
 		}
 
-		void					ExpandStorage(size_type n)
+		void	EnsureStorage(size_type n)
 		{
 			const iterator first = begin();
 			const iterator last = end();
 			const size_type oldcap = capacity();
-			Allocate(n);
-			move(first, last, begin());
+			Allocate(n, true);
+			ft::move(first, last, begin());
 			_end_ptr = begin() + oldcap;
 			_allocator.deallocate(_begin_ptr, oldcap);
 		}
 
-		void					ConstructBy(iterator first, iterator last)
+		void	MoveElements(iterator ibegin, iterator iend, iterator obegin)
 		{
-			const difference_type count = distance(first, last);
-			const size_type ms = max_size();
-			if (count > ms)
-				throw std::length_error("vector<T, Alloc>::vector(InputIt first, InputIt last, const Allocator& alloc)"
-										" iterator distance exceeds maximum supported size");
-			Allocate(count);
-			move(first, last, begin());
-			_end_ptr = begin() + count;
+			if (ibegin != end() && from != to)
+			{
+				if (from < to)
+					ft::move_backward(ibegin, iend, obegin);
+				else
+					ft::move(ibegin, iend, obegin);
+			}
 		}
 
-		void					ConstructAs(iterator out, size_type n, const T& value)
+		void	MoveElements(size_type from, size_type to)
 		{
-			const size_type ms = max_size();
-			if (n > ms)
-				throw std::length_error("vector<T, Alloc>::vector(size_type count, const T& value, const Allocator& alloc)"
-										" 'count' exceeds maximum supported size");
-			Allocate(n);
-			fill(begin(), n, value);
+			MoveElements(
+				ft::next(begin(), from),
+				end(),
+				ft::next(begin(), to)
+			);
 		}
 
+		void	DestoryElements(iterator first, iterator last)
+		{
+			while (first != last)
+			{
+				allocator.destory(&(*first));
+				++first;
+			}
+		}
 	};
+
+	template<typename T, typename Allocator>
+	bool	operator==(vector<T, Allocator> const& lhs, vector<T, Allocator> const& rhs)
+	{
+		if (lhs.size() != rhs.size())
+			return false;
+		return ft::equal(lhs.begin(), lhs.end(), rhs.begin());
+	}
+
+	template<typename T, typename Allocator>
+	bool	operator!=(vector<T, Allocator> const& lhs, vector<T, Allocator> const& rhs)
+	{
+		return !(lhs == rhs);
+	}
+
+	template<typename T, typename Allocator>
+	bool	operator<(vector<T, Allocator> const& lhs, vector<T, Allocator> const& rhs)
+	{
+		return ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+	}
+
+	template<typename T, typename Allocator>
+	bool	operator<=(vector<T, Allocator> const& lhs, vector<T, Allocator> const& rhs)
+	{
+		return !(rhs < lhs);
+	}
+
+	template<typename T, typename Allocator>
+	bool	operator>(vector<T, Allocator> const& lhs, vector<T, Allocator> const& rhs)
+	{
+		return (rhs < lhs);
+	}
+
+	template<typename T, typename Allocator>
+	bool	operator>=(vector<T, Allocator> const& lhs, vector<T, Allocator> const& rhs)
+	{
+		return !(lhs < rhs);
+	}
 }
+
 #endif

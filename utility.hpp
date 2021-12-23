@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 22:10:39 by smun              #+#    #+#             */
-/*   Updated: 2021/12/22 22:11:05 by smun             ###   ########.fr       */
+/*   Updated: 2021/12/24 01:00:56 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,9 +54,10 @@ namespace ft
 			return *this;
 		}
 
-		void	swap(pair<T1, T2>& another)
+		void	swap(pair<T1, T2>& rhs)
 		{
-			ft::swap(*this, &another);
+			ft::swap(first, rhs.first);
+			ft::swap(second, rhs.second);
 		}
 	};
 
@@ -64,6 +65,48 @@ namespace ft
 	pair<T1, T2>	make_pair(T1 first, T2 second)
 	{
 		return ft::pair<T1, T2>(first, second);
+	}
+
+	template<typename T1, typename T2>
+	bool	operator==(pair<T1, T2> const& lhs, pair<T1, T2> const& rhs)
+	{
+		return lhs.first == rhs.first && lhs.second == rhs.second;
+	}
+
+	template<typename T1, typename T2>
+	bool	operator!=(pair<T1, T2> const& lhs, pair<T1, T2> const& rhs)
+	{
+		return !(lhs == rhs);
+	}
+
+	template<typename T1, typename T2>
+	bool	operator<(pair<T1, T2> const& lhs, pair<T1, T2> const& rhs)
+	{
+		return lhs.first < rhs.first || (!(rhs.first < lhs.first) && lhs.second < rhs.second);
+	}
+
+	template<typename T1, typename T2>
+	bool	operator>(pair<T1, T2> const& lhs, pair<T1, T2> const& rhs)
+	{
+		return rhs < lhs;
+	}
+
+	template<typename T1, typename T2>
+	bool	operator<=(pair<T1, T2> const& lhs, pair<T1, T2> const& rhs)
+	{
+		return !(rhs < lhs);
+	}
+
+	template<typename T1, typename T2>
+	bool	operator>=(pair<T1, T2> const& lhs, pair<T1, T2> const& rhs)
+	{
+		return !(lhs < rhs);
+	}
+
+	template<typename T1, typename T2>
+	void	swap(pair<T1, T2>& lhs, pair<T1, T2>& rhs)
+	{
+		lhs.swap(rhs);
 	}
 }
 

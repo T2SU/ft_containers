@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 19:00:42 by smun              #+#    #+#             */
-/*   Updated: 2021/12/22 22:48:26 by smun             ###   ########.fr       */
+/*   Updated: 2021/12/23 11:26:32 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,20 +86,6 @@ namespace ft
 			return advance(n, iterator_category());
 		}
 	};
-
-	template<typename InputIter>
-	typename iterator_traits<InputIter>::difference_type
-	distance(InputIter& first, InputIter& last)
-	{
-		return IteratorManipulator(first).distance(last);
-	}
-
-	template<typename InputIter>
-	void
-	advance(InputIter& iter, typename iterator_traits<InputIter>::difference_type n)
-	{
-		iter = IteratorManipulator(iter).advance(n);
-	}
 }
 
 #endif

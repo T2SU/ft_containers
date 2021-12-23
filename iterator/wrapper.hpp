@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 22:48:46 by smun              #+#    #+#             */
-/*   Updated: 2021/12/22 22:48:49 by smun             ###   ########.fr       */
+/*   Updated: 2021/12/23 22:55:35 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,6 +113,42 @@ namespace ft
 			return *(*this + n);
 		}
 	};
+
+	template<typename Iter>
+	bool	operator==(IteratorWrapper<Iter> const& lhs, IteratorWrapper<Iter> const& rhs)
+	{
+		return lhs.base() == rhs.base();
+	}
+
+	template<typename Iter>
+	bool	operator!=(IteratorWrapper<Iter> const& lhs, IteratorWrapper<Iter> const& rhs)
+	{
+		return lhs.base() != rhs.base();
+	}
+
+	template<typename Iter>
+	bool	operator<(IteratorWrapper<Iter> const& lhs, IteratorWrapper<Iter> const& rhs)
+	{
+		return lhs.base() < rhs.base();
+	}
+
+	template<typename Iter>
+	bool	operator<=(IteratorWrapper<Iter> const& lhs, IteratorWrapper<Iter> const& rhs)
+	{
+		return lhs.base() <= rhs.base();
+	}
+
+	template<typename Iter>
+	bool	operator>(IteratorWrapper<Iter> const& lhs, IteratorWrapper<Iter> const& rhs)
+	{
+		return lhs.base() > rhs.base();
+	}
+
+	template<typename Iter>
+	bool	operator>=(IteratorWrapper<Iter> const& lhs, IteratorWrapper<Iter> const& rhs)
+	{
+		return lhs.base() >= rhs.base();
+	}
 }
 
 #endif

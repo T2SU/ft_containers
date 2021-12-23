@@ -6,11 +6,13 @@
 
 int main()
 {
-	std::vector<int> vi(3);
+	std::vector<int> vi;
 	std::vector<int> vi2 = vi;
 
 	std::allocator<int> al;
 	std::pair<int, int> dd;
+
+	std::cout << &vi.back() << std::endl;
 
 	std::cout << vi.size() << "/" << vi.capacity() << std::endl;
 	vi.push_back(5);
@@ -26,6 +28,13 @@ int main()
 
 	vi.resize(5);
 	std::cout << vi.size() << "/" << vi.capacity() << std::endl;
+
+	std::prev(vi.end());
+
+	vi2.reserve(50);
+	vi2 = vi;
+	std::cout << vi2.size() << "/" << vi2.capacity() << std::endl;
+
 
 	return 0;
 }
