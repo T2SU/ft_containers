@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 10:56:57 by smun              #+#    #+#             */
-/*   Updated: 2021/12/24 00:45:01 by smun             ###   ########.fr       */
+/*   Updated: 2021/12/24 01:11:26 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -311,6 +311,8 @@ namespace ft
 			const iterator first = begin();
 			const iterator last = end();
 			const size_type oldcap = capacity();
+			if (n > max_size())
+				throw std::length_error("size_t n 'n' exceeds max_size");
 			Allocate(n, true);
 			ft::move(first, last, begin());
 			_end_ptr = begin() + oldcap;
