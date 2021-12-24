@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 10:56:57 by smun              #+#    #+#             */
-/*   Updated: 2021/12/24 15:09:32 by smun             ###   ########.fr       */
+/*   Updated: 2021/12/24 22:55:01 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,11 @@ namespace ft
 
 		/* Copy Constructor */
 		vector(const vector& other)
-		: _allocator(other.get_allocator())
+		: _begin_ptr(nullptr)
+		, _end_ptr(nullptr)
+		, _end_cap(nullptr)
+		, _cap(0)
+		, _allocator(other.get_allocator())
 		{
 			assign(other.begin(), other.end());
 		}
@@ -133,7 +137,7 @@ namespace ft
 			const difference_type count = ft::distance(first, last);
 			EnsureStorage(count);
 			ft::move(first, last, begin());
-			_end_ptr = begin() + count;
+			_end_ptr = _begin_ptr + count;
 		}
 
 
@@ -248,8 +252,10 @@ namespace ft
 		{
 			if (size() == 0)
 				return end();
+			const difference_type distance = ft::distance(first, last);
 			DestoryElements(first, last);
 			MoveElements(last, end(), first);
+			_end_ptr -= distance;
 			return last;
 		}
 
@@ -263,20 +269,17 @@ namespace ft
 			erase(end());
 		}
 
-		void		resize(size_type count)
-		{
-			resize(count, T());
-		}
-
 		void		resize(size_type count, T value = T())
 		{
-			size_type sizediff = count - size();
 			if (count > capacity())
 				EnsureStorage(count);
-			if (count > size())
-				ft::fill(end(), count - size(), value);
-			else if (count < size())
+			if (count < size())
 				erase(ft::prev(end(), size() - count), end());
+			else if (count > size())
+			{
+				ft::fill(end(), count - size(), value);
+				_end_ptr = count + _begin_ptr;
+			}
 		}
 
 		void		swap(vector& other)
