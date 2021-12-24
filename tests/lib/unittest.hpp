@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/24 20:18:30 by smun              #+#    #+#             */
-/*   Updated: 2021/12/24 22:53:35 by smun             ###   ########.fr       */
+/*   Updated: 2021/12/24 23:02:47 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,16 @@ for (unsigned long i = 1; ;++i) \
 	{
 
 # define REGISTER_EVAL(IDX, TESTOBJ, FUNCNAME) \
-		case IDX: if (!TESTOBJ.Eval(#FUNCNAME, &decltype(TESTOBJ)::expected_test_type::FUNCNAME, &decltype(TESTOBJ)::your_test_type::FUNCNAME)) return; break
+		case IDX: \
+			if (!TESTOBJ.Eval \
+					( \
+						#FUNCNAME, \
+						&decltype(TESTOBJ)::expected_test_type::FUNCNAME, \
+						&decltype(TESTOBJ)::your_test_type::FUNCNAME \
+					) \
+				) \
+				return; \
+			break
 
 # define END_EVAL \
 		default: goto _END_TEST; \
