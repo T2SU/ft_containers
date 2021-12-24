@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 19:00:42 by smun              #+#    #+#             */
-/*   Updated: 2021/12/23 11:26:32 by smun             ###   ########.fr       */
+/*   Updated: 2021/12/24 12:38:22 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ namespace ft
 		typedef typename iterator_traits<Iter>::iterator_category	iterator_category;
 		typedef typename iterator_traits<Iter>::difference_type		difference_type;
 
-		difference_type	distance(input_iterator_tag) const
+		difference_type	distance(Iter& another, input_iterator_tag) const
 		{
 			difference_type r(0);
 			Iter i = iter;
@@ -42,7 +42,7 @@ namespace ft
 			return r;
 		}
 
-		difference_type	distance(random_access_iterator_tag) const
+		difference_type	distance(Iter& another, random_access_iterator_tag) const
 		{
 			return another - iter;
 		}

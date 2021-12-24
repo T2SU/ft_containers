@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 22:48:46 by smun              #+#    #+#             */
-/*   Updated: 2021/12/23 22:55:35 by smun             ###   ########.fr       */
+/*   Updated: 2021/12/24 14:23:59 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,12 +24,12 @@ namespace ft
 		Iter	current;
 
 	public:
-		typedef Iter										iterator_type;
-		typedef iterator_traits<Iter>::value_type			value_type;
-		typedef iterator_traits<Iter>::difference_type		difference_type;
-		typedef iterator_traits<Iter>::pointer				pointer;
-		typedef iterator_traits<Iter>::reference			reference;
-		typedef iterator_traits<Iter>::iterator_category	iterator_category;
+		typedef Iter												iterator_type;
+		typedef typename iterator_traits<Iter>::value_type			value_type;
+		typedef typename iterator_traits<Iter>::difference_type		difference_type;
+		typedef typename iterator_traits<Iter>::pointer				pointer;
+		typedef typename iterator_traits<Iter>::reference			reference;
+		typedef typename iterator_traits<Iter>::iterator_category	iterator_category;
 
 		IteratorWrapper() : current() {}
 		virtual ~IteratorWrapper() {}
@@ -44,7 +44,7 @@ namespace ft
 			return *this;
 		}
 
-		Iter	base()
+		Iter	base() const
 		{
 			return current;
 		}
@@ -91,15 +91,15 @@ namespace ft
 			return IteratorWrapper(current + n);
 		}
 
+		IteratorWrapper	operator-(difference_type n) const
+		{
+			return IteratorWrapper(current - n);
+		}
+
 		IteratorWrapper&	operator+=(difference_type n)
 		{
 			current += n;
 			return *this;
-		}
-
-		IteratorWrapper	operator-(difference_type n) const
-		{
-			return IteratorWrapper(current - n);
 		}
 
 		IteratorWrapper&	operator-=(difference_type n)
@@ -148,6 +148,20 @@ namespace ft
 	bool	operator>=(IteratorWrapper<Iter> const& lhs, IteratorWrapper<Iter> const& rhs)
 	{
 		return lhs.base() >= rhs.base();
+	}
+
+	template<typename Iter>
+	typename IteratorWrapper<Iter>::difference_type
+	operator-(IteratorWrapper<Iter> const& x, IteratorWrapper<Iter> const& y)
+	{
+		return x.base() - y.base();
+	}
+
+	template<typename Iter>
+	IteratorWrapper<Iter>
+	operator+(typename IteratorWrapper<Iter>::difference_type n, IteratorWrapper<Iter> const& x)
+	{
+		return IteratorWrapper<Iter>(x.base() + n);
 	}
 }
 

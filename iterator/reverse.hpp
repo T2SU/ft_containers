@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 18:59:30 by smun              #+#    #+#             */
-/*   Updated: 2021/12/23 22:55:13 by smun             ###   ########.fr       */
+/*   Updated: 2021/12/24 14:24:18 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,11 +44,11 @@ namespace ft
 		{
 			if (this == &another)
 				return *this;
-			curret = another.base();
+			current = another.base();
 			return *this;
 		}
 
-		Iter	base()
+		Iter	base() const
 		{
 			return current;
 		}
@@ -152,6 +152,20 @@ namespace ft
 	bool	operator>=(reverse_iterator<Iter> const& lhs, reverse_iterator<Iter> const& rhs)
 	{
 		return lhs.base() >= rhs.base();
+	}
+
+	template<typename Iter>
+	typename reverse_iterator<Iter>::difference_type
+	operator-(reverse_iterator<Iter> const& x, reverse_iterator<Iter> const& y)
+	{
+		return y.base() - x.base();
+	}
+
+	template<typename Iter>
+	reverse_iterator<Iter>
+	operator+(typename reverse_iterator<Iter>::difference_type n, reverse_iterator<Iter> const& x)
+	{
+		return reverse_iterator<Iter>(x.base() - n);
 	}
 }
 

@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 22:10:09 by smun              #+#    #+#             */
-/*   Updated: 2021/12/23 21:09:06 by smun             ###   ########.fr       */
+/*   Updated: 2021/12/24 14:09:58 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,7 @@ namespace ft
 	template <typename T1, typename T2 = T1>
 	struct less
 	{
-		bool operator(T1 const& x, T2 const& y) const
+		bool operator()(T1 const& x, T2 const& y) const
 		{
 			return x < y;
 		}
@@ -79,7 +79,7 @@ namespace ft
 	template <typename T1, typename T2 = T1>
 	struct equal_to
 	{
-		bool operator(T1 const& x, T2 const& y) const
+		bool operator()(T1 const& x, T2 const& y) const
 		{
 			return x == y;
 		}
@@ -111,30 +111,30 @@ namespace ft
 
 	template<typename InputIter>
 	typename iterator_traits<InputIter>::difference_type
-	distance(InputIter& first, InputIter& last)
+	distance(InputIter first, InputIter last)
 	{
-		return IteratorManipulator(first).distance(last);
+		return IteratorManipulator<InputIter>(first).distance(last);
 	}
 
 	template<typename InputIter>
 	InputIter
-	next(InputIter& iter, typename iterator_traits<InputIter>::difference_type n = 1)
+	next(InputIter iter, typename iterator_traits<InputIter>::difference_type n = 1)
 	{
-		return IteratorManipulator(iter).advance(n);
+		return IteratorManipulator<InputIter>(iter).advance(n);
 	}
 
 	template<typename InputIter>
 	InputIter
-	prev(InputIter& iter, typename iterator_traits<InputIter>::difference_type n = 1)
+	prev(InputIter iter, typename iterator_traits<InputIter>::difference_type n = 1)
 	{
-		return IteratorManipulator(iter).advance(-n);
+		return IteratorManipulator<InputIter>(iter).advance(-n);
 	}
 
 	template<typename InputIter>
 	void
 	advance(InputIter& iter, typename iterator_traits<InputIter>::difference_type n)
 	{
-		iter = IteratorManipulator(iter).advance(n);
+		iter = IteratorManipulator<InputIter>(iter).advance(n);
 	}
 
 	template<typename InputIter1, typename InputIter2, typename BinaryPredicate>
@@ -153,7 +153,7 @@ namespace ft
 
 	template<typename InputIter1, typename InputIter2>
 	bool
-	equal(InputIter1 first1, InputIter1 last1, InputIter2 first)
+	equal(InputIter1 first1, InputIter1 last1, InputIter2 first2)
 	{
 		return equal(
 			first1,

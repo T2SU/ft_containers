@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 10:56:57 by smun              #+#    #+#             */
-/*   Updated: 2021/12/24 01:11:26 by smun             ###   ########.fr       */
+/*   Updated: 2021/12/24 15:09:32 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,9 +36,6 @@ namespace ft
 		typedef ft::IteratorWrapper<const_pointer>			const_iterator;
 		typedef ft::reverse_iterator<iterator>				reverse_iterator;
 		typedef ft::reverse_iterator<const_iterator>		const_reverse_iterator;
-
-	private:
-		size_type	RecommendedSize(size_type n) const;
 
 	protected:
 		pointer			_begin_ptr;
@@ -103,7 +100,7 @@ namespace ft
 		/* Destructor */
 		virtual ~vector()
 		{
-			allocator.deallocate(_begin_ptr, capacity());
+			_allocator.deallocate(_begin_ptr, capacity());
 			_begin_ptr = nullptr;
 			_end_ptr = nullptr;
 			_end_cap = nullptr;
@@ -114,7 +111,7 @@ namespace ft
 		/* Operators */
 		vector&		operator=(const vector& other)
 		{
-			if (this == &another)
+			if (this == &other)
 				return *this;
 			assign(other.begin(), other.end());
 			return *this;
@@ -150,7 +147,7 @@ namespace ft
 			if (pos >= size()) // undefined exception at (pos < 0)
 				throw std::out_of_range("vector<T, Alloc>::at(size_t pos)"
 										" 'pos' out of bound");
-			return _begin_ptr[n];
+			return _begin_ptr[pos];
 		}
 
 		const_reference			at(size_type pos) const
@@ -158,21 +155,21 @@ namespace ft
 			if (pos >= size()) // undefined exception at (pos < 0)
 				throw std::out_of_range("vector<T, Alloc>::at(size_t pos)"
 										" 'pos' out of bound");
-			return _begin_ptr[n];
+			return _begin_ptr[pos];
 		}
 
 		reference				operator[](size_type pos)
 		{
 			// not defined exceptions at any cases.
 			// Accessing a nonexistent element through this operator is undefined behavior.
-			return _begin_ptr[n];
+			return _begin_ptr[pos];
 		}
 
 		const_reference			operator[](size_type pos) const
 		{
 			// not defined exceptions at any cases.
 			// Accessing a nonexistent element through this operator is undefined behavior.
-			return _begin_ptr[n];
+			return _begin_ptr[pos];
 		}
 
 		reference				front()			{ return _begin_ptr[0];	}
@@ -197,7 +194,7 @@ namespace ft
 		/* Capacity */
 		bool					empty()		const			{ return begin() == end(); }
 		size_type				size()		const			{ return static_cast<size_type>(_end_ptr - _begin_ptr); }
-		size_type				max_size()	const			{ return allocator.max_size(); }
+		size_type				max_size()	const			{ return _allocator.max_size(); }
 		size_type				capacity()	const			{ return _cap; }
 		void					reserve(size_type new_cap)	{ EnsureStorage(new_cap); }
 
@@ -210,21 +207,25 @@ namespace ft
 			_end_ptr = _begin_ptr;
 		}
 
-		iterator	insert(iterator pos, const T& value)
+		iterator	insert(iterator pos, const_reference value)
 		{
 			const difference_type idx = ft::distance(begin(), pos);
 			EnsureStorage(RecommendedSize(size() + 1));
+			iterator mbegin = ft::next(begin(), idx);
 			MoveElements(idx, idx + 1);
+			++_end_ptr;
 			*mbegin = value;
 			return mbegin;
 		}
 
-		void		insert(iterator pos, size_type count, const T& value)
+		void		insert(iterator pos, size_type count, const_reference value)
 		{
 			const difference_type idx = ft::distance(begin(), pos);
 			EnsureStorage(RecommendedSize(size() + count));
+			iterator mbegin = ft::next(begin(), idx);
 			MoveElements(idx, idx + count);
 			ft::fill(mbegin, count, value);
+			_end_ptr += count;
 		}
 
 		template <typename InputIt>
@@ -235,6 +236,7 @@ namespace ft
 			EnsureStorage(RecommendedSize(size() + count));
 			MoveElements(idx, idx + count);
 			ft::move(first, last, ft::next(begin(), idx));
+			_end_ptr += count;
 		}
 
 		iterator	erase(iterator pos)
@@ -251,7 +253,7 @@ namespace ft
 			return last;
 		}
 
-		void		push_back(const T& value)
+		void		push_back(const_reference value)
 		{
 			insert(end(), value);
 		}
@@ -290,6 +292,7 @@ namespace ft
 		size_type	RecommendedSize(size_type n) const
 		{
 			const size_type cap = capacity();
+			const size_type ms = max_size();
 			if (cap >= ms / 2)
 				return ms;
 			return ft::max(2 * cap, n);
@@ -302,7 +305,7 @@ namespace ft
 					return;
 			pointer nptr = _allocator.allocate(n);
 			_begin_ptr = _end_ptr = nptr;
-			_end_cap = &_begin_ptr[n];
+			_end_cap = &_begin_ptr[n - 1];
 			_cap = n;
 		}
 
@@ -315,19 +318,16 @@ namespace ft
 				throw std::length_error("size_t n 'n' exceeds max_size");
 			Allocate(n, true);
 			ft::move(first, last, begin());
-			_end_ptr = begin() + oldcap;
-			_allocator.deallocate(_begin_ptr, oldcap);
+			_end_ptr = _begin_ptr + oldcap;
+			_allocator.deallocate(first.base(), oldcap);
 		}
 
 		void	MoveElements(iterator ibegin, iterator iend, iterator obegin)
 		{
-			if (ibegin != end() && from != to)
-			{
-				if (from < to)
-					ft::move_backward(ibegin, iend, obegin);
-				else
-					ft::move(ibegin, iend, obegin);
-			}
+			if (ibegin < obegin)
+				ft::move_backward(ibegin, iend, obegin);
+			else
+				ft::move(ibegin, iend, obegin);
 		}
 
 		void	MoveElements(size_type from, size_type to)
@@ -343,7 +343,7 @@ namespace ft
 		{
 			while (first != last)
 			{
-				allocator.destory(&(*first));
+				_allocator.destroy(first.operator->());
 				++first;
 			}
 		}
