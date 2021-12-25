@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/24 20:18:30 by smun              #+#    #+#             */
-/*   Updated: 2021/12/25 12:50:19 by smun             ###   ########.fr       */
+/*   Updated: 2021/12/25 19:35:28 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,6 @@
 # define BLUE "\e[34m"
 # define REWIND "\e[2K\r"
 
-# include <csignal>
 # include <string>
 # include <sstream>
 # include <iostream>
@@ -141,27 +140,6 @@ namespace ft
 		UnitTest(UnitTest const&);
 		UnitTest& operator=(UnitTest const&);
 
-		static void	HandleSig(int sig)
-		{
-			if (sig == SIGABRT)
-				std::cerr << "Aborted" << std::endl;
-			else if (sig == SIGSEGV)
-				std::cerr << "Segmentation Fault" << std::endl;
-			else if (sig == SIGBUS)
-				std::cerr << "Bus Error" << std::endl;
-			else if (sig == SIGALRM)
-				std::cerr << "!! Timed-out !!" << std::endl;
-			else
-				std::cerr << "Signal: " << sig << std::endl;
-		}
-
-		static void	EnableSigHandler(void(*fn)(int))
-		{
-			std::signal(SIGABRT, fn);
-			std::signal(SIGSEGV, fn);
-			std::signal(SIGBUS, fn);
-		}
-
 		static time_t	GetTimeMicroseconds()
 		{
 			static time_t		start_s;
@@ -195,12 +173,10 @@ namespace ft
 			cont1ss.str("");
 			cont2ss.str("");
 			std::cout << YELLOW << "Testing.... : [ " << std::setw(14) << std::left << funcName << "]" << RESET;
-			EnableSigHandler(&HandleSig);
 		}
 
 		bool	CompleteEval(const char* funcName)
 		{
-			EnableSigHandler(SIG_DFL);
 			std::string const cont1out = cont1ss.str();
 			std::string const cont2out = cont2ss.str();
 			std::cout << REWIND;

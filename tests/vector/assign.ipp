@@ -1,28 +1,29 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   resize.ipp                                         :+:      :+:    :+:   */
+/*   assign.ipp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/24 20:26:30 by smun              #+#    #+#             */
-/*   Updated: 2021/12/25 14:21:19 by smun             ###   ########.fr       */
+/*   Updated: 2021/12/25 19:33:52 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 /*
-** Vector Resize
+** Vector Assignment (Replacement)
 **
-**  1. resize() 함수
+**  1. assign() 함수
 */
 
-void	Resize(value_type val1, value_type val2, value_type val3)
+void	Assign(value_type val1)
 {
-	Vector vec;
-	vec.resize(100);
-	vec.resize(static_cast<typename Vector::size_type>(500), val1);
-	vec.resize(static_cast<typename Vector::size_type>(250), val2);
-	vec.resize(static_cast<typename Vector::size_type>(375), val3);
-	PrintSizeAndCapacity(vec);
-	PrintElements(vec);
+	Vector vec1(50, val1);
+	//Vector vec2(30);
+	//vec2.assign(vec1.begin(), vec1.begin() + 5);
+	//Vector vec3;
+	//vec3.assign(10, value_type());
+	//vec3.assign(vec2.begin(), vec2.end());
+	PrintSizeAndCapacity(vec1);
+	PrintElements(vec1);
 }

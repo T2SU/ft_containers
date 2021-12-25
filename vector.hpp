@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 10:56:57 by smun              #+#    #+#             */
-/*   Updated: 2021/12/25 13:23:08 by smun             ###   ########.fr       */
+/*   Updated: 2021/12/25 19:38:43 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,7 +91,11 @@ namespace ft
 
 		/* Parameterized Constructor (Source iterator and Allocator) */
 		template <typename InputIt>
-		vector(InputIt first, InputIt last, const Allocator& alloc = Allocator())
+		vector(
+				typename ft::enable_if<ft::is_input_iterator<InputIt>::value, InputIt>::type first,
+				typename ft::enable_if<ft::is_input_iterator<InputIt>::value, InputIt>::type last,
+				const Allocator& alloc = Allocator()
+			)
 		: _begin_ptr(nullptr)
 		, _end_ptr(nullptr)
 		, _end_cap(nullptr)
@@ -128,10 +132,12 @@ namespace ft
 			clear();
 			EnsureStorage(count);
 			ft::fill_n(begin(), count, value);
+			_end_ptr = _begin_ptr + count;
 		}
 
 		template <typename InputIt>
-		void	assign(InputIt first, InputIt last)
+		typename ft::enable_if<ft::is_input_iterator<InputIt>::value, void>::type
+		assign(InputIt first, InputIt last)
 		{
 			clear();
 			const difference_type count = ft::distance(first, last);

@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 22:48:46 by smun              #+#    #+#             */
-/*   Updated: 2021/12/24 14:23:59 by smun             ###   ########.fr       */
+/*   Updated: 2021/12/25 19:58:31 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,8 +51,7 @@ namespace ft
 
 		reference	operator*() const
 		{
-			Iter tmp = current;
-			return *++tmp;
+			return *current;
 		}
 
 		pointer	operator->() const

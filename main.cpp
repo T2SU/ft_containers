@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 19:04:19 by smun              #+#    #+#             */
-/*   Updated: 2021/12/25 13:29:58 by smun             ###   ########.fr       */
+/*   Updated: 2021/12/25 19:52:41 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ static void	TestIntVector()
 	REGISTER_EVAL(2, ut1, BasicTest2);
 	REGISTER_EVAL(3, ut1, Resize, 1234, 5678, 9876);
 	REGISTER_EVAL(4, ut1, Resize, 999555, 174534, 13333333);
+	REGISTER_EVAL(5, ut1, Assign, INT_MAX);
 	END_EVAL;
 }
 
@@ -43,6 +44,7 @@ static void	TestStringVector()
 	REGISTER_EVAL(1, ut1, BasicTest1);
 	REGISTER_EVAL(2, ut1, BasicTest2);
 	REGISTER_EVAL(3, ut1, Resize, "Hello", "World", "4242424242Fourty-Two");
+	REGISTER_EVAL(4, ut1, Assign, "aaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAaaaaaaaaaaaaaaaa");
 	END_EVAL;
 }
 
