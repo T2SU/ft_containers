@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 10:56:57 by smun              #+#    #+#             */
-/*   Updated: 2021/12/25 19:38:43 by smun             ###   ########.fr       */
+/*   Updated: 2021/12/25 21:00:31 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,21 +129,14 @@ namespace ft
 		/* Replacement */
 		void	assign(size_type count, const T& value)
 		{
-			clear();
-			EnsureStorage(count);
-			ft::fill_n(begin(), count, value);
-			_end_ptr = _begin_ptr + count;
+			// TODO
 		}
 
 		template <typename InputIt>
 		typename ft::enable_if<ft::is_input_iterator<InputIt>::value, void>::type
 		assign(InputIt first, InputIt last)
 		{
-			clear();
-			const difference_type count = ft::distance(first, last);
-			EnsureStorage(count);
-			ft::move(first, last, begin());
-			_end_ptr = _begin_ptr + count;
+			// TODO
 		}
 
 
@@ -219,34 +212,20 @@ namespace ft
 
 		iterator	insert(iterator pos, const_reference value)
 		{
-			const difference_type idx = ft::distance(begin(), pos);
-			EnsureStorage(RecommendedSize(size() + 1));
-			iterator mbegin = ft::next(begin(), idx);
-			MoveElements(idx, idx + 1);
-			++_end_ptr;
-			*mbegin = value;
-			return mbegin;
+			// TODO
+			// return inserted iterator
 		}
 
 		void		insert(iterator pos, size_type count, const_reference value)
 		{
-			const difference_type idx = ft::distance(begin(), pos);
-			EnsureStorage(RecommendedSize(size() + count));
-			iterator mbegin = ft::next(begin(), idx);
-			MoveElements(idx, idx + count);
-			ft::fill_n(mbegin, count, value);
-			_end_ptr += count;
+			// TODO
 		}
 
 		template <typename InputIt>
-		void		insert(iterator pos, InputIt first, InputIt last)
+		typename enable_if<is_input_iterator<InputIt>::value, void>::type
+		insert(iterator pos, InputIt first, InputIt last)
 		{
-			const difference_type idx = ft::distance(begin(), pos);
-			const typename iterator_traits<InputIt>::difference_type count = ft::distance(first, last);
-			EnsureStorage(RecommendedSize(size() + count));
-			MoveElements(idx, idx + count);
-			ft::move(first, last, ft::next(begin(), idx));
-			_end_ptr += count;
+
 		}
 
 		iterator	erase(iterator pos)
@@ -258,34 +237,35 @@ namespace ft
 		{
 			if (size() == 0)
 				return end();
-			const difference_type distance = ft::distance(first, last);
-			DestoryElements(first, last);
-			MoveElements(last, end(), first);
-			_end_ptr -= distance;
-			return last;
+			pointer delfirst = first.base();
+			pointer dellast = last.base();
+			while (delfirst != dellast)
+				_allocator.destroy(delfirst++);
+			while (_end_ptr != dellast)
+				_allocator.construct(*(--delfirst), *(--_end_ptr));
+			return iterator(dellast);
 		}
 
 		void		push_back(const_reference value)
 		{
-			insert(end(), value);
+			EnsureStorage(RecommendedSize(size() + 1));
+			ConstructAtEnd(1, value);
 		}
 
 		void		pop_back()
 		{
-			erase(end());
+			DeconstructFromEnd(1);
 		}
 
 		void		resize(size_type count, T value = T())
 		{
-			if (count > capacity())
-				EnsureStorage(count);
-			if (count < size())
-				erase(ft::prev(end(), size() - count), end());
-			else if (count > size())
+			if (count > size())
 			{
-				ft::fill_n(end(), count - size(), value);
-				_end_ptr = count + _begin_ptr;
+				EnsureStorage(count);
+				ConstructAtEnd(count - size(), value);
 			}
+			else if (count < size())
+				DeconstructFromEnd(size() - count);
 		}
 
 		void		swap(vector& other)
@@ -307,54 +287,35 @@ namespace ft
 			return ft::max(2 * cap, n);
 		}
 
-		void	Allocate(size_type n, bool allocateWhenOnlyNecessary = false)
-		{
-			if (allocateWhenOnlyNecessary)
-				if (n <= capacity())
-					return;
-			pointer nptr = _allocator.allocate(n);
-			_begin_ptr = _end_ptr = nptr;
-			_end_cap = &_begin_ptr[n - 1];
-			_cap = n;
-		}
-
 		void	EnsureStorage(size_type n)
 		{
-			const iterator first = begin();
-			const iterator last = end();
-			const size_type oldcap = capacity();
 			if (n > max_size())
 				throw std::length_error("size_t n 'n' exceeds max_size");
-			Allocate(n, true);
-			ft::move(first, last, begin());
-			_end_ptr = _begin_ptr + oldcap;
-			_allocator.deallocate(first.base(), oldcap);
-		}
-
-		void	MoveElements(iterator ibegin, iterator iend, iterator obegin)
-		{
-			if (ibegin < obegin)
-				ft::move_backward(ibegin, iend, obegin);
-			else
-				ft::move(ibegin, iend, obegin);
-		}
-
-		void	MoveElements(size_type from, size_type to)
-		{
-			MoveElements(
-				ft::next(begin(), from),
-				end(),
-				ft::next(begin(), to)
-			);
-		}
-
-		void	DestoryElements(iterator first, iterator last)
-		{
+			if (n <= capacity())
+				return;
+			size_type oldcap = capacity();
+			pointer nptr = _allocator.allocate(n);
+			pointer first = _begin_ptr;
+			pointer last = _end_ptr;
+			pointer target = nptr;
 			while (first != last)
-			{
-				_allocator.destroy(first.operator->());
-				++first;
-			}
+				_allocator.construct(target++, *(first++));
+			_allocator.deallocate(_begin_ptr, oldcap);
+			_begin_ptr = nptr;
+			_end_ptr = target;
+			_end_cap = nptr + (_cap = n);
+		}
+
+		void	ConstructAtEnd(size_type count, T const& value)
+		{
+			while (count-- > 0)
+				_allocator.construct(_end_ptr++, value);
+		}
+
+		void	DeconstructFromEnd(size_type n)
+		{
+			while (n-- > 0)
+				_allocator.destroy(_end_ptr--);
 		}
 	};
 

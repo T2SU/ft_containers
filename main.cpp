@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 19:04:19 by smun              #+#    #+#             */
-/*   Updated: 2021/12/25 19:52:41 by smun             ###   ########.fr       */
+/*   Updated: 2021/12/25 20:14:14 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ static void	TestStringVector()
 
 int main(void)
 {
-	TestIntVector();
 	TestStringVector();
+	TestIntVector();
 	return 0;
 }
