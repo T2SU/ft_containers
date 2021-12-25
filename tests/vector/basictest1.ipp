@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/24 20:26:30 by smun              #+#    #+#             */
-/*   Updated: 2021/12/24 22:48:34 by smun             ###   ########.fr       */
+/*   Updated: 2021/12/25 12:09:42 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,7 @@
 **  4. begin(), end(), iterator::operator*()
 */
 
-template<typename Vector>
-void	VectorTest<Vector>::BasicTest1()
+void	BasicTest1()
 {
 	Vector vec;
 	PrintSizeAndCapacity(vec);

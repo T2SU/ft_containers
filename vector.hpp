@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 10:56:57 by smun              #+#    #+#             */
-/*   Updated: 2021/12/24 22:55:01 by smun             ###   ########.fr       */
+/*   Updated: 2021/12/25 13:23:08 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,7 +127,7 @@ namespace ft
 		{
 			clear();
 			EnsureStorage(count);
-			ft::fill(begin(), count, value);
+			ft::fill_n(begin(), count, value);
 		}
 
 		template <typename InputIt>
@@ -228,7 +228,7 @@ namespace ft
 			EnsureStorage(RecommendedSize(size() + count));
 			iterator mbegin = ft::next(begin(), idx);
 			MoveElements(idx, idx + count);
-			ft::fill(mbegin, count, value);
+			ft::fill_n(mbegin, count, value);
 			_end_ptr += count;
 		}
 
@@ -277,7 +277,7 @@ namespace ft
 				erase(ft::prev(end(), size() - count), end());
 			else if (count > size())
 			{
-				ft::fill(end(), count - size(), value);
+				ft::fill_n(end(), count - size(), value);
 				_end_ptr = count + _begin_ptr;
 			}
 		}

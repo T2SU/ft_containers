@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/24 20:26:30 by smun              #+#    #+#             */
-/*   Updated: 2021/12/24 22:51:17 by smun             ###   ########.fr       */
+/*   Updated: 2021/12/25 12:09:55 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,7 @@
 **  3. reserver() 함수
 */
 
-template<typename Vector>
-void	VectorTest<Vector>::BasicTest2()
+void BasicTest2()
 {
 	Vector vec;
 	vec.reserve(5000);

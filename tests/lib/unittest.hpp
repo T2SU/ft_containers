@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/24 20:18:30 by smun              #+#    #+#             */
-/*   Updated: 2021/12/24 23:02:47 by smun             ###   ########.fr       */
+/*   Updated: 2021/12/25 12:50:19 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ for (unsigned long i = 1; ;++i) \
 	switch(i) \
 	{
 
-# define REGISTER_EVAL(IDX, TESTOBJ, FUNCNAME) \
+# define _REGISTER_EVAL_REAL0(IDX, TESTOBJ, FUNCNAME) \
 		case IDX: \
 			if (!TESTOBJ.Eval \
 					( \
@@ -44,6 +44,52 @@ for (unsigned long i = 1; ;++i) \
 				) \
 				return; \
 			break
+# define _REGISTER_EVAL_REAL1(IDX, TESTOBJ, FUNCNAME, ARG1) \
+		case IDX: \
+			if (!TESTOBJ.Eval \
+					( \
+						#FUNCNAME, \
+						&decltype(TESTOBJ)::expected_test_type::FUNCNAME, \
+						&decltype(TESTOBJ)::your_test_type::FUNCNAME, \
+						ARG1 \
+					) \
+				) \
+				return; \
+			break
+# define _REGISTER_EVAL_REAL2(IDX, TESTOBJ, FUNCNAME, ARG1, ARG2) \
+		case IDX: \
+			if (!TESTOBJ.Eval \
+					( \
+						#FUNCNAME, \
+						&decltype(TESTOBJ)::expected_test_type::FUNCNAME, \
+						&decltype(TESTOBJ)::your_test_type::FUNCNAME, \
+						ARG1, \
+						ARG2 \
+					) \
+				) \
+				return; \
+			break
+# define _REGISTER_EVAL_REAL3(IDX, TESTOBJ, FUNCNAME, ARG1, ARG2, ARG3) \
+		case IDX: \
+			if (!TESTOBJ.Eval \
+					( \
+						#FUNCNAME, \
+						&decltype(TESTOBJ)::expected_test_type::FUNCNAME, \
+						&decltype(TESTOBJ)::your_test_type::FUNCNAME, \
+						ARG1, \
+						ARG2, \
+						ARG3 \
+					) \
+				) \
+				return; \
+			break
+
+# define _GET_END_OF_ARG(IDX, TESTOBJ, FUNCNAME, ARG1, ARG2, ARG3, END, ...) END
+# define _DO_TEST_EVAL_MACRO_CHOOSER(...) \
+	_GET_END_OF_ARG(__VA_ARGS__, _REGISTER_EVAL_REAL3, \
+				_REGISTER_EVAL_REAL2, _REGISTER_EVAL_REAL1, _REGISTER_EVAL_REAL0, )
+
+# define REGISTER_EVAL(...) _DO_TEST_EVAL_MACRO_CHOOSER(__VA_ARGS__)(__VA_ARGS__)
 
 # define END_EVAL \
 		default: goto _END_TEST; \
@@ -78,11 +124,19 @@ namespace ft
 	template<typename ExpectedContTest, typename YourContTest>
 	class UnitTest
 	{
+	public:
+		typedef typename ExpectedContTest::value_type	value_type;
+		typedef typename YourContTest::value_type		value_type2;
+
 	private:
 		ExpectedContTest	cont1;
 		YourContTest		cont2;
 		std::stringstream	cont1ss;
 		std::stringstream	cont2ss;
+		time_t				st1;
+		time_t				et1;
+		time_t				st2;
+		time_t				et2;
 
 		UnitTest(UnitTest const&);
 		UnitTest& operator=(UnitTest const&);
@@ -135,35 +189,17 @@ namespace ft
 			return (seconds * 1000000 + microseconds);
 		}
 
-	public:
-		UnitTest() {}
-		virtual ~UnitTest() {}
-
-		typedef	ExpectedContTest	expected_test_type;
-		typedef YourContTest		your_test_type;
-
-		bool	Eval(const char* funcName, void(ExpectedContTest::*fn1)(), void(YourContTest::*fn2)())
+		void	PrepareEval(const char* funcName)
 		{
-			time_t st1, et1, st2, et2;
 
 			cont1ss.str("");
 			cont2ss.str("");
 			std::cout << YELLOW << "Testing.... : [ " << std::setw(14) << std::left << funcName << "]" << RESET;
 			EnableSigHandler(&HandleSig);
-			{
-				RedirectStd rdout(std::cout, cont1ss);
-				RedirectStd rderr(std::cerr, cont1ss);
-				st1 = GetTimeMicroseconds();
-				(cont1.*fn1)();
-				et1 = GetTimeMicroseconds();
-			}
-			{
-				RedirectStd rdout(std::cout, cont2ss);
-				RedirectStd rderr(std::cerr, cont2ss);
-				st2 = GetTimeMicroseconds();
-				(cont2.*fn2)();
-				et2 = GetTimeMicroseconds();
-			}
+		}
+
+		bool	CompleteEval(const char* funcName)
+		{
 			EnableSigHandler(SIG_DFL);
 			std::string const cont1out = cont1ss.str();
 			std::string const cont2out = cont2ss.str();
@@ -183,6 +219,93 @@ namespace ft
 				std::cout << GREEN << "Test Success: [ " << std::setw(14) << std::left << funcName << "] (STL:" << (et1 - st1) << "μs, Your:" << (et2 - st2) << "μs)" << RESET << std::endl;
 				return true;
 			}
+		}
+
+	public:
+		UnitTest() {}
+		virtual ~UnitTest() {}
+
+		typedef	ExpectedContTest						expected_test_type;
+		typedef YourContTest							your_test_type;
+
+		bool	Eval(const char* funcName, void(ExpectedContTest::*fn1)(), void(YourContTest::*fn2)())
+		{
+			PrepareEval(funcName);
+			{
+				RedirectStd rdout(std::cout, cont1ss);
+				RedirectStd rderr(std::cerr, cont1ss);
+				st1 = GetTimeMicroseconds();
+				(cont1.*fn1)();
+				et1 = GetTimeMicroseconds();
+			}
+			{
+				RedirectStd rdout(std::cout, cont2ss);
+				RedirectStd rderr(std::cerr, cont2ss);
+				st2 = GetTimeMicroseconds();
+				(cont2.*fn2)();
+				et2 = GetTimeMicroseconds();
+			}
+			return CompleteEval(funcName);
+		}
+
+		bool	Eval(const char* funcName, void(ExpectedContTest::*fn1)(value_type), void(YourContTest::*fn2)(value_type2), value_type arg1)
+		{
+			PrepareEval(funcName);
+			{
+				RedirectStd rdout(std::cout, cont1ss);
+				RedirectStd rderr(std::cerr, cont1ss);
+				st1 = GetTimeMicroseconds();
+				(cont1.*fn1)(arg1);
+				et1 = GetTimeMicroseconds();
+			}
+			{
+				RedirectStd rdout(std::cout, cont2ss);
+				RedirectStd rderr(std::cerr, cont2ss);
+				st2 = GetTimeMicroseconds();
+				(cont2.*fn2)(arg1);
+				et2 = GetTimeMicroseconds();
+			}
+			return CompleteEval(funcName);
+		}
+
+		bool	Eval(const char* funcName, void(ExpectedContTest::*fn1)(value_type, value_type), void(YourContTest::*fn2)(value_type2, value_type2), value_type arg1, value_type arg2)
+		{
+			PrepareEval(funcName);
+			{
+				RedirectStd rdout(std::cout, cont1ss);
+				RedirectStd rderr(std::cerr, cont1ss);
+				st1 = GetTimeMicroseconds();
+				(cont1.*fn1)(arg1, arg2);
+				et1 = GetTimeMicroseconds();
+			}
+			{
+				RedirectStd rdout(std::cout, cont2ss);
+				RedirectStd rderr(std::cerr, cont2ss);
+				st2 = GetTimeMicroseconds();
+				(cont2.*fn2)(arg1, arg2);
+				et2 = GetTimeMicroseconds();
+			}
+			return CompleteEval(funcName);
+		}
+
+		bool	Eval(const char* funcName, void(ExpectedContTest::*fn1)(value_type, value_type, value_type), void(YourContTest::*fn2)(value_type2, value_type2, value_type2), value_type arg1, value_type arg2, value_type arg3)
+		{
+			PrepareEval(funcName);
+			{
+				RedirectStd rdout(std::cout, cont1ss);
+				RedirectStd rderr(std::cerr, cont1ss);
+				st1 = GetTimeMicroseconds();
+				(cont1.*fn1)(arg1, arg2, arg3);
+				et1 = GetTimeMicroseconds();
+			}
+			{
+				RedirectStd rdout(std::cout, cont2ss);
+				RedirectStd rderr(std::cerr, cont2ss);
+				st2 = GetTimeMicroseconds();
+				(cont2.*fn2)(arg1, arg2, arg3);
+				et2 = GetTimeMicroseconds();
+			}
+			return CompleteEval(funcName);
 		}
 	};
 }

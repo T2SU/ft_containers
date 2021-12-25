@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 22:10:09 by smun              #+#    #+#             */
-/*   Updated: 2021/12/24 14:09:58 by smun             ###   ########.fr       */
+/*   Updated: 2021/12/25 13:23:15 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define ALGORITHM_HPP
 
 # include "iterator.hpp"
+# include "type_traits.hpp"
 
 namespace ft
 {
@@ -37,12 +38,6 @@ namespace ft
 			--n;
 		}
 		return first;
-	}
-
-	template <typename OutputIter, typename Size, typename Type>
-	void		fill(OutputIter first, Size n, const Type& value)
-	{
-		fill_n(first, n, value);
 	}
 
 	template <typename InputIter, typename OutputIter>

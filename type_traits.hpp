@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 19:42:47 by smun              #+#    #+#             */
-/*   Updated: 2021/12/24 12:13:19 by smun             ###   ########.fr       */
+/*   Updated: 2021/12/25 13:11:09 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,13 @@ namespace ft
 	template <>					struct is_integral<unsigned long>		: public true_type {};
 	template <>					struct is_integral<long long>			: public true_type {};
 	template <>					struct is_integral<unsigned long long>	: public true_type {};
+
+	inline int					convert_to_integral(int val) { return val; }
+	inline unsigned				convert_to_integral(unsigned val) { return val; }
+	inline long					convert_to_integral(long val) { return val; }
+	inline unsigned long		convert_to_integral(unsigned long val) { return val; }
+	inline long long			convert_to_integral(long long val) { return val; }
+	inline unsigned long long	convert_to_integral(unsigned long long val) { return val; }
 }
 
 #endif
