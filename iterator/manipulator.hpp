@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 19:00:42 by smun              #+#    #+#             */
-/*   Updated: 2021/12/24 12:38:22 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/01 18:06:27 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define MANIPULATOR_HPP
 
 # include "base.hpp"
+# include <algorithm>
 
 namespace ft
 {
@@ -29,6 +30,7 @@ namespace ft
 
 		typedef typename iterator_traits<Iter>::iterator_category	iterator_category;
 		typedef typename iterator_traits<Iter>::difference_type		difference_type;
+
 
 		difference_type	distance(Iter& another, input_iterator_tag) const
 		{
@@ -69,6 +71,31 @@ namespace ft
 		{
 			iter += n;
 			return iter;
+		}
+
+		difference_type	distance(Iter& another, std::random_access_iterator_tag) const
+		{
+			return distance(another, ft::random_access_iterator_tag());
+		}
+
+		difference_type	distance(Iter& another, std::input_iterator_tag) const
+		{
+			return distance(another, ft::input_iterator_tag());
+		}
+
+		Iter	advance(difference_type n, std::input_iterator_tag)
+		{
+			return advance(n, ft::input_iterator_tag());
+		}
+
+		Iter	advance(difference_type n, std::bidirectional_iterator_tag)
+		{
+			return advance(n, ft::bidirectional_iterator_tag());
+		}
+
+		Iter	advance(difference_type n, std::random_access_iterator_tag)
+		{
+			return advance(n, ft::random_access_iterator_tag());
 		}
 
 	public:

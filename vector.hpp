@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 10:56:57 by smun              #+#    #+#             */
-/*   Updated: 2022/01/01 17:39:59 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/01 20:09:09 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -219,6 +219,7 @@ namespace ft
 		{
 			iterator dest = PrepareInsertion(pos, 1);
 			_allocator.construct(dest.base(), value);
+			++_end_ptr;
 			return dest;
 		}
 
@@ -226,7 +227,10 @@ namespace ft
 		{
 			iterator dest = PrepareInsertion(pos, count);
 			while (count-- > 0)
+			{
 				_allocator.construct((dest++).base(), value);
+				++_end_ptr;
+			}
 		}
 
 		template <typename InputIt>
@@ -235,7 +239,10 @@ namespace ft
 		{
 			iterator dest = PrepareInsertion(pos, first, last);
 			while (first != last)
+			{
 				_allocator.construct((dest++).base(), *(first++));
+				++_end_ptr;
+			}
 		}
 
 		iterator	erase(iterator pos)
@@ -260,7 +267,7 @@ namespace ft
 
 		void		push_back(const_reference value)
 		{
-			EnsureStorage(RecommendedSize(size() + 1));
+			EnsureStorageForInsert(1);
 			ConstructAtEnd(1, value);
 		}
 
@@ -299,6 +306,15 @@ namespace ft
 			return ft::max(2 * cap, n);
 		}
 
+		void	EnsureStorageForInsert(size_type n)
+		{
+			const size_type sz = size();
+
+			if (sz + n <= capacity())
+				return;
+			EnsureStorage(RecommendedSize(sz + n));
+		}
+
 		void	EnsureStorage(size_type n)
 		{
 			if (n > max_size())
@@ -334,7 +350,7 @@ namespace ft
 		iterator	PrepareInsertion(iterator pos, difference_type space)
 		{
 			difference_type n = ft::distance(begin(), pos);
-			EnsureStorage(RecommendedSize(size() + space));
+			EnsureStorageForInsert(space);
 			return ft::next(begin(), n);
 		}
 

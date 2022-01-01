@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 19:04:19 by smun              #+#    #+#             */
-/*   Updated: 2022/01/01 17:17:00 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/01 20:10:32 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,11 +27,13 @@ static void	TestIntVector()
 	BEGIN_EVAL;
 	REGISTER_EVAL(1, ut1, BasicTest1);
 	REGISTER_EVAL(2, ut1, BasicTest2);
-	REGISTER_EVAL(3, ut1, Resize, 1234, 5678, 9876);
-	REGISTER_EVAL(4, ut1, Resize, 999555, 174534, 13333333);
-	REGISTER_EVAL(5, ut1, Assign1, INT_MAX);
-	REGISTER_EVAL(6, ut1, Assign2, INT_MAX);
-	REGISTER_EVAL(7, ut1, Assign3, INT_MAX);
+	// REGISTER_EVAL(3, ut1, Resize, 1234, 5678, 9876);
+	// REGISTER_EVAL(4, ut1, Resize, 999555, 174534, 13333333);
+	// REGISTER_EVAL(5, ut1, Assign1, INT_MAX);
+	// REGISTER_EVAL(6, ut1, Assign2, INT_MAX);
+	// REGISTER_EVAL(7, ut1, Assign3, INT_MAX);
+	// REGISTER_EVAL(8, ut1, PushBack, INT_MIN, INT_MAX);
+	REGISTER_EVAL(3, ut1, Insert1, INT_MIN, INT_MAX);
 	END_EVAL;
 }
 
@@ -45,10 +47,12 @@ static void	TestStringVector()
 	BEGIN_EVAL;
 	REGISTER_EVAL(1, ut1, BasicTest1);
 	REGISTER_EVAL(2, ut1, BasicTest2);
-	REGISTER_EVAL(3, ut1, Resize, "Hello", "World", "4242424242Fourty-Two");
-	REGISTER_EVAL(4, ut1, Assign1, "aaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAaaaaaaaaaaaaaaaa");
-	REGISTER_EVAL(5, ut1, Assign2, "aaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAaaaaaaaaaaaaaaaa");
-	REGISTER_EVAL(6, ut1, Assign3, "aaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAaaaaaaaaaaaaaaaa");
+	// REGISTER_EVAL(3, ut1, Resize, "Hello", "World", "4242424242Fourty-Two");
+	// REGISTER_EVAL(4, ut1, Assign1, "aaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAaaaaaaaaaaaaaaaa");
+	// REGISTER_EVAL(5, ut1, Assign2, "aaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAaaaaaaaaaaaaaaaa");
+	// REGISTER_EVAL(6, ut1, Assign3, "aaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAaaaaaaaaaaaaaaaa");
+	// REGISTER_EVAL(7, ut1, PushBack, "aaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAaaaaaaaaaaaaaaaa", "--");
+	//REGISTER_EVAL(3, ut1, Insert1, "aaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAaaaaaaaaaaaaaaaa", "++");
 	END_EVAL;
 }
 
