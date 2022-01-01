@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/24 19:59:27 by smun              #+#    #+#             */
-/*   Updated: 2021/12/25 14:24:04 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/01 17:14:53 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,9 @@ namespace ft
 		# include "vector/basictest1.ipp"
 		# include "vector/basictest2.ipp"
 		# include "vector/resize.ipp"
-		# include "vector/assign.ipp"
+		# include "vector/assign1.ipp"
+		# include "vector/assign2.ipp"
+		# include "vector/assign3.ipp"
 	};
 
 }

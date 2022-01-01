@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 10:56:57 by smun              #+#    #+#             */
-/*   Updated: 2021/12/25 21:00:31 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/01 17:39:59 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,14 +129,19 @@ namespace ft
 		/* Replacement */
 		void	assign(size_type count, const T& value)
 		{
-			// TODO
+			clear();
+			EnsureStorage(size() + count);
+			ConstructAtEnd(count, value);
 		}
 
 		template <typename InputIt>
 		typename ft::enable_if<ft::is_input_iterator<InputIt>::value, void>::type
 		assign(InputIt first, InputIt last)
 		{
-			// TODO
+			clear();
+			EnsureStorage(size() + ft::distance(first, last));
+			while (first != last)
+				_allocator.construct((_end_ptr)++, *(first++));
 		}
 
 
@@ -212,20 +217,25 @@ namespace ft
 
 		iterator	insert(iterator pos, const_reference value)
 		{
-			// TODO
-			// return inserted iterator
+			iterator dest = PrepareInsertion(pos, 1);
+			_allocator.construct(dest.base(), value);
+			return dest;
 		}
 
 		void		insert(iterator pos, size_type count, const_reference value)
 		{
-			// TODO
+			iterator dest = PrepareInsertion(pos, count);
+			while (count-- > 0)
+				_allocator.construct((dest++).base(), value);
 		}
 
 		template <typename InputIt>
 		typename enable_if<is_input_iterator<InputIt>::value, void>::type
 		insert(iterator pos, InputIt first, InputIt last)
 		{
-
+			iterator dest = PrepareInsertion(pos, first, last);
+			while (first != last)
+				_allocator.construct((dest++).base(), *(first++));
 		}
 
 		iterator	erase(iterator pos)
@@ -241,8 +251,10 @@ namespace ft
 			pointer dellast = last.base();
 			while (delfirst != dellast)
 				_allocator.destroy(delfirst++);
-			while (_end_ptr != dellast)
-				_allocator.construct(*(--delfirst), *(--_end_ptr));
+			pointer dest = first.base();
+			while (delfirst != _end_ptr)
+				_allocator.construct(dest++, *(delfirst++));
+			_end_ptr = dest;
 			return iterator(dellast);
 		}
 
@@ -298,24 +310,44 @@ namespace ft
 			pointer first = _begin_ptr;
 			pointer last = _end_ptr;
 			pointer target = nptr;
+
+			// Move elements to new memory
 			while (first != last)
 				_allocator.construct(target++, *(first++));
+
+			// Deallocate previous memory
 			_allocator.deallocate(_begin_ptr, oldcap);
+
+			// Relocate to new memory (and set new capacity)
 			_begin_ptr = nptr;
 			_end_ptr = target;
 			_end_cap = nptr + (_cap = n);
 		}
 
+		template <typename InputIt>
+		typename enable_if<is_input_iterator<InputIt>::value, iterator>::type
+		PrepareInsertion(iterator pos, InputIt first, InputIt last)
+		{
+			return PrepareInsertion(pos, ft::distance(first, last));
+		}
+
+		iterator	PrepareInsertion(iterator pos, difference_type space)
+		{
+			difference_type n = ft::distance(begin(), pos);
+			EnsureStorage(RecommendedSize(size() + space));
+			return ft::next(begin(), n);
+		}
+
 		void	ConstructAtEnd(size_type count, T const& value)
 		{
 			while (count-- > 0)
-				_allocator.construct(_end_ptr++, value);
+				_allocator.construct((_end_ptr)++, value);
 		}
 
 		void	DeconstructFromEnd(size_type n)
 		{
 			while (n-- > 0)
-				_allocator.destroy(_end_ptr--);
+				_allocator.destroy((_end_ptr)--);
 		}
 	};
 
