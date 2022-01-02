@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/24 20:18:30 by smun              #+#    #+#             */
-/*   Updated: 2021/12/25 19:35:28 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/02 13:32:56 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,9 +27,9 @@
 # include <sys/time.h>
 
 # define BEGIN_EVAL \
-for (unsigned long i = 1; ;++i) \
+for (int i = 0; numpair.second == nullptr || i < numpair.first; ++i) \
 { \
-	switch(i) \
+	switch(numpair.second == nullptr ? (i + 1) : (numpair.second[i])) \
 	{
 
 # define _REGISTER_EVAL_REAL0(IDX, TESTOBJ, FUNCNAME) \

@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 22:10:39 by smun              #+#    #+#             */
-/*   Updated: 2021/12/24 01:00:56 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/02 13:33:28 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,9 +19,6 @@ namespace ft
 	class pair
 	{
 	public:
-		typedef typename T1		first_type;
-		typedef typename T2		second_type;
-
 		T1	first;
 		T2	second;
 

@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 10:56:57 by smun              #+#    #+#             */
-/*   Updated: 2022/01/01 20:09:09 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/02 12:54:39 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -267,7 +267,10 @@ namespace ft
 
 		void		push_back(const_reference value)
 		{
-			EnsureStorageForInsert(1);
+			const size_type	sz = size();
+
+			if (sz + 1 > capacity())
+				EnsureStorage(RecommendedSize(sz + 1));
 			ConstructAtEnd(1, value);
 		}
 
@@ -306,15 +309,6 @@ namespace ft
 			return ft::max(2 * cap, n);
 		}
 
-		void	EnsureStorageForInsert(size_type n)
-		{
-			const size_type sz = size();
-
-			if (sz + n <= capacity())
-				return;
-			EnsureStorage(RecommendedSize(sz + n));
-		}
-
 		void	EnsureStorage(size_type n)
 		{
 			if (n > max_size())
@@ -349,9 +343,23 @@ namespace ft
 
 		iterator	PrepareInsertion(iterator pos, difference_type space)
 		{
-			difference_type n = ft::distance(begin(), pos);
-			EnsureStorageForInsert(space);
-			return ft::next(begin(), n);
+			const size_type			sz = size();
+			const difference_type	n = ft::distance(begin(), pos);
+
+			if (sz + space > capacity())
+				EnsureStorage(RecommendedSize(sz + space));
+			pos = ft::next(begin(), n);
+			iterator to = ft::next(pos, space);
+			MoveAsBackward(pos.base(), to.base(), sz - n);
+			return pos;
+		}
+
+		void	MoveAsBackward(pointer from, pointer to, difference_type len)
+		{
+			pointer	origin = from + len;
+			pointer	target = to + len;
+			while (len-- > 0)
+				_allocator.construct(--target, *(--origin));
 		}
 
 		void	ConstructAtEnd(size_type count, T const& value)
