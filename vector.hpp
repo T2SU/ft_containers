@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 10:56:57 by smun              #+#    #+#             */
-/*   Updated: 2022/01/02 12:54:39 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/02 14:00:40 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -218,6 +218,7 @@ namespace ft
 		iterator	insert(iterator pos, const_reference value)
 		{
 			iterator dest = PrepareInsertion(pos, 1);
+
 			_allocator.construct(dest.base(), value);
 			++_end_ptr;
 			return dest;
@@ -225,10 +226,12 @@ namespace ft
 
 		void		insert(iterator pos, size_type count, const_reference value)
 		{
-			iterator dest = PrepareInsertion(pos, count);
+			iterator	dest = PrepareInsertion(pos, count);
+			pointer		target = dest.base();
+
 			while (count-- > 0)
 			{
-				_allocator.construct((dest++).base(), value);
+				_allocator.construct(target++, value);
 				++_end_ptr;
 			}
 		}
@@ -237,10 +240,12 @@ namespace ft
 		typename enable_if<is_input_iterator<InputIt>::value, void>::type
 		insert(iterator pos, InputIt first, InputIt last)
 		{
-			iterator dest = PrepareInsertion(pos, first, last);
+			iterator	dest = PrepareInsertion(pos, first, last);
+			pointer		target = dest.base();
+
 			while (first != last)
 			{
-				_allocator.construct((dest++).base(), *(first++));
+				_allocator.construct(target++, *(first++));
 				++_end_ptr;
 			}
 		}
@@ -356,6 +361,8 @@ namespace ft
 
 		void	MoveAsBackward(pointer from, pointer to, difference_type len)
 		{
+			if (from == to)
+				return;
 			pointer	origin = from + len;
 			pointer	target = to + len;
 			while (len-- > 0)

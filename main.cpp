@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 19:04:19 by smun              #+#    #+#             */
-/*   Updated: 2022/01/02 13:34:58 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/02 13:36:58 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ static void	TestIntVector(ft::pair<int, int*> numpair)
 	REGISTER_EVAL(7, ut1, Assign3, INT_MAX);
 	REGISTER_EVAL(8, ut1, PushBack, INT_MIN, INT_MAX);
 	REGISTER_EVAL(9, ut1, Insert1, INT_MIN, INT_MAX);
+	REGISTER_EVAL(10, ut1, Insert2, INT_MIN, INT_MAX);
 	END_EVAL;
 }
 
@@ -54,6 +55,7 @@ static void	TestStringVector(ft::pair<int, int*> numpair)
 	REGISTER_EVAL(6, ut1, Assign3, "aaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAaaaaaaaaaaaaaaaa");
 	REGISTER_EVAL(7, ut1, PushBack, "aaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAaaaaaaaaaaaaaaaa", "--");
 	REGISTER_EVAL(8, ut1, Insert1, "aaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAaaaaaaaaaaaaaaaa", "++");
+	REGISTER_EVAL(9, ut1, Insert2, "aaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAaaaaaaaaaaaaaaaa", "**");
 	END_EVAL;
 }
 
