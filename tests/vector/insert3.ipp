@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/24 20:26:30 by smun              #+#    #+#             */
-/*   Updated: 2022/01/02 14:08:21 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/02 14:11:05 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ void	Insert3(value_type val1, value_type val2)
 	for (int i = 0; i < 10; i++)
 		vec1.push_back(val1);
 	Vector vec2(10, val2);
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < 10; i++)
 	{
 		PrintSizeAndCapacity(vec1);
 		vec1.insert(ft::next(vec1.begin(), i), vec2.begin(), ft::next(vec2.begin(), i));

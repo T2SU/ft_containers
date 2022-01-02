@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/24 20:26:30 by smun              #+#    #+#             */
-/*   Updated: 2022/01/01 18:02:17 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/02 14:12:08 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 **  1. push_back() 함수
 */
 
-void	PushBack(value_type val1, value_type val2)
+void	Push_Back(value_type val1, value_type val2)
 {
 	Vector vec1(5);
 	for (int i = 0; i < 5; i++)
