@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 10:56:57 by smun              #+#    #+#             */
-/*   Updated: 2022/01/02 14:00:40 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/02 15:49:32 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -255,19 +255,31 @@ namespace ft
 			return erase(pos, ft::next(pos));
 		}
 
+		// 1. 삭제된 요소의 iterator
+		// 2. 삭제된 요소(pos)가 마지막 요소일 경우, end()
+		// 3. [first, last] 범위가 비어있을 경우, last
+		// 4. 삭제 직전에 last == end() 였을 경우, 갱신된 end()
+
 		iterator	erase(iterator first, iterator last)
 		{
-			if (size() == 0)
-				return end();
-			pointer delfirst = first.base();
+			pointer delcursor = first.base();
 			pointer dellast = last.base();
-			while (delfirst != dellast)
-				_allocator.destroy(delfirst++);
-			pointer dest = first.base();
-			while (delfirst != _end_ptr)
-				_allocator.construct(dest++, *(delfirst++));
-			_end_ptr = dest;
-			return iterator(dellast);
+
+			// Destroying erasing range
+			while (delcursor != dellast)
+				_allocator.destroy(delcursor++);
+
+			// Calculating elements number for moving(len) and first~last range size(range)
+			const difference_type len = _end_ptr - delcursor;
+			const difference_type range = ft::distance(first, last);
+
+			// Move elements to deleted starting position.
+			MoveAsForward(delcursor, first.base(), len);
+
+			// Adjusting end pointer by deleted length.
+			_end_ptr -= range;
+
+			return first;
 		}
 
 		void		push_back(const_reference value)
@@ -359,14 +371,22 @@ namespace ft
 			return pos;
 		}
 
+		void	MoveAsForward(pointer from, pointer to, difference_type len)
+		{
+			if (from == to)
+				return;
+			while (len-- > 0)
+				_allocator.construct(to++, *(from++));
+		}
+
 		void	MoveAsBackward(pointer from, pointer to, difference_type len)
 		{
 			if (from == to)
 				return;
-			pointer	origin = from + len;
-			pointer	target = to + len;
+			from += len;
+			to += len;
 			while (len-- > 0)
-				_allocator.construct(--target, *(--origin));
+				_allocator.construct(--to, *(--from));
 		}
 
 		void	ConstructAtEnd(size_type count, T const& value)

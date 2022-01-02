@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 19:04:19 by smun              #+#    #+#             */
-/*   Updated: 2022/01/02 14:12:05 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/02 15:10:05 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,8 +36,14 @@ static void	TestStringVector(ft::pair<int, int*> numpair)
 	REGISTER_EVAL(8, ut1, Insert1, "aaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAaaaaaaaaaaaaaaaa", "++");
 	REGISTER_EVAL(9, ut1, Insert2, "aaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAaaaaaaaaaaaaaaaa", "**");
 	REGISTER_EVAL(10, ut1, Insert3, "aaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAaaaaaaaaaaaaaaaa", "^^");
+	REGISTER_EVAL(11, ut1, Erase1, "aaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAaaaaaaaaaaaaaaaa");
+	REGISTER_EVAL(12, ut1, Erase2, "aaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAaaaaaaaaaaaaaaaa");
+	REGISTER_EVAL(13, ut1, Erase_Empty, "&&");
 	END_EVAL;
 }
+
+
+
 
 enum
 {
