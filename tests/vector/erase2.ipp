@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/24 20:26:30 by smun              #+#    #+#             */
-/*   Updated: 2022/01/02 16:02:53 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/02 16:03:36 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,4 +37,3 @@ void	Erase2(value_type val1)
 	PrintSizeAndCapacity(vec1);
 	PrintElements(vec1);
 }
-
