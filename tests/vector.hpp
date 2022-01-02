@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/24 19:59:27 by smun              #+#    #+#             */
-/*   Updated: 2022/01/02 13:36:39 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/02 14:07:53 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,7 @@ namespace ft
 		# include "vector/push_back.ipp"
 		# include "vector/insert1.ipp"
 		# include "vector/insert2.ipp"
+		# include "vector/insert3.ipp"
 	};
 
 }
