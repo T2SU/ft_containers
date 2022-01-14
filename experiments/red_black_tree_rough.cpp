@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/06 17:14:00 by smun              #+#    #+#             */
-/*   Updated: 2022/01/11 14:21:38 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/13 22:23:43 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,14 @@ namespace ft
 		{
 			target->_parent = this;
 			_right = target;
+		}
+
+		void replaceChild(node* original, node* newone)
+		{
+			if (_left == original)
+				_left = newone;
+			else if (_right == original)
+				_right = newone;
 		}
 
 		// w가 black이라면 restructuring
@@ -166,6 +174,13 @@ namespace ft
 			return nullptr;
 		}
 
+		node*	find_minimum()
+		{
+			if (_left == nullptr)
+				return this;
+			return _left->find_minimum();
+		}
+
 		node*	insert(T const& value)
 		{
 			// 이진 탐색 트리 insert
@@ -202,6 +217,25 @@ namespace ft
 			else
 				recolor();
 		}
+
+		bool	isChild(node* node)
+		{
+			return _left == node || _right == node;
+		}
+
+		void	transplant(node* newone)
+		{
+			if (_parent != nullptr)
+				_parent->replaceChild(this, newone);
+			if (newone != nullptr)
+			{
+				newone->_parent = _parent;
+				if (_left)
+					newone->setLeftChild(_left);
+				if (_right)
+					newone->setRightChild(_right);
+			}
+		}
 	};
 
 	// https://zeddios.tistory.com/237
@@ -213,12 +247,13 @@ namespace ft
 	{
 	private:
 		typedef Compare compare_type;
-		node<T, Compare>* root;
+		typedef node<T, Compare>	node_type;
+		node_type* root;
 
 		tree(tree const& o);
 		tree& operator=(tree const& o);
 
-		node<T, Compare>*	find(T const& value)
+		node_type*	find(T const& value)
 		{
 			if (root)
 				return root->find(value);
@@ -232,9 +267,9 @@ namespace ft
 		void	insert(T const& value)
 		{
 			// 이진 탐색 트리로 삽입
-			node<T, Compare>* inserted;
+			node_type* inserted;
 			if (root == nullptr)
-				inserted = (root = new node<T, Compare>(true, value));
+				inserted = (root = new node_type(true, value));
 			else
 				inserted = root->insert(value);
 
@@ -248,15 +283,12 @@ namespace ft
 		bool	erase(T const& value)
 		{
 			// 삭제 후 Restructuring / Recoloring?
-			node<T, Compare>* elem = find(value);
+			node_type* elem = find(value);
 			if (elem == nullptr)
 				return false;
 
 			// 요약
 			//  이진 탐색 트리에 맞게 삭제
-
-
-			// 어떻게..?
 
 			// https://www.programiz.com/dsa/deletion-from-a-red-black-tree
 			// 1. 삭제할 노드의 색깔 저장.
@@ -270,52 +302,32 @@ namespace ft
 			//   2. 삭제할 노드의 위치에 x 로 대체.
 
 			// CASE 3: 나머지 경우
-			//   1. 삭제할 노드의 오른쪽 서브트리를 y 변수에 저장.
+			//   1. 삭제할 노드의 오른쪽에서 최소 서브트리를 y 변수에 저장.
 			//   2. y의 색깔을 저장.
 			//   3. y의 오른쪽 자식 노드를 x 변수에 저장.
 			//   4. y가 삭제할 노드의 자식이라면, x의 부모를 y로 설정.
-			//      아니라면, y를 y의 오른쪽 자식 노드로 대체.
+			//      아니라면, x를 y로 만듦.
 			//   5. 삭제할 노드를 y로 대체.
 			//   6. y의 색을 2에서 저장한 색깔로 대체.
 			//   7. 6에서 설정된 색이 BLACK이라면 추가 작업 필요.
 
-			// -------------- 추가 작업 --------------
-
-			//
-
-
-
-			// case1. 삭제할 노드에 자식 노드가 없는 경우
-			// --> 노드를 삭제 후 부모에서 연결 끊기.
-
-			// case2. 삭제할 노드에 자식 하나가 있는 경우.
-			// --> 노드를 삭제 후, 하나 뿐인 자식을 부모와 연결.
-
-			// case3. 삭제할 노드에 자식 두개가 있는 경우.
-			// --> 1. 삭제 대상 노드의 오른쪽 서브트리를 찾는다.
-			//     2. 계승자 (1에서 찾은 서브트리의 최소 값) 노드를 찾는다.
-			//     3. 2 에서 찾은 계승자의 값을 삭제 대상 노드에 복사한다.
-			//     4. 계승자 노드를 삭제한다.
-
-			// ----- 레드 블랙 트리 삭제 -----
-			// case1. 삭제 Node 가 RED인 경우, 더 이상 아무 작업도 필요하지 않음.
-
-
-			// case2. 삭제 Node 가 BLACK인 경우.
-			//    --> 상황에 따라 문제 해결.
-			//  ****
-			//    [1] 자식이 없었을 경우
-			//      1. 그냥 해당 노드를 삭제.
-			//
-			//    [2] 자식 노드가 RED일 경우.
-			//      1. 이진탐색트리에 따라 삭제.
-			//      2. 자식 노드의 색깔들을 모두 BLACK으로.
-			//
-			//    [3] 삭제 노드와 자식이 모두 BLACK일 경우.
-			//      1. 형제를 BLACK으로.
-			//      2. 자신과 형제의 부모를 RED로.
-			//      3.
-			//
+			if (elem->_left == nullptr || elem->_right == nullptr)
+			{
+				node_type* x = (elem->_left ? elem->_left : elem->_right);
+				elem->transplant(x);
+			}
+			else
+			{
+				node_type* right = elem->_right;
+				node_type* y = right->find_minimum();
+				node_type* x = y->_right;
+				if (elem->isChild(y))
+					x->_parent = y;
+				else
+					y->transplant(x);
+				elem->transplant(y);
+			}
+			delete elem;
 		}
 
 		void	print()
@@ -339,6 +351,22 @@ namespace ft
 		// -> 부모의 부모의 부모가 존재하고, 그것이 red일 경우
 		//    1. 부모의 부모를 다시 recoloring 또는 restructing.
 
+
+		// 좌회전
+		void	leftRotate(node_type* x)
+		{
+			// 1. 부모 P의 자리를 x로 대체.
+			// 2. x의 왼쪽 서브트리가 P의 오른쪽 서브트리가 되게 함.
+			// 3. P가 x의 왼쪽 서브트리가 되게 함.
+		}
+
+		// 우회전
+		void	rightRotate(node_type* x)
+		{
+			 // 1. 부모 P의 자리를 x로 대체.
+			 // 2. x의 오른쪽 서브트리가 P의 왼쪽 서브트리가 되게 함.
+			 // 3. P가 x의 오른쪽 서브트리가 되게 함.
+		}
 
 	};
 }
