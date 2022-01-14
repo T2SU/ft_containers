@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/13 22:44:03 by smun              #+#    #+#             */
-/*   Updated: 2022/01/14 19:45:23 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/14 21:16:42 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,6 +168,7 @@ namespace ft
 				p->_black = true;
 				g->_black = false;
 				g->tryRecolouring();
+				g->tryRestructuring();
 			}
 
 			void	tryRestructuring()
@@ -295,6 +296,8 @@ namespace ft
 			if (_root)
 			{
 				node* inserted = _root->insert(value);
+				if (inserted == nullptr) // already inserted
+					return;
 				inserted->tryRecolouring();
 				inserted->tryRestructuring();
 			}
@@ -340,6 +343,18 @@ int main()
 	tree.insert(25);
 	tree.insert(40);
 	tree.insert(80);
+	tree.insert(26);
+	tree.insert(96);
+	tree.insert(33);
+	tree.insert(16);
+	tree.insert(7);
+	tree.insert(3);
+	tree.insert(19);
+	tree.insert(97);
+	tree.insert(98);
+	tree.insert(99);
+	tree.insert(34);
+	tree.insert(33);
 
 
 	tree.print();
