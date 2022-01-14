@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/13 22:44:03 by smun              #+#    #+#             */
-/*   Updated: 2022/01/14 15:32:23 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/14 16:20:14 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,8 @@ namespace ft
 
 			void	transplant(node* x)
 			{
+				if (_parent == nullptr)
+					return;
 				if (_parent->_left == this)
 					_parent->setLeftChild(x);
 				else if (_parent->_right == this)
@@ -54,16 +56,19 @@ namespace ft
 
 				for (int i = 0; i < level; ++i)
 					std::cout << ' ';
+				if (level == 0)
+					std::cout << "-:";
 				std::cout << _value << std::endl;
-				++level;
 				if (_left)
 				{
+					++level;
 					std::cout << "L:";
 					_left->print();
 					--level;
 				}
 				if (_right)
 				{
+					++level;
 					std::cout << "R:";
 					_right->print();
 					--level;
@@ -110,6 +115,8 @@ namespace ft
 				}
 			}
 
+		public:
+
 			bool	isChild(node* node)
 			{
 				return _left == node || _right == node;
@@ -121,8 +128,8 @@ namespace ft
 				node *x = _left;
 
 				p->transplant(this);
-				this->setLeftChild(x);
-				x->setRightChild(p);
+				this->setLeftChild(p);
+				p->setRightChild(x);
 			}
 
 			void	rightRotate()
@@ -131,8 +138,8 @@ namespace ft
 				node *x = _right;
 
 				p->transplant(this);
-				this->setRightChild(x);
-				x->setLeftChild(p);
+				this->setRightChild(p);
+				p->setLeftChild(x);
 			}
 
 		public:
@@ -205,11 +212,18 @@ int main()
 	tree.insert(22);
 	tree.print();
 
-	std::cout << std::endl;
-	std::cout << std::endl;
+	std::cout << std::endl << std::endl;
 
-	ft::tree<int>::node* n = tree.find(11);
-	std::cout << n->_value << std::endl;
+	ft::tree<int>::node* n = tree.find(18);
+	n->leftRotate();
+	tree.print();
+
+	std::cout << std::endl << std::endl;
+
+	n = tree.find(3);
+	n->rightRotate();
+	tree.print();
+
 
 	return 0;
 }
