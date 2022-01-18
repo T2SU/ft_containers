@@ -6,12 +6,13 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/13 22:44:03 by smun              #+#    #+#             */
-/*   Updated: 2022/01/18 20:20:20 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/18 21:50:06 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <memory>
 #include <iostream>
+#include <string>
 
 namespace ft
 {
@@ -79,33 +80,25 @@ namespace ft
 					x->setRightChild(_right);
 			}
 
-			void print()
+			void print(std::string indent, bool last)
 			{
-				static int level = 0;
-
-				for (int i = 0; i < level; ++i)
-					std::cout << '-';
-				if (level == 0)
-					std::cout << "*:";
-				std::cout << _value << ' ';
-				if (_black)
-					std::cout << "(B)" << std::endl;
+				std::cout << indent;
+				if (last)
+				{
+					std::cout << "R----";
+					indent += "   ";
+				}
 				else
-					std::cout << "(R)" << std::endl;
+				{
+					std::cout << "L----";
+					indent += "|  ";
+				}
+				std::string color = isBlack(this) ? "BLACK" : "RED";
+				std::cout << _value << "(" << color << ")" << std::endl;
 				if (_left)
-				{
-					++level;
-					std::cout << "L:";
-					_left->print();
-					--level;
-				}
+					_left->print(indent, false);
 				if (_right)
-				{
-					++level;
-					std::cout << "R:";
-					_right->print();
-					--level;
-				}
+					_right->print(indent, true);
 			}
 
 			node* find(T const& value)
@@ -121,11 +114,11 @@ namespace ft
 				return nullptr;
 			}
 
-			node*	findMinimum()
+			static node*	minimum(node* n)
 			{
-				if (_left == nullptr)
-					return this;
-				return _left->findMinimum();
+				if (n->_left == nullptr)
+					return n;
+				return minimum(n->_left);
 			}
 
 			node*	insert(T const& value)
@@ -179,73 +172,6 @@ namespace ft
 				if (_left != nullptr)
 					return _left;
 				return _right;
-			}
-
-			static void	fixDoubleBlack(node* s, node* p)
-			{
-				if (p == nullptr) // root node
-					return;
-
-				if (s == nullptr)
-				{
-					fixDoubleBlack(p->getSiblingNode(), p->_parent);
-					return;
-				}
-				if (!isBlack(s))
-				{
-					p->setBlack(false);
-					s->setBlack(true);
-					if (s->isOnLeft())
-						p->rightRotate();
-					else
-						p->leftRotate();
-					fixDoubleBlack(s, p);
-					return;
-				}
-				if (isBlack(s->_left) && isBlack(s->_right))
-				{
-					s->setBlack(false);
-					if (isBlack(p))
-						fixDoubleBlack(p->getSiblingNode(), p->_parent);
-					else
-						p->setBlack(true);
-					return;
-				}
-				if (!isBlack(s->_left))
-				{
-					if (s->isOnLeft())
-					{
-						// LL
-						s->_left->setBlack(isBlack(s));
-						s->setBlack(isBlack(p));
-						p->rightRotate();
-					}
-					else
-					{
-						// RL
-						s->_left->setBlack(isBlack(p));
-						s->rightRotate();
-						p->leftRotate();
-					}
-				}
-				else
-				{
-					if (s->isOnLeft())
-					{
-						// LR
-						s->_right->setBlack(isBlack(p));
-						s->leftRotate();
-						p->rightRotate();
-					}
-					else
-					{
-						// RR
-						s->_right->setBlack(isBlack(s));
-						s->setBlack(isBlack(p));
-						p->leftRotate();
-					}
-				}
-				p->setBlack(true);
 			}
 
 			void	tryFixDoubleRed()
@@ -357,49 +283,118 @@ namespace ft
 		tree(tree const& o);
 		tree& operator=(tree const& o);
 
-		node*	deleteAsStandardBST(node* n)
+		void	deleteNode(node* z)
 		{
-			if (n == nullptr)
-				return nullptr;
-			node* leftChild = n->_left;
-			node* rightChild = n->_right;
-			node* successor;
-			if (leftChild != nullptr && rightChild != nullptr)
+			node* x;
+			node* y = z;
+			bool y_original_color = y->_black;
+			if (z->_left == nullptr)
 			{
-				// 1. 계승자 찾기 (삭제할 노드의 오른쪽 서브트리에서, 가장 작은 요소 노드 찾기)
-				successor = rightChild->findMinimum();
-				// 2. 계승자의 자식을 계승자의 부모에 연결. (계승자 고립)
-				successor->transplant(successor->getFirstChild());
-				// 3. 계승자를 삭제할 노드의 위치로. (삭제할 노드 고립)
-				n->replace(successor);
+				x = z->_right;
+				z->transplant(z->_right);
 			}
-			else if (leftChild != nullptr || rightChild != nullptr)
+			else if (z->_right == nullptr)
 			{
-				if (leftChild != nullptr)
-					n->transplant((successor = leftChild));
-				else
-					n->transplant((successor = rightChild));
+				x = z->_left;
+				z->transplant(z->_left);
 			}
 			else
-				n->transplant((successor = nullptr));
-			delete n;
-			return successor;
+			{
+				y = node::minimum(z->_right);
+				y_original_color = y->_black;
+				x = y->_right;
+				if (y->_parent == z)
+				{
+					if (x != nullptr)
+						x->_parent = y;
+				}
+				else
+				{
+					y->transplant(y->_right);
+					y->setRightChild(z->_right);
+				}
+				z->transplant(y);
+				y->setLeftChild(z->_left);
+				y->_black = z->_black;
+			}
+			delete z;
+			if (y_original_color)
+				deleteFix(x);
 		}
 
-		void	deleteNode(node* n)
+		void deleteFix(node *x)
 		{
-			bool black = node::isBlack(n);
-			node* s = n->getSiblingNode();
-			node* p = n->_parent;
-			node* successor = deleteAsStandardBST(n);
-			if (!black)
-				return;
-			if (!node::isBlack(successor))
+			node *s;
+			while (x != _root && x->_black)
 			{
-				successor->setBlack(true);
-				return;
+				if (x == x->_parent->_left)
+				{
+					s = x->_parent->_right;
+					if (!s->_black)
+					{
+						s->_black = true;
+						x->_parent->_black = false;
+						x->_parent->leftRotate();
+						s = x->_parent->_right;
+					}
+
+					if (s->_left->_black && s->_right->_black)
+					{
+						s->_black = false;
+						x = x->_parent;
+					}
+					else
+					{
+						if (s->_right->_black)
+						{
+							s->_left->_black = true;
+							s->_black = false;
+							s->rightRotate();
+							s = x->_parent->_right;
+						}
+
+						s->_black = x->_parent->_black;
+						x->_parent->_black = true;
+						s->_right->_black = true;
+						x->_parent->leftRotate();
+						x = _root;
+					}
+				}
+				else
+				{
+					s = x->_parent->_left;
+					if (!s->_black)
+					{
+						s->_black = true;
+						x->_parent->_black = false;
+						x->_parent->rightRotate();
+						s = x->_parent->_left;
+					}
+
+					if (s->_right->_black && s->_right->_black)
+					{
+						s->_black = false;
+						x = x->_parent;
+					}
+					else
+					{
+						if (s->_left->_black)
+						{
+							s->_right->_black = true;
+							s->_black = false;
+							s->leftRotate();
+							s = x->_parent->_left;
+						}
+
+						s->_black = x->_parent->_black;
+						x->_parent->_black = true;
+						s->_left->_black = true;
+						x->_parent->rightRotate();
+						x = _root;
+					}
+				}
 			}
-			node::fixDoubleBlack(s, p);
+			x->_black = true;
 		}
 
 	public:
@@ -424,7 +419,7 @@ namespace ft
 		void	print()
 		{
 			if (_root)
-				_root->print();
+				_root->print("", true);
 		}
 
 		node*	find(T const& value)
@@ -454,6 +449,8 @@ int main()
 	tree.insert(25);
 	tree.insert(40);
 	tree.insert(80);
+	tree.print();
+
 	tree.erase(8);
 	//tree.erase(17);
 
