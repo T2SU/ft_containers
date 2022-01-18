@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/13 22:44:03 by smun              #+#    #+#             */
-/*   Updated: 2022/01/18 15:23:13 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/18 20:20:20 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,11 @@ namespace ft
 			node(node const& o);
 			node& operator=(node const& o);
 
+			static bool	isBlack(node* x)
+			{
+				return x == nullptr || x->_black;
+			}
+
 			void	setLeftChild(node* x)
 			{
 				if ((_left = x))
@@ -41,6 +46,16 @@ namespace ft
 					_right->_parent = this;
 			}
 
+			bool	isOnLeft()
+			{
+				return _parent->_left == this;
+			}
+
+			bool	isOnRight()
+			{
+				return _parent->_right == this;
+			}
+
 			void	transplant(node* x)
 			{
 				if (_parent == nullptr)
@@ -49,9 +64,9 @@ namespace ft
 					x->_parent = nullptr;
 					return;
 				}
-				if (_parent->_left == this)
+				if (isOnLeft())
 					_parent->setLeftChild(x);
-				else if (_parent->_right == this)
+				else if (isOnRight())
 					_parent->setRightChild(x);
 			}
 
@@ -138,7 +153,7 @@ namespace ft
 				node* p = _parent;
 				if (p == nullptr)
 					return false;
-				return !isBlack() && !p->isBlack();
+				return !isBlack(this) && !isBlack(p);
 			}
 
 			node*	getUncleNode()
@@ -154,7 +169,7 @@ namespace ft
 				node* p = _parent;
 				if (p == nullptr)
 					return nullptr;
-				if (p->_left == this)
+				if (isOnLeft())
 					return p->_right;
 				return p->_left;
 			}
@@ -166,69 +181,121 @@ namespace ft
 				return _right;
 			}
 
-			void	tryRecolouring()
+			static void	fixDoubleBlack(node* s, node* p)
 			{
-				if (isRootNode())
+				if (p == nullptr) // root node
+					return;
+
+				if (s == nullptr)
 				{
-					if (!isBlack())
-						_black = true;
+					fixDoubleBlack(p->getSiblingNode(), p->_parent);
 					return;
 				}
-
-				node* p = _parent;
-				node* g = _parent->_parent;
-				node* u = getUncleNode();
-
-				if (g == nullptr || !isDoubleRed())
-					return;
-				if (u == nullptr || u->isBlack())
-					return;
-
-				u->_black = true;
-				p->_black = true;
-				g->_black = false;
-				g->tryRecolouring();
-				g->tryRestructuring();
-			}
-
-			void	tryRestructuring()
-			{
-				if (isRootNode())
-					return;
-
-				node* p = _parent;
-				node* g = _parent->_parent;
-				node* u = getUncleNode();
-
-				if (g == nullptr || !isDoubleRed())
-					return;
-				if (u != nullptr && !u->isBlack())
-					return;
-
-				if (_comp(this->_value, g->_value))
+				if (!isBlack(s))
 				{
-					node* greater = _comp(p->_value, this->_value) ? this : p;
-					if (greater == this)
-						this->leftRotate();
-					greater->rightRotate();
-					std::swap(greater->_black, g->_black);
+					p->setBlack(false);
+					s->setBlack(true);
+					if (s->isOnLeft())
+						p->rightRotate();
+					else
+						p->leftRotate();
+					fixDoubleBlack(s, p);
+					return;
+				}
+				if (isBlack(s->_left) && isBlack(s->_right))
+				{
+					s->setBlack(false);
+					if (isBlack(p))
+						fixDoubleBlack(p->getSiblingNode(), p->_parent);
+					else
+						p->setBlack(true);
+					return;
+				}
+				if (!isBlack(s->_left))
+				{
+					if (s->isOnLeft())
+					{
+						// LL
+						s->_left->setBlack(isBlack(s));
+						s->setBlack(isBlack(p));
+						p->rightRotate();
+					}
+					else
+					{
+						// RL
+						s->_left->setBlack(isBlack(p));
+						s->rightRotate();
+						p->leftRotate();
+					}
 				}
 				else
 				{
-					node* lesser = _comp(p->_value, this->_value) ? p : this;
-					if (lesser == this)
-						this->rightRotate();
-					lesser->leftRotate();
-					std::swap(lesser->_black, g->_black);
+					if (s->isOnLeft())
+					{
+						// LR
+						s->_right->setBlack(isBlack(p));
+						s->leftRotate();
+						p->rightRotate();
+					}
+					else
+					{
+						// RR
+						s->_right->setBlack(isBlack(s));
+						s->setBlack(isBlack(p));
+						p->leftRotate();
+					}
+				}
+				p->setBlack(true);
+			}
+
+			void	tryFixDoubleRed()
+			{
+				if (isRootNode())
+				{
+					if (!isBlack(this))
+						setBlack(true);
+					return;
+				}
+
+				node* p = _parent;
+				node* g = _parent->_parent;
+				node* u = getUncleNode();
+
+				if (g == nullptr || !isDoubleRed())
+					return;
+				if (u != nullptr && !isBlack(u))
+				{
+					u->setBlack(true);
+					p->setBlack(true);
+					g->setBlack(false);
+					g->tryFixDoubleRed();
+				}
+				if (g == nullptr || !isDoubleRed())
+					return;
+				if (u == nullptr || isBlack(u))
+				{
+					if (_comp(this->_value, g->_value))
+						// x, p, g | p, x, g
+					{
+						node* greater = _comp(p->_value, this->_value) ? this : p;
+						if (greater == this)
+							this->leftRotate();
+						greater->rightRotate();
+						std::swap(greater->_black, g->_black);
+					}
+					else
+						// g, x, p | g, p, x
+					{
+						node* lesser = _comp(p->_value, this->_value) ? p : this;
+						if (lesser == this)
+							this->rightRotate();
+						lesser->leftRotate();
+						std::swap(lesser->_black, g->_black);
+					}
 				}
 			}
 
 		public:
-
-			bool	isBlack()
-			{
-				return _black;
-			}
 
 			bool	isRootNode()
 			{
@@ -276,6 +343,11 @@ namespace ft
 					_black = true;
 			}
 
+			void	setBlack(bool black)
+			{
+				_black = black;
+			}
+
 			friend class tree;
 		};
 
@@ -314,9 +386,20 @@ namespace ft
 			return successor;
 		}
 
-		void	deleteNode(node* x)
+		void	deleteNode(node* n)
 		{
-			deleteAsStandardBST(x);
+			bool black = node::isBlack(n);
+			node* s = n->getSiblingNode();
+			node* p = n->_parent;
+			node* successor = deleteAsStandardBST(n);
+			if (!black)
+				return;
+			if (!node::isBlack(successor))
+			{
+				successor->setBlack(true);
+				return;
+			}
+			node::fixDoubleBlack(s, p);
 		}
 
 	public:
@@ -330,8 +413,7 @@ namespace ft
 				node* inserted = _root->insert(value);
 				if (inserted == nullptr) // already inserted
 					return;
-				inserted->tryRecolouring();
-				inserted->tryRestructuring();
+				inserted->tryFixDoubleRed();
 			}
 			else
 			{
@@ -373,7 +455,7 @@ int main()
 	tree.insert(40);
 	tree.insert(80);
 	tree.erase(8);
-	tree.erase(17);
+	//tree.erase(17);
 
 
 	tree.print();
