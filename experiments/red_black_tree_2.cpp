@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/13 22:44:03 by smun              #+#    #+#             */
-/*   Updated: 2022/01/18 15:04:49 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/14 21:16:42 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,10 +59,10 @@ namespace ft
 			{
 				static int level = 0;
 
-				for (int i = 0; i < level - 1; ++i)
-					std::cout << '-';
+				for (int i = 0; i < level; ++i)
+					std::cout << ' ';
 				if (level == 0)
-					std::cout << "*:";
+					std::cout << "-:";
 				std::cout << _value << ' ';
 				if (_black)
 					std::cout << "(B)" << std::endl;
@@ -97,11 +97,11 @@ namespace ft
 				return nullptr;
 			}
 
-			node*	findMinimum()
+			node*	find_minimum()
 			{
 				if (_left == nullptr)
 					return this;
-				return _left->findMinimum();
+				return _left->find_minimum();
 			}
 
 			node*	insert(T const& value)
@@ -185,21 +185,38 @@ namespace ft
 				if (u != nullptr && !u->isBlack())
 					return;
 
-				if (_comp(this->_value, g->_value))
+				node* tab[] = {this, p, g};
+				for (int i = 0; i < 2; i++)
+					for (int j = 0; j < 2 - i; j++)
+						if (_comp(tab[j + 1]->_value, tab[j]->_value))
+							std::swap(tab[j], tab[j + 1]);
+
+				// LL: x, p, g
+				// LR: p, x, g
+				// RL: g, x, p
+				// RR: g, p, x
+
+				if (tab[0] == this) // LL
 				{
-					node* greater = _comp(p->_value, this->_value) ? this : p;
-					if (greater == this)
-						this->leftRotate();
-					greater->rightRotate();
-					std::swap(greater->_black, g->_black);
+					p->rightRotate();
+					std::swap(p->_black, g->_black);
 				}
-				else
+				else if (tab[1] == this && tab[0] == p) // LR
 				{
-					node* lesser = _comp(p->_value, this->_value) ? p : this;
-					if (lesser == this)
-						this->rightRotate();
-					lesser->leftRotate();
-					std::swap(lesser->_black, g->_black);
+					this->leftRotate();
+					this->rightRotate();
+					std::swap(this->_black, g->_black);
+				}
+				else if (tab[1] == this) // RL
+				{
+					this->rightRotate();
+					this->leftRotate();
+					std::swap(this->_black, g->_black);
+				}
+				else if (tab[2] == this) // RR
+				{
+					p->leftRotate();
+					std::swap(p->_black, g->_black);
 				}
 			}
 
@@ -302,27 +319,6 @@ namespace ft
 				return _root->find(value);
 			return nullptr;
 		}
-
-		node*	erase(node* n)
-		{
-			if (n == nullptr)
-				return nullptr;
-			node* lchild = n->_left;
-			node* rchild = n->_right;
-			if (lchild != nullptr && rchild != nullptr)
-			{
-
-			}
-			else if (lchild != nullptr || rchild != nullptr)
-			{
-
-			}
-		}
-
-		node*	erase(T const& value)
-		{
-			return erase(find(value));
-		}
 	};
 }
 
@@ -331,6 +327,14 @@ int main()
 	ft::tree<int> tree;
 	std::cout << "hello tree" << std::endl;
 
+	/*tree.insert(8);
+	tree.insert(18);
+	tree.insert(5);
+	tree.insert(15);
+	tree.insert(17);
+	tree.insert(25);
+	tree.insert(40);
+	tree.insert(80);*/
 	tree.insert(8);
 	tree.insert(18);
 	tree.insert(5);
@@ -339,6 +343,18 @@ int main()
 	tree.insert(25);
 	tree.insert(40);
 	tree.insert(80);
+	tree.insert(26);
+	tree.insert(96);
+	tree.insert(33);
+	tree.insert(16);
+	tree.insert(7);
+	tree.insert(3);
+	tree.insert(19);
+	tree.insert(97);
+	tree.insert(98);
+	tree.insert(99);
+	tree.insert(34);
+	tree.insert(33);
 
 
 	tree.print();

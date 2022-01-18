@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/13 22:44:03 by smun              #+#    #+#             */
-/*   Updated: 2022/01/18 15:04:49 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/18 15:23:13 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,11 +55,20 @@ namespace ft
 					_parent->setRightChild(x);
 			}
 
+			void	replace(node* x)
+			{
+				transplant(x);
+				if (_left != nullptr)
+					x->setLeftChild(_left);
+				if (_right != nullptr)
+					x->setRightChild(_right);
+			}
+
 			void print()
 			{
 				static int level = 0;
 
-				for (int i = 0; i < level - 1; ++i)
+				for (int i = 0; i < level; ++i)
 					std::cout << '-';
 				if (level == 0)
 					std::cout << "*:";
@@ -137,13 +146,24 @@ namespace ft
 				node* p = _parent;
 				if (p == nullptr)
 					return nullptr;
-				node* grandp = p->_parent;
-				if (grandp == nullptr)
+				return p->getSiblingNode();
+			}
+
+			node*	getSiblingNode() // Right
+			{
+				node* p = _parent;
+				if (p == nullptr)
 					return nullptr;
-				if (grandp->_left == p)
-					return grandp->_right;
-				else
-					return grandp->_left;
+				if (p->_left == this)
+					return p->_right;
+				return p->_left;
+			}
+
+			node*	getFirstChild()
+			{
+				if (_left != nullptr)
+					return _left;
+				return _right;
 			}
 
 			void	tryRecolouring()
@@ -205,11 +225,6 @@ namespace ft
 
 		public:
 
-			bool	isChild(node* node)
-			{
-				return _left == node || _right == node;
-			}
-
 			bool	isBlack()
 			{
 				return _black;
@@ -249,15 +264,15 @@ namespace ft
 
 			virtual ~node() {}
 			node(tree* tree, T const& value, node* parent)
-				: _value(value)
-				, _parent(parent)
-				, _left(nullptr)
-				, _right(nullptr)
-				, _black(false)
-				, _comp(Compare())
-				, _tree(tree)
+					: _value(value)
+					, _parent(parent)
+					, _left(nullptr)
+					, _right(nullptr)
+					, _black(false)
+					, _comp(Compare())
+					, _tree(tree)
 			{
-				if (parent == nullptr)
+				if (isRootNode())
 					_black = true;
 			}
 
@@ -269,6 +284,40 @@ namespace ft
 
 		tree(tree const& o);
 		tree& operator=(tree const& o);
+
+		node*	deleteAsStandardBST(node* n)
+		{
+			if (n == nullptr)
+				return nullptr;
+			node* leftChild = n->_left;
+			node* rightChild = n->_right;
+			node* successor;
+			if (leftChild != nullptr && rightChild != nullptr)
+			{
+				// 1. 계승자 찾기 (삭제할 노드의 오른쪽 서브트리에서, 가장 작은 요소 노드 찾기)
+				successor = rightChild->findMinimum();
+				// 2. 계승자의 자식을 계승자의 부모에 연결. (계승자 고립)
+				successor->transplant(successor->getFirstChild());
+				// 3. 계승자를 삭제할 노드의 위치로. (삭제할 노드 고립)
+				n->replace(successor);
+			}
+			else if (leftChild != nullptr || rightChild != nullptr)
+			{
+				if (leftChild != nullptr)
+					n->transplant((successor = leftChild));
+				else
+					n->transplant((successor = rightChild));
+			}
+			else
+				n->transplant((successor = nullptr));
+			delete n;
+			return successor;
+		}
+
+		void	deleteNode(node* x)
+		{
+			deleteAsStandardBST(x);
+		}
 
 	public:
 		tree() : _root(nullptr) {}
@@ -303,25 +352,9 @@ namespace ft
 			return nullptr;
 		}
 
-		node*	erase(node* n)
+		void	erase(T const& value)
 		{
-			if (n == nullptr)
-				return nullptr;
-			node* lchild = n->_left;
-			node* rchild = n->_right;
-			if (lchild != nullptr && rchild != nullptr)
-			{
-
-			}
-			else if (lchild != nullptr || rchild != nullptr)
-			{
-
-			}
-		}
-
-		node*	erase(T const& value)
-		{
-			return erase(find(value));
+			deleteNode(find(value));
 		}
 	};
 }
@@ -339,6 +372,8 @@ int main()
 	tree.insert(25);
 	tree.insert(40);
 	tree.insert(80);
+	tree.erase(8);
+	tree.erase(17);
 
 
 	tree.print();
