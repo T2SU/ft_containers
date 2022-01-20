@@ -329,8 +329,6 @@ namespace ft
 			{
 				node* suc = n->getRightChild()->getMinimum();
 				node::swap(n, suc, VALUE);
-				//transplant(suc, suc->getFirstChild());
-				//replace(n, suc);
 				n = suc;
 			}
 			node* c = n->getFirstChild();
@@ -356,11 +354,11 @@ namespace ft
 			}
 
 			node* s = siblingOf(p, db);
+			// 이진 트리 속성에 의해서 s가 없을 수는 없음.
 
 			// case 3. (s쪽의 BLACK을 하나 줄여서 균형을 맞추기.
 			//          p가 블랙이라서 균형 안맞으면 이중블랙 다시 수정.)
-			if (s != nullptr
-				&& getColor(s) == BLACK
+			if (getColor(s) == BLACK
 				&& getColor(s->getLeftChild()) == BLACK
 				&& getColor(s->getRightChild()) == BLACK)
 			{
@@ -372,8 +370,7 @@ namespace ft
 			}
 
 			// case 5.
-			else if (s != nullptr
-					&& getColor(s) == BLACK
+			else if (getColor(s) == BLACK
 					&& getColor(getChildByFar(s)) == BLACK
 					&& getColor(getChildByNear(s)) == RED)
 			{
@@ -387,8 +384,7 @@ namespace ft
 			}
 
 			// case 6.
-			else if (s != nullptr
-					&& getColor(s) == BLACK
+			else if (getColor(s) == BLACK
 					&& getColor(getChildByFar(s)) == RED)
 			{
 				node* farChild = getChildByFar(s);
@@ -468,6 +464,9 @@ int main()
 	tree.print();
 
 	tree.erase(15);
+	tree.print();
+
+	tree.erase(40);
 	tree.print();
 
 	return 0;
