@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   red_black_tree_1.cpp                               :+:      :+:    :+:   */
+/*   cccc.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/13 22:44:03 by smun              #+#    #+#             */
-/*   Updated: 2022/01/18 21:50:06 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/20 16:29:42 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,6 +167,11 @@ namespace ft
 				return p->_left;
 			}
 
+			int		getChildCount()
+			{
+				return (_left != nullptr) + (_right != nullptr);
+			}
+
 			node*	getFirstChild()
 			{
 				if (_left != nullptr)
@@ -282,120 +287,6 @@ namespace ft
 
 		tree(tree const& o);
 		tree& operator=(tree const& o);
-
-		void	deleteNode(node* z)
-		{
-			node* x;
-			node* y = z;
-			bool y_original_color = y->_black;
-			if (z->_left == nullptr)
-			{
-				x = z->_right;
-				z->transplant(z->_right);
-			}
-			else if (z->_right == nullptr)
-			{
-				x = z->_left;
-				z->transplant(z->_left);
-			}
-			else
-			{
-				y = node::minimum(z->_right);
-				y_original_color = y->_black;
-				x = y->_right;
-				if (y->_parent == z)
-				{
-					if (x != nullptr)
-						x->_parent = y;
-				}
-				else
-				{
-					y->transplant(y->_right);
-					y->setRightChild(z->_right);
-				}
-				z->transplant(y);
-				y->setLeftChild(z->_left);
-				y->_black = z->_black;
-			}
-			delete z;
-			if (y_original_color)
-				deleteFix(x);
-		}
-
-		void deleteFix(node *x)
-		{
-			node *s;
-			while (x != _root && x->_black)
-			{
-				if (x == x->_parent->_left)
-				{
-					s = x->_parent->_right;
-					if (!s->_black)
-					{
-						s->_black = true;
-						x->_parent->_black = false;
-						x->_parent->leftRotate();
-						s = x->_parent->_right;
-					}
-
-					if (s->_left->_black && s->_right->_black)
-					{
-						s->_black = false;
-						x = x->_parent;
-					}
-					else
-					{
-						if (s->_right->_black)
-						{
-							s->_left->_black = true;
-							s->_black = false;
-							s->rightRotate();
-							s = x->_parent->_right;
-						}
-
-						s->_black = x->_parent->_black;
-						x->_parent->_black = true;
-						s->_right->_black = true;
-						x->_parent->leftRotate();
-						x = _root;
-					}
-				}
-				else
-				{
-					s = x->_parent->_left;
-					if (!s->_black)
-					{
-						s->_black = true;
-						x->_parent->_black = false;
-						x->_parent->rightRotate();
-						s = x->_parent->_left;
-					}
-
-					if (s->_right->_black && s->_right->_black)
-					{
-						s->_black = false;
-						x = x->_parent;
-					}
-					else
-					{
-						if (s->_left->_black)
-						{
-							s->_right->_black = true;
-							s->_black = false;
-							s->leftRotate();
-							s = x->_parent->_left;
-						}
-
-						s->_black = x->_parent->_black;
-						x->_parent->_black = true;
-						s->_left->_black = true;
-						x->_parent->rightRotate();
-						x = _root;
-					}
-				}
-			}
-			x->_black = true;
-		}
 
 	public:
 		tree() : _root(nullptr) {}
