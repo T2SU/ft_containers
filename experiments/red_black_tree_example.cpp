@@ -421,13 +421,19 @@ int main() {
 	bst.insert(80);
 
   bst.printTree();
-  cout << endl
-     << "After deleting" << endl;
+  cout << endl;
   bst.deleteNode(8);
   bst.printTree();
 
-  cout << endl
-     << "After deleting" << endl;
+  cout << endl;
   bst.deleteNode(17);
+  bst.printTree();
+
+  cout << endl;
+  bst.deleteNode(5);
+  bst.printTree();
+
+  cout << endl;
+  bst.deleteNode(15);
   bst.printTree();
 }
