@@ -8,8 +8,7 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
+/*   By: smun <smun@student.42se/*   Updated: 2022/01/21 11:39:35 by smun             ###   ########.fr       */                   +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/20 16:20:46 by smun              #+#    #+#             */
 /*   Updated: 2022/01/20 17:22:40 by smun             ###   ########.fr       */
 /*                                                                            */
@@ -18,6 +17,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <utility>
 
 namespace ft
 {
@@ -26,7 +26,7 @@ namespace ft
 	{
 	private:
 		enum { BLACK, RED };
-		enum { ALL = -1, PARENT = 0x1, LEFT_CHILD = 0x2, RIGHT_CHILD = 0x4, COLOR = 0x8, VALUE = 0x10 };
+		enum { ALL = -1, COLOR = 0x8, VALUE = 0x10 };
 
 		class node
 		{
@@ -106,19 +106,13 @@ namespace ft
 
 			static void	swap(node* a, node* b, int flag)
 			{
-				if (flag & PARENT)
-					std::swap(a->_parent, b->_parent);
-				if (flag & LEFT_CHILD)
-					std::swap(a->_left, b->_left);
-				if (flag & RIGHT_CHILD)
-					std::swap(a->_right, b->_right);
 				if (flag & COLOR)
 				{
 					if (a != nullptr && b != nullptr)
 						std::swap(a->_color, b->_color);
-					else if (a != nullptr && b == nullptr)
+					else if (a != nullptr)
 						a->setColor(BLACK);
-					else if (a == nullptr && b != nullptr)
+					else if (b != nullptr)
 						b->setColor(BLACK);
 				}
 				if (flag & VALUE)
@@ -297,27 +291,23 @@ namespace ft
 				return;
 			if (getColor(u) == BLACK)
 			{
-				T const val_n = n->getValue();
-				T const val_g = g->getValue();
-				T const val_p = p->getValue();
-
-				if (_comp(val_n, val_g))
-					// x, p, g | p, x, g
+				// x, p, g가 직선형태가 되게.
+				// 중간이 굽어진 형태라면, x를 g의 반대방향으로 회전.
+				// 이후 p또는 x를 g쪽으로 색교체 후 회전.
+				node* child_of_g = p;
+				if (p->isOnLeft())
 				{
-					node* greater = _comp(val_p, val_n) ? n : p;
-					if (greater == n)
-						leftRotate(n);
-					rightRotate(greater);
-					node::swap(greater, g, COLOR);
+					if (n->isOnRight())
+						leftRotate(child_of_g = n);
+					node::swap(child_of_g, g, COLOR);
+					rightRotate(child_of_g);
 				}
 				else
-					// g, x, p | g, p, x
 				{
-					node* lesser = _comp(val_p, val_n) ? p : n;
-					if (lesser == n)
-						rightRotate(n);
-					leftRotate(lesser);
-					node::swap(lesser, g, COLOR);
+					if (n->isOnLeft())
+						rightRotate(child_of_g = n);
+					node::swap(child_of_g, g, COLOR);
+					leftRotate(child_of_g);
 				}
 			}
 		}
@@ -356,38 +346,68 @@ namespace ft
 			node* s = siblingOf(p, db);
 			// 이진 트리 속성에 의해서 s가 없을 수는 없음.
 
-			// case 3. (s쪽의 BLACK을 하나 줄여서 균형을 맞추기.
-			//          p가 블랙이라서 균형 안맞으면 이중블랙 다시 수정.)
-			if (getColor(s) == BLACK
-				&& getColor(s->getLeftChild()) == BLACK
-				&& getColor(s->getRightChild()) == BLACK)
+			// case 4. 형제가 RED일 경우,
+			//         db방향으로 색교체 회전을 해서 RED도 넘기고, 노드 개수도 하나 옮김.
+			//         그러나 여전히 db는 이중블랙. fixDoubleBlack 다시 호출.
+			if (getColor(s) == RED)
 			{
+				node::swap(db, p, COLOR);
+				if (s->isOnLeft())
+					rightRotate(s);
+				else
+					leftRotate(s);
+				fixDoubleBlack(db, p);
+				return;
+			}
+
+			node* nearChild = getChildByNear(s);
+			node* farChild = getChildByFar(s);
+
+			// case 3. 형제와 형제의 자식이 모두 BLACK일 경우, 형제쪽에 RED를 넣어 균형을 맞추어야함.
+			//         형제를 RED로 설정하고, 대신 p는 BLACK으로.
+			if (getColor(nearChild) == BLACK && getColor(farChild) == BLACK)
+			{
+
 				s->setColor(RED);
-				if (getColor(p) == RED) // s와 p의 순서를 맞바꾸는것만으로 문제를 해결할 수 있을 때.
+				if (getColor(p) == RED)
 					p->setColor(BLACK);
+
+				// p가 원래 BLACK이었다면, p가 이중 블랙 상태가 됨.
+				// p에 대해서 fixDoubleBlack 호출.
 				else
 					fixDoubleBlack(p, p->getParent());
 			}
 
-			// case 5.
-			else if (getColor(s) == BLACK
-					&& getColor(getChildByFar(s)) == BLACK
-					&& getColor(getChildByNear(s)) == RED)
+			// case 5. (s와 s의 db와 nearChild를 색교체 후, nearChild를 db와 반대쪽으로 회전.)
+			//          1. s가 오른쪽에 있을 경우.
+			//             --> db와 가까운 쪽은 s의 왼쪽 자식.
+			//             --> s는 p의 왼쪽에 달려있으므로, 우회전.
+			//          2. s가 왼쪽에 있을 경우.
+			//             --> db와 가까운 쪽은 s의 오른쪽 자식.
+			//             --> s는 p의 오른쪽에 달려있으므로, 좌회전.)
+			else if (getColor(farChild) == BLACK && getColor(nearChild) == RED)
 			{
-				node* nearChild = getChildByNear(s);
 				node::swap(nearChild, s, COLOR);
 				if (s->isOnRight())
 					rightRotate(nearChild);
 				else
 					leftRotate(nearChild);
-				fixDoubleBlack(db, p); // apply case 6
+
+				// 이 상태에서는 db가 이중 블랙 상태이므로, 균형이 맞지 않음.
+
+				// p색이 RED가 된 상태에서 db와 먼 쪽으로 회전되므로,
+				// p는 s의 먼쪽 자식이 됨.
+				// 따라서 자연스레 아래 함수는 case 6을 처리함.
+				fixDoubleBlack(db, p);
 			}
 
-			// case 6.
-			else if (getColor(s) == BLACK
-					&& getColor(getChildByFar(s)) == RED)
+			// case 6. (s의 db에 대한 farChild가 RED)
+			//   --> s는 BLACK일 것, farChild의 자식은 모두 BLACK.
+			//       이진트리 속성에 의해 nearChild의 색은 무조건 BLACK.
+			//   따라서, p와 s를 색교환하고, s를 db쪽으로 회전해서 균형을 맞춤.
+			//   이후 farChild, db색을 모두 BLACK으로 칠하면, db의 색에 관계없이 BLACK노드 개수가 균형.
+			else if (getColor(farChild) == RED)
 			{
-				node* farChild = getChildByFar(s);
 				node::swap(p, s, COLOR);
 				if (s->isOnRight())
 					leftRotate(s);
@@ -398,16 +418,6 @@ namespace ft
 				farChild->setColor(BLACK);
 			}
 
-			// case 4.
-			else if (getColor(s) == RED)
-			{
-				node::swap(db, p, COLOR);
-				if (s->isOnLeft())
-					rightRotate(s);
-				else
-					leftRotate(s);
-				fixDoubleBlack(db, p);
-			}
 		}
 
 	public:
