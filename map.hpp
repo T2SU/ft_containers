@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/03 17:35:17 by smun              #+#    #+#             */
-/*   Updated: 2022/01/06 10:54:51 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/24 17:40:15 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,11 @@ namespace ft
 	class map
 	{
 	private:
+		template<typename ValueType, typename NodePtr, typename DiffType>
+		class	MapIterator;
+		template<typename ValueType, typename NodePtr, typename DiffType>
+		class	ConstMapIterator;
+
 	public:
 		typedef Key											key_type;
 		typedef T											mapped_type;
@@ -43,115 +48,248 @@ namespace ft
 		typedef typename allocator_type::const_reference	const_reference;
 		typedef typename allocator_type::pointer			pointer;
 		typedef typename allocator_type::const_pointer		const_pointer;
-		typedef ft::IteratorWrapper<pointer>				iterator;
-		typedef ft::IteratorWrapper<const_pointer>			const_iterator;
-		typedef ft::reverse_iterator<iterator>				reverse_iterator;
-		typedef ft::reverse_iterator<const_iterator>		const_reverse_iterator;
 
+	private:
+		enum { BLACK, RED };
+		enum { ALL = -1, COLOR = 0x1, VALUE = 0x2 };
+		class node;
+
+		typedef node			node_type;
+		typedef node_type*		node_pointer;
+		typedef node_type&		node_reference;
+
+		typedef typename Allocator::template rebind<node_type>::other	node_allocator_type;
+
+		Compare				_compare;
+		node_pointer		_root;
+		node_pointer		_begin_ptr;
+		node_pointer		_end_ptr;
+		size_type			_size;
+		allocator_type		_allocator;
+		node_allocator_type	_node_allocator;
+
+	public:
+		typedef MapIterator<value_type, node_pointer, difference_type>		iterator;
+		typedef ConstMapIterator<value_type, node_pointer, difference_type>	const_iterator;
+		typedef ft::reverse_iterator<iterator>								reverse_iterator;
+		typedef ft::reverse_iterator<const_iterator>						const_reverse_iterator;
+
+	public:
 		class value_compare
 			: public std::binary_function<value_type, value_type, bool>
 		{
+			friend class map;
+		private:
+			value_compare();
+			value_compare(value_compare const&);
+			value_compare& operator=(value_compare const&);
+
 		protected:
 			key_compare comp;
 
-			value_compare(key_compare c);
+			value_compare(key_compare c) : comp(c) {}
 		public:
-			bool operator()(const value_type& x, const value_type& y) const;
+			virtual ~value_compare() {}
+
+			bool operator()(const value_type& x, const value_type& y) const
+			{
+				return comp(x.first, y.first);
+			}
 		};
 
 
 		/* Constructor */
 
-		map();
-		explicit map(Compare const& cmp, Allocator const& alloc = Allocator());
-		map(map const& origin);
+		map()
+			: _compare(Compare())
+			, _allocator(Allocator())
+			, _node_allocator(node_allocator_type(_allocator))
+			, _root()
+			, _begin_ptr(_end_ptr)
+			, _size()
+			, _end_ptr(createEndNode())
+		{
+		}
+
+		explicit map(Compare const& cmp, Allocator const& alloc = Allocator())
+			: _compare(cmp)
+			, _allocator(alloc)
+			, _node_allocator(node_allocator_type(_allocator))
+			, _root()
+			, _begin_ptr(_end_ptr)
+			, _size()
+			, _end_ptr(createEndNode())
+		{
+		}
+
+		map(map const& origin)
+			: _compare(origin._compare)
+			, _allocator(origin._allocator)
+			, _node_allocator(origin._node_allocator)
+			, _root()
+			, _begin_ptr(_end_ptr)
+			, _size()
+			, _end_ptr(createEndNode())
+		{
+			insert(origin.begin(), origin.end());
+		}
 
 		template<typename InputIt>
 		map(
-			ft::enable_if<ft::is_input_iterator<InputIt>::value, InputIt>::type first,
-			ft::enable_if<ft::is_input_iterator<InputIt>::value, InputIt>::type last,
+			typename ft::enable_if<ft::is_input_iterator<InputIt>::value, InputIt>::type first,
+			typename ft::enable_if<ft::is_input_iterator<InputIt>::value, InputIt>::type last,
 			Compare const& comp = Compare(),
 			Allocator const& alloc = Allocator()
-		);
+		)
+			: _compare(comp)
+			, _allocator(alloc)
+			, _node_allocator(node_allocator_type(_allocator))
+			, _root()
+			, _begin_ptr(_end_ptr)
+			, _size()
+			, _end_ptr(createEndNode())
+		{
+			insert(first, last);
+		}
 
 
 		/* Destructor */
 
-		virtual ~map();
+		virtual ~map()
+		{
+			clear();
+			destroyNode(_end_ptr);
+		}
 
 
 		/* Operators */
-		map*	operator=(map const& other);
+		map*	operator=(map const& other)
+		{
+			clear();
+			insert(other.begin(), other.end());
+		}
 
 
 		/* Allocator getter */
-		allocator_type	get_allocator() const;
+		allocator_type	get_allocator() const	{ return _allocator; }
 
 
 		/* Accessors */
-		T&	at(Key const& key);
-		T	const& at(Key const& key) const;
-		T&	operator[](Key const& key);
+		T&	at(Key const& key)
+		{
+			node_pointer	place = findNode(key);
+
+			if (place == nullptr)
+				throw std::out_of_range("Key not found");
+			return place->getValue().second;
+		}
+
+		T	const& at(Key const& key) const
+		{
+			node_pointer	place = findNode(key);
+
+			if (place == nullptr)
+				throw std::out_of_range("Key not found");
+			return place->getValue().second;
+		}
+
+		T&	operator[](Key const& key)
+		{
+			node_pointer	parent;
+			node_pointer&	place = findPlace(_root, key, parent);
+			value_type		value(key, T());
+
+			insertNodeAt(parent, place, value, false);
+			return place->getValue().second;
+		}
 
 
 		/* Iterators */
-		iterator					begin();
-		const_iterator				begin() const;
-		iterator					end();
-		const_iterator				end() const;
-		reverse_iterator			rbegin();
-		const_reverse_iterator		rbegin() const;
-		reverse_iterator			rend();
-		const_reverse_iterator		rend() const;
+		iterator					begin()			{ return iterator(_begin_ptr); }
+		const_iterator				begin() const	{ return const_iterator(_begin_ptr);}
+		iterator					end()			{ return iterator(_end_ptr); }
+		const_iterator				end() const		{ return const_iterator(_end_ptr);}
+		reverse_iterator			rbegin()		{ return reverse_iterator(end()); }
+		const_reverse_iterator		rbegin() const	{ return const_reverse_iterator(end()); }
+		reverse_iterator			rend()			{ return reverse_iterator(begin()); }
+		const_reverse_iterator		rend() const	{ return const_reverse_iterator(begin()); }
 
 
 		/* Capacity */
-		bool		empty() const;
-		size_type	size() const;
-		size_type	max_size() const;
+		bool		empty() const		{ return !_size; }
+		size_type	size() const		{ return _size; }
+		size_type	max_size() const	{ return _allocator.max_size(); }
 
 
 		/* Modifiers */
 		void		clear()
 		{
-
+			destroyNode(_root);
+			_root = nullptr;
+			_size = 0;
+			_end_ptr->setLeftChild(nullptr);
 		}
 
-		ft::pair<iterator, bool>	insert(value_type const& value)
+		ft::pair<iterator, bool>	insert(const_reference value)
 		{
+			node_pointer	parent;
+			node_pointer&	place = findPlace(_root, value.first, parent);
+			bool			inserted = insertNodeAt(parent, place, value, true);
 
+			return ft::make_pair<iterator, bool>(iterator(place), inserted);
 		}
 
-		iterator	insert(iterator hint, value_type const& value)
+		iterator	insert(iterator hint, const_reference value)
 		{
+			node_pointer	parent;
+			node_pointer&	place = findPlaceWithHint(hint, value.first, parent);
 
+			insertNodeAt(parent, place, value, true);
+			return iterator(place);
 		}
 
 		template<typename InputIt>
 		typename ft::enable_if<ft::is_input_iterator<InputIt>::value, void>::type
 		insert(InputIt first, InputIt last)
 		{
-
+			while (first != last)
+				insert(*(first++));
 		}
 
 		void		erase(iterator pos)
 		{
-
+			deleteNode(pos.base());
+			--_size;
 		}
 
 		void		erase(iterator first, iterator last)
 		{
-
+			while (first != last)
+				erase(first++);
 		}
 
 		size_type	erase(Key const& key)
 		{
+			if (_root == nullptr)
+				return 0;
 
+			node_pointer	place = findNode(key);
+			if (place == nullptr)
+				return 0;
+			deleteNode(place);
+			--_size;
+			return 1;
 		}
 
 		void		swap(map& other)
 		{
-
+			ft::swap(_compare, other._compare);
+			ft::swap(_root, other._root);
+			ft::swap(_begin_ptr, other._begin_ptr);
+			ft::swap(_end_ptr, other._end_ptr);
+			ft::swap(_size, other._size);
+			ft::swap(_allocator, other._allocator);
+			ft::swap(_node_allocator, other._node_allocator);
 		}
 
 
@@ -159,17 +297,25 @@ namespace ft
 
 		size_type		count(Key const& key) const
 		{
-
+			return findNode(key) ? 1 : 0;
 		}
 
 		iterator		find(Key const& key)
 		{
+			node_pointer	place = findNode(key);
 
+			if (place == nullptr)
+				return end();
+			return iterator(place);
 		}
 
 		const_iterator	find(Key const& key) const
 		{
+			node_pointer	place = findNode(key);
 
+			if (place == nullptr)
+				return end();
+			return const_iterator(place);
 		}
 
 		ft::pair<iterator, iterator>
@@ -186,22 +332,38 @@ namespace ft
 
 		iterator	lower_bound(Key const& key)
 		{
+			node_pointer lowerBound = getLowerBound(key);
 
+			if (lowerBound == nullptr)
+				return end();
+			return iterator(lowerBound);
 		}
 
-		const_iterator	lower_Bound(Key const& key) const
+		const_iterator	lower_bound(Key const& key) const
 		{
+			node_pointer lowerBound = getLowerBound(key);
 
+			if (lowerBound == nullptr)
+				return end();
+			return const_iterator(lowerBound);
 		}
 
 		iterator	upper_bound(Key const& key)
 		{
+			node_pointer upperBound = getUpperBound(key);
 
+			if (upperBound == nullptr)
+				return end();
+			return iterator(upperBound);
 		}
 
 		const_iterator	upper_bound(Key const& key) const
 		{
+			node_pointer upperBound = getUpperBound(key);
 
+			if (upperBound == nullptr)
+				return end();
+			return const_iterator(upperBound);
 		}
 
 
@@ -209,13 +371,433 @@ namespace ft
 
 		key_compare	key_comp() const
 		{
-
+			return _compare;
 		}
 
 		value_compare	value_comp() const
 		{
-
+			return value_compare(key_comp());
 		}
+
+	private:
+		class node
+		{
+		private:
+			value_type		_value;
+			node_pointer	_parent;
+			node_pointer	_left;
+			node_pointer	_right;
+			int				_color;
+
+			node();
+			node& operator=(node const&);
+			node(node const&);
+
+		public:
+			node(value_type const& value, node_pointer parent)
+				: _value(value)
+				, _parent(parent)
+				, _left(nullptr)
+				, _right(nullptr)
+				, _color(RED)
+			{}
+			virtual ~node() {}
+
+			int				getColor() const		{ return _color; }
+			void			setColor(int color)		{ _color = color; }
+			value_type&		getValue()				{ return _value; }
+			node_pointer&	getParent()				{ return _parent; }
+			void			setParent(node* p)		{ _parent = p; }
+			node_pointer&	getLeftChild()			{ return _left; }
+			node_pointer&	getRightChild()			{ return _right; }
+			bool			isOnLeft() const		{ return _parent->_left == this; }
+			bool			isOnRight() const		{ return _parent->_right == this; }
+			int				getChildCount() const	{ return (_left ? 1 : 0) + (_right ? 1 : 0); }
+			node_pointer&	getFirstChild()			{ return _left ? _left : _right; }
+
+			node_pointer	setLeftChild(node_pointer const x)
+			{
+				if ((_left = x))
+					_left->setParent(this);
+				return x;
+			}
+
+			node_pointer	setRightChild(node_pointer const x)
+			{
+				if ((_right = x))
+					_right->setParent(this);
+				return x;
+			}
+
+			node_pointer	getMinimum()
+			{
+				if (_left == nullptr)
+					return this;
+				return _left->getMinimum();
+			}
+
+			node_pointer	getMaximum()
+			{
+				if (_right == nullptr)
+					return this;
+				return _right->getMaximum();
+			}
+
+			static void	swap(node_pointer a, node_pointer b, int flag)
+			{
+				if (flag & COLOR)
+				{
+					if (a != nullptr && b != nullptr)
+						ft::swap(a->_color, b->_color);
+					else if (a != nullptr)
+						a->setColor(BLACK);
+					else if (b != nullptr)
+						b->setColor(BLACK);
+				}
+				if (flag & VALUE)
+					ft::swap(a->_value, b->_value);
+			}
+		};
+
+		static int		getColor(node const* const n) { return n ? n->getColor() : BLACK; }
+
+		static bool		isDoubleRed(node_pointer const n)
+		{
+			return getColor(n) == RED && getColor(n->getParent()) == RED;
+		}
+
+		static node_pointer	getChildByNear(node_pointer sib)
+		{
+			bool dbIsOnLeft = !sib->isOnLeft();
+			if (dbIsOnLeft)
+				return sib->getLeftChild();
+			else
+				return sib->getRightChild();
+		}
+
+		static node_pointer	getChildByFar(node_pointer sib)
+		{
+			bool dbIsOnLeft = !sib->isOnLeft();
+			if (dbIsOnLeft)
+				return sib->getRightChild();
+			else
+				return sib->getLeftChild();
+		}
+
+		node_pointer	siblingOf(node_pointer const p, node_pointer const n)
+		{
+			if (n == _root)
+				return nullptr;
+			if (p->getLeftChild() == n)
+				return p->getRightChild();
+			return p->getLeftChild();
+		}
+
+		node_pointer	createEndNode()
+		{
+			return createNode(value_type(), nullptr);
+		}
+
+		void	transplant(node_pointer n, node_pointer as)
+		{
+			if (_root == n)
+			{
+				_end_ptrsetLeftChild(_root = as);
+				return;
+			}
+			node_pointer p = n->getParent();
+			if (p->getLeftChild() == n)
+				p->setLeftChild(as);
+			if (p->getRightChild() == n)
+				p->setRightChild(as);
+			n->setParent(nullptr);
+		}
+
+		void	leftRotate(node_pointer n)
+		{
+			node_pointer const p = n->getParent();
+			node_pointer const x = n->getLeftChild();
+
+			transplant(p, n);
+			n->setLeftChild(p);
+			p->setRightChild(x);
+		}
+
+		void	rightRotate(node_pointer n)
+		{
+			node_pointer const p = n->getParent();
+			node_pointer const x = n->getRightChild();
+
+			transplant(p, n);
+			n->setRightChild(p);
+			p->setLeftChild(x);
+		}
+
+		node_pointer	findNode(Key const& key)
+		{
+			node_pointer	parent;
+			node_pointer&	place = findPlace(_root, key);
+
+			return place;
+		}
+
+		node_pointer&	findPlace(node_pointer& root, Key const& key, node_pointer& parent)
+		{
+			node_pointer	current = root;
+			node_pointer&	ret = root;
+
+			parent = current->getParent();
+			while (current != nullptr)
+			{
+				if (_compare(current->getValue().first, key))
+				{
+					parent = ret;
+					ret = current->getLeftChild();
+					current = ret;
+				}
+				else if (_compare(key, current->getValue().first))
+				{
+					parent = ret;
+					ret = current->getRightChild();
+					current = ret;
+				}
+				else
+					break;
+			}
+			return ret;
+		}
+
+		// Find node by using hint, and return node_pointer REFERENCE.
+		node_pointer&	findPlaceWithHint(const_iterator hint, Key const& key, node_pointer& parent)
+		{
+			if (hint == end() || _compare(key, hint->first)) // key < hint
+			{
+				const_iterator prev = hint;
+				if (prev == begin() || _compare((--prev)->first, key)) // --hint < key (*valid hint*)
+				{
+					if (hint->base()->getLeftChild() == nullptr)
+						return (parent = hint->base())->getLeftChild();
+					else
+						return (parent = prev->base())->getRightChild();
+				}
+				return find(_root, key, parent); // invalid hint
+			}
+			else if (_compare(hint->first, key)) // hint < key
+			{
+				const_iterator next = ++hint;
+				if (next == end() || _compare(key, next)) // key < ++hint (*valid hint*)
+				{
+					if (hint->base()->getRightChild() == nullptr)
+						return (parent = hint->base())->getRightChild();
+					else
+						return (parent = next->base())->getLeftChild();
+				}
+				return find(_root, key, parent); // invalid hint
+			}
+			else // hint == key
+			{
+				parent = hint->base()->getParent();
+				if (parent->getLeftChild() == hint->base())
+					return parent->getLeftChild();
+				else
+					return parent->getRightChild();
+			}
+		}
+
+		bool	insertNodeAt(node_pointer parent, node_pointer& place, const_reference value, bool overwrite)
+		{
+			if (place != nullptr)
+			{
+				if (overwrite)
+					place->getValue().second = value.second;
+				return false;
+			}
+			else
+			{
+				tryFixDoubleRed(place = createNode(value, parent));
+				if (place == _root)
+					_end_ptr->setLeftChild(place);
+				if (_begin_ptr == _end_ptr || _compare(value.first, _begin_ptr->getValue().first))
+					_begin_ptr = place;
+				++_size;
+				return true;
+			}
+		}
+
+		void	tryFixDoubleRed(node_pointer n)
+		{
+			if (n == nullptr)
+				return;
+			if (_root == n)
+			{
+				if (getColor(n) == RED)
+					n->setColor(BLACK);
+				return;
+			}
+
+			node_pointer p = n->getParent();
+			node_pointer g = p->getParent();
+			node_pointer u = siblingOf(g, p);
+
+			if (p == _root || !isDoubleRed(n))
+				return;
+			if (getColor(u) == RED)
+			{
+				u->setColor(BLACK);
+				p->setColor(BLACK);
+				g->setColor(RED);
+				tryFixDoubleRed(g);
+			}
+			if (!isDoubleRed(n))
+				return;
+			if (getColor(u) == BLACK)
+			{
+				node_pointer descendant_of_g = p;
+				if (p->isOnLeft())
+				{
+					if (n->isOnRight())
+						leftRotate(descendant_of_g = n);
+					node::swap(descendant_of_g, g, COLOR);
+					rightRotate(descendant_of_g);
+				}
+				else
+				{
+					if (n->isOnLeft())
+						rightRotate(descendant_of_g = n);
+					node::swap(descendant_of_g, g, COLOR);
+					leftRotate(descendant_of_g);
+				}
+			}
+		}
+
+		void	destroyNode(node_pointer n)
+		{
+			if (n == nullptr)
+				return;
+			destroyNode(n->getLeftChild());
+			destroyNode(n->getRightChild());
+		}
+
+		// https://medium.com/analytics-vidhya/deletion-in-red-black-rb-tree-92301e1474ea
+		void	deleteNode(node_pointer n)
+		{
+			if (n->getChildCount() == 2)
+			{
+				node_pointer suc = n->getRightChild()->getMinimum();
+				node::swap(n, suc, VALUE);
+				n = suc;
+			}
+			node_pointer c = n->getFirstChild();
+			node_pointer p = n->getParent();
+			transplant(n, c);
+			if (getColor(n) == BLACK)
+			{
+				if (getColor(c) == RED)
+					c->setColor(BLACK);
+				else
+					fixDoubleBlack(c, p);
+			}
+			if (!_compare(_begin_ptr->getValue().first, n->getValue().first))
+				_begin_ptr = (_root ? _root->getMinimum() : _end_ptr);
+			_node_allocator.deallocate(n, 1);
+		}
+
+		void	fixDoubleBlack(node_pointer db, node_pointer p)
+		{
+			if (db == _root) // reached root node
+			{
+				db->setColor(BLACK);
+				return;
+			}
+
+			node_pointer s = siblingOf(p, db);
+			if (getColor(s) == RED)
+			{
+				node::swap(db, p, COLOR);
+				if (s->isOnLeft())
+					rightRotate(s);
+				else
+					leftRotate(s);
+				fixDoubleBlack(db, p);
+				return;
+			}
+
+			node_pointer nearChild = getChildByNear(s);
+			node_pointer farChild = getChildByFar(s);
+
+			if (getColor(nearChild) == BLACK && getColor(farChild) == BLACK)
+			{
+				s->setColor(RED);
+				if (getColor(p) == RED)
+					p->setColor(BLACK);
+				else
+					fixDoubleBlack(p, p->getParent());
+			}
+			else if (getColor(farChild) == BLACK && getColor(nearChild) == RED)
+			{
+				node::swap(nearChild, s, COLOR);
+				if (s->isOnRight())
+					rightRotate(nearChild);
+				else
+					leftRotate(nearChild);
+				fixDoubleBlack(db, p);
+			}
+			else if (getColor(farChild) == RED)
+			{
+				node::swap(p, s, COLOR);
+				if (s->isOnRight())
+					leftRotate(s);
+				else
+					rightRotate(s);
+				if (getColor(db) == RED)
+					db->setColor(BLACK);
+				farChild->setColor(BLACK);
+			}
+		}
+
+		node_pointer	createNode(const_reference value, node_pointer parent)
+		{
+			node_pointer ptr = _node_allocator.allocate(1);
+			_node_allocator.construct(ptr, value, parent);
+			return ptr;
+		}
+
+		node_pointer	getLowerBound(Key const& key)
+		{
+			node_pointer	ret = _root;
+			node_pointer	n = _root;
+
+			while (n != nullptr)
+			{
+				if (!_compare(n->getValue(), key))
+				{
+					ret = n;
+					n = n->getLeftChild();
+				}
+				else
+					n = n->getRightChild();
+			}
+			return ret;
+		}
+
+		node_pointer	getUpperBound(Key const& key)
+		{
+			node_pointer	ret = _root;
+			node_pointer	n = _root;
+
+			while (n != nullptr)
+			{
+				if (_compare(key, n->getValue()))
+				{
+					ret = n;
+					n = n->getLeftChild();
+				}
+				else
+					n = n->getRightChild();
+			}
+			return ret;
+		}
+
 	};
 
 	/* Non member operators */
@@ -223,31 +805,172 @@ namespace ft
 	template<typename Key, typename T, typename Compare, typename Alloc>
 	bool	operator==(map<Key,T,Compare,Alloc> const& lhs, map<Key,T,Compare,Alloc> const& rhs)
 	{
-	}
-
-	template<typename Key, typename T, typename Compare, typename Alloc>
-	bool	operator!=(map<Key,T,Compare,Alloc> const& lhs, map<Key,T,Compare,Alloc> const& rhs)
-	{
+		return lhs.size() == rhs.size() && ft::equal(lhs.begin(), lhs.end(), rhs.begin());
 	}
 
 	template<typename Key, typename T, typename Compare, typename Alloc>
 	bool	operator<(map<Key,T,Compare,Alloc> const& lhs, map<Key,T,Compare,Alloc> const& rhs)
 	{
+		return ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 	}
 
 	template<typename Key, typename T, typename Compare, typename Alloc>
-	bool	operator<=(map<Key,T,Compare,Alloc> const& lhs, map<Key,T,Compare,Alloc> const& rhs)
+	bool	operator!=(map<Key,T,Compare,Alloc> const& lhs, map<Key,T,Compare,Alloc> const& rhs)
 	{
+		return !(lhs == rhs);
 	}
 
 	template<typename Key, typename T, typename Compare, typename Alloc>
 	bool	operator>(map<Key,T,Compare,Alloc> const& lhs, map<Key,T,Compare,Alloc> const& rhs)
 	{
+		return rhs < lhs;
 	}
 
 	template<typename Key, typename T, typename Compare, typename Alloc>
 	bool	operator>=(map<Key,T,Compare,Alloc> const& lhs, map<Key,T,Compare,Alloc> const& rhs)
 	{
+		return !(lhs < rhs);
+	}
+
+	template<typename Key, typename T, typename Compare, typename Alloc>
+	bool	operator<=(map<Key,T,Compare,Alloc> const& lhs, map<Key,T,Compare,Alloc> const& rhs)
+	{
+		return !(rhs < lhs);
+	}
+
+	template<typename ValueType, typename NodePtr, typename DiffType>
+	class	MapIterator
+	{
+	private:
+		NodePtr	current;
+
+	public:
+		typedef NodePtr						node_pointer;
+		typedef ValueType					value_type;
+		typedef DiffType					difference_type;
+		typedef ValueType*					pointer;
+		typedef ValueType&					reference;
+		typedef bidirectional_iterator_tag	iterator_category;
+
+		MapIterator() : current() {}
+		virtual ~MapIterator() {}
+		explicit MapIterator(NodePtr iter) : current(iter) {}
+		MapIterator(MapIterator const& origin) : current(origin.base()) {}
+
+		MapIterator& operator=(MapIterator const& another)
+		{
+			if (this != &another)
+				current = another.base();
+			return *this;
+		}
+
+		node_pointer	base() const
+		{
+			return current;
+		}
+
+		reference	operator*() const
+		{
+			return current->getValue();
+		}
+
+		pointer	operator->() const
+		{
+			return &(operator*());
+		}
+
+		MapIterator&	operator++()
+		{
+			if (current->getRightChild() != nullptr)
+				return current = current->getRightChild()->getMinimum();
+			while (current->isOnRight())
+				current = current->getParent();
+			current = current->getParent();
+			return *this;
+		}
+
+		MapIterator	operator++(int)
+		{
+			MapIterator tmp(*this);
+			++(*this);
+			return tmp;
+		}
+
+		MapIterator&	operator--()
+		{
+			if (current->getLeftChild() != nullptr)
+				return current = current->getLeftChild()->getMaximum();
+			while (current->isOnLeft())
+				current = current->getParent();
+			current = current->getParent();
+			return *this;
+		}
+
+		MapIterator	operator--(int)
+		{
+			MapIterator tmp(*this);
+			--(*this);
+			return tmp;
+		}
+	};
+
+	template<typename MapIter>
+	class	ConstMapIterator
+	{
+	private:
+		MapIter mapIter;
+		ConstMapIterator();
+
+	public:
+		typedef typename MapIter::node_pointer		node_pointer;
+		typedef typename MapIter::value_type		value_type;
+		typedef typename MapIter::difference_type	difference_type;
+		typedef value_type const*					pointer;
+		typedef value_type const&					reference;
+		typedef bidirectional_iterator_tag			iterator_category;
+
+		virtual ~ConstMapIterator() {}
+		ConstMapIterator(MapIter const& mi) : mapIter(mi) {}
+		ConstMapIterator(ConstMapIterator const& origin) : mapIter(origin.mapIter) {}
+
+		ConstMapIterator& operator=(ConstMapIterator const& another)
+		{
+			if (this != &another)
+				mapIter = another.mapIter;
+			return *this;
+		}
+
+		node_pointer	base() const 		{ return mapIter.base(); }
+		reference operator*() const			{ return *mapIter; }
+		pointer	operator->() const			{ return mapIter.operator->(); }
+		ConstMapIterator& operator++()		{ ++mapIter; return *this; }
+		ConstMapIterator& operator++(int)	{ ConstMapIterator tmp(*this); ++mapIter; return tmp; }
+		ConstMapIterator& operator--()		{ --mapIter; return *this; }
+		ConstMapIterator& operator--(int)	{ ConstMapIterator tmp(*this); --mapIter; return tmp; }
+	};
+
+	template<typename ValueType, typename NodePtr, typename DiffType>
+	bool	operator==(MapIterator<ValueType, NodePtr, DiffType> const& lhs, MapIterator<ValueType, NodePtr, DiffType> const& rhs)
+	{
+		return lhs.base() == rhs.base();
+	}
+
+	template<typename ValueType, typename NodePtr, typename DiffType>
+	bool	operator!=(MapIterator<ValueType, NodePtr, DiffType> const& lhs, MapIterator<ValueType, NodePtr, DiffType> const& rhs)
+	{
+		return lhs.base() != rhs.base();
+	}
+
+	template<typename MapIter>
+	bool	operator==(ConstMapIterator<MapIter> const& lhs, ConstMapIterator<MapIter> const& rhs)
+	{
+		return lhs.base() == rhs.base();
+	}
+
+	template<typename MapIter>
+	bool	operator!=(ConstMapIterator<MapIter> const& lhs, ConstMapIterator<MapIter> const& rhs)
+	{
+		return lhs.base() != rhs.base();
 	}
 }
 
