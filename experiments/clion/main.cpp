@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/24 17:36:20 by smun              #+#    #+#             */
-/*   Updated: 2022/01/24 17:49:49 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/24 18:05:44 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,6 +70,14 @@ namespace ft
 			int		getChildCount() const	{ return (_left != nullptr) + (_right != nullptr); }
 			node*	getFirstChild() const	{ return _left != nullptr ? _left : _right; }
 
+			node**	getPlace()
+			{
+				if (isOnLeft())
+					return &(_parent->_left);
+				else
+					return &(_parent->_right);
+			}
+
 			node*	setLeftChild(node* const x)
 			{
 				if ((_left = x))
@@ -122,62 +130,70 @@ namespace ft
 				}
 			}
 
-			static void swapNodes(node* aP,node* aQ, node** root)
+			static void swapNodes(node* n,node* suc)
 			{
-				std::swap(aP->_color, aQ->_color);
+				node new_n = *suc;
+				node** new_n_place = suc->getPlace();
+				node new_suc = *n;
+				node** new_suc_place = n->getPlace();
+				if (suc->getParent() == n)
+				{
+					new_n._parent = n;
+					if (suc->isOnLeft())
+						new_suc._left = n;
+					else
+						new_suc._right = n;
+					new_n_place = nullptr;
+				}
+				n->setParent(new_n.getParent());
+				n->setLeftChild(new_n.getLeftChild());
+				n->setRightChild(new_n.getRightChild());
+				n->setColor(new_n.getColor());
+				if (new_n_place)
+					*new_n_place = n;
+				suc->setParent(new_suc.getParent());
+				suc->setLeftChild(new_suc.getLeftChild());
+				suc->setRightChild(new_suc.getRightChild());
+				suc->setColor(new_suc.getColor());
+				if (new_suc_place)
+					*new_suc_place = suc;
+			}
 
-				node* new_p_parent = aQ->_parent;
-				node* new_p_left = aQ->_left;
-				node* new_p_right = aQ->_right;
+			static void _swapNodes(node* n, node* suc, node** root)
+			{
+				node new_p = *suc;
 				node** new_p_link = root;
-				if (aQ->_parent)
-					new_p_link = aQ->_parent->_left == aQ ? &aQ->_parent->_left : &aQ->_parent->_right;
+				if (suc->_parent)
+					new_p_link = suc->getPlace();
 
-				node* new_q_parent = aP->_parent;
-				node* new_q_left = aP->_left;
-				node* new_q_right = aP->_right;
+				node new_q = *n;
 				node** new_q_link = root;
-				if (aP->_parent)
-					new_q_link = aP->_parent->_left == aP ? &aP->_parent->_left : &aP->_parent->_right;
+				if (n->_parent)
+					new_q_link = n->getPlace();
 
-				if (aQ->_parent == aP)
+				if (suc->_parent == n)
 				{
-					new_p_parent = aQ;
+					new_p._parent = suc;
+					if (suc->isOnLeft())
+						new_q._left = n;
+					else
+						new_q._right = n;
 					new_p_link = nullptr;
-					if (aP->_left == aQ)
-						new_q_left = aP;
-					else
-						new_q_right = aP;
-				}
-				else if (aP->_parent == aQ)
-				{
-					new_q_parent = aP;
-					new_q_link = nullptr;
-					if (aQ->_left == aP)
-						new_p_left = aQ;
-					else
-						new_p_right = aQ;
 				}
 
-				aP->_parent = new_p_parent;
-				aP->_left = new_p_left;
-				if (aP->_left)
-					aP->_left->_parent = aP;
-				aP->_right = new_p_right;
-				if (aP->_right)
-					aP->_right->_parent = aP;
+				n->_parent = new_p._parent;
+				n->setLeftChild(new_p._left);
+				n->setRightChild(new_p._right);
+				n->setColor(new_p._color);
 				if (new_p_link)
-					*new_p_link = aP;
+					*new_p_link = n;
 
-				aQ->_parent = new_q_parent;
-				aQ->_left = new_q_left;
-				if (aQ->_left)
-					aQ->_left->_parent = aQ;
-				aQ->_right = new_q_right;
-				if (aQ->_right)
-					aQ->_right->_parent = aQ;
+				suc->_parent = new_q._parent;
+				suc->setLeftChild(new_q._left);
+				suc->setRightChild(new_q._right);
+				suc->setColor(new_q._color);
 				if (new_q_link)
-					*new_q_link = aQ;
+					*new_q_link = suc;
 
 			}
 		};
@@ -372,11 +388,9 @@ namespace ft
 				//node::swap(n, suc, VALUE);
 				//n = suc;
 
-				node::swapNodes(n, suc, &_root);
+				node::swapNodes(n, suc);
 				if (n == _root)
 					_root = suc;
-				else if (suc == _root)
-					_root = n;
 			}
 			node* c = n->getFirstChild();
 			node* p = n->getParent();
