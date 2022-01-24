@@ -1,18 +1,19 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   zzzzzzzzzzz.cpp                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/01/24 17:36:20 by smun              #+#    #+#             */
+/*   Updated: 2022/01/24 17:49:49 by smun             ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "NotImplementedFunctions"
 #pragma ide diagnostic ignored "modernize-use-equals-delete"
 #pragma ide diagnostic ignored "modernize-use-equals-default"
-
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: smun <smun@student.42se/*   Updated: 2022/01/21 11:39:35 by smun             ###   ########.fr       */                   +#+#+#+#+#+   +#+           */
-/*   Created: 2022/01/20 16:20:46 by smun              #+#    #+#             */
-/*   Updated: 2022/01/20 17:22:40 by smun             ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
 
 #include <iostream>
 #include <memory>
@@ -31,24 +32,28 @@ namespace ft
 		class node
 		{
 		private:
+			node& operator=(node const&);
+			node(node const& o)
+					: _value(T())
+					, _parent(o._parent)
+					, _left(o._left)
+					, _right(o._right)
+					, _color(o._color) {}
+
+		public:
 			T		_value;
 			node*	_parent;
 			node*	_left;
 			node*	_right;
 			int		_color;
 
-			node& operator=(node const&);
-			node(node const&);
-			node();
-
-		public:
 			node(T const& value, node* parent)
-				: _value(value)
-				, _parent(parent)
-				, _left(nullptr)
-				, _right(nullptr)
-				, _color(RED)
-				{}
+					: _value(value)
+					, _parent(parent)
+					, _left(nullptr)
+					, _right(nullptr)
+					, _color(RED)
+			{}
 			virtual ~node()
 			{
 			}
@@ -115,23 +120,74 @@ namespace ft
 					else if (b != nullptr)
 						b->setColor(BLACK);
 				}
-				if (flag & VALUE)
-					std::swap(a->_value, b->_value);
+			}
+
+			static void swapNodes(node* aP,node* aQ, node** root)
+			{
+				std::swap(aP->_color, aQ->_color);
+
+				node* new_p_parent = aQ->_parent;
+				node* new_p_left = aQ->_left;
+				node* new_p_right = aQ->_right;
+				node** new_p_link = root;
+				if (aQ->_parent)
+					new_p_link = aQ->_parent->_left == aQ ? &aQ->_parent->_left : &aQ->_parent->_right;
+
+				node* new_q_parent = aP->_parent;
+				node* new_q_left = aP->_left;
+				node* new_q_right = aP->_right;
+				node** new_q_link = root;
+				if (aP->_parent)
+					new_q_link = aP->_parent->_left == aP ? &aP->_parent->_left : &aP->_parent->_right;
+
+				if (aQ->_parent == aP)
+				{
+					new_p_parent = aQ;
+					new_p_link = nullptr;
+					if (aP->_left == aQ)
+						new_q_left = aP;
+					else
+						new_q_right = aP;
+				}
+				else if (aP->_parent == aQ)
+				{
+					new_q_parent = aP;
+					new_q_link = nullptr;
+					if (aQ->_left == aP)
+						new_p_left = aQ;
+					else
+						new_p_right = aQ;
+				}
+
+				aP->_parent = new_p_parent;
+				aP->_left = new_p_left;
+				if (aP->_left)
+					aP->_left->_parent = aP;
+				aP->_right = new_p_right;
+				if (aP->_right)
+					aP->_right->_parent = aP;
+				if (new_p_link)
+					*new_p_link = aP;
+
+				aQ->_parent = new_q_parent;
+				aQ->_left = new_q_left;
+				if (aQ->_left)
+					aQ->_left->_parent = aQ;
+				aQ->_right = new_q_right;
+				if (aQ->_right)
+					aQ->_right->_parent = aQ;
+				if (new_q_link)
+					*new_q_link = aQ;
+
 			}
 		};
 
+		node*	_end;
 		node*	_root;
 		Compare	_comp;
 
 		tree& operator=(tree const&);
 		tree(tree const&);
-
-		static int	getColor(node const* n)
-		{
-			if (n == nullptr)
-				return BLACK;
-			return n->getColor();
-		}
 
 		static void	print(node const* n, std::string indent, bool last)
 		{
@@ -155,9 +211,16 @@ namespace ft
 			print(n->getRightChild(), indent, true);
 		}
 
-		static node*	siblingOf(node* const p, node* const n)
+		static int	getColor(node const* n)
 		{
-			if (p == nullptr)
+			if (n == nullptr)
+				return BLACK;
+			return n->getColor();
+		}
+
+		node*	siblingOf(node* const p, node* const n)
+		{
+			if (n == _root)
 				return nullptr;
 			if (p->getLeftChild() == n)
 				return p->getRightChild();
@@ -191,7 +254,7 @@ namespace ft
 		{
 			if (_root == n)
 			{
-				(_root = as)->setParent(nullptr);
+				_end->setLeftChild(_root = as);
 				return;
 			}
 			node* p = n->getParent();
@@ -199,19 +262,6 @@ namespace ft
 				p->setLeftChild(as);
 			if (p->getRightChild() == n)
 				p->setRightChild(as);
-			n->setParent(nullptr);
-		}
-
-		void	replace(node* n, node* as)
-		{
-			node* const left = n->getLeftChild();
-			node* const right = n->getLeftChild();
-
-			transplant(n, as);
-			if (left != nullptr)
-				as->setLeftChild(left);
-			if (right != nullptr)
-				as->setRightChild(right);
 		}
 
 		void	leftRotate(node* n)
@@ -278,7 +328,7 @@ namespace ft
 			node* g = p->getParent();
 			node* u = siblingOf(g, p);
 
-			if (g == nullptr || !isDoubleRed(n))
+			if (p == _root || !isDoubleRed(n))
 				return;
 			if (getColor(u) == RED)
 			{
@@ -318,8 +368,15 @@ namespace ft
 			if (n->getChildCount() == 2)
 			{
 				node* suc = n->getRightChild()->getMinimum();
-				node::swap(n, suc, VALUE);
-				n = suc;
+
+				//node::swap(n, suc, VALUE);
+				//n = suc;
+
+				node::swapNodes(n, suc, &_root);
+				if (n == _root)
+					_root = suc;
+				else if (suc == _root)
+					_root = n;
 			}
 			node* c = n->getFirstChild();
 			node* p = n->getParent();
@@ -337,7 +394,7 @@ namespace ft
 		void	fixDoubleBlack(node* db, node* p)
 		{
 			// case 2. (ROOT에 도달하면, BLACK으로 설정하고 종료.)
-			if (p == nullptr)
+			if (db == _root)
 			{
 				db->setColor(BLACK);
 				return;
@@ -372,19 +429,19 @@ namespace ft
 				if (getColor(p) == RED)
 					p->setColor(BLACK);
 
-				// p가 원래 BLACK이었다면, p가 이중 블랙 상태가 됨.
-				// p에 대해서 fixDoubleBlack 호출.
+					// p가 원래 BLACK이었다면, p가 이중 블랙 상태가 됨.
+					// p에 대해서 fixDoubleBlack 호출.
 				else
 					fixDoubleBlack(p, p->getParent());
 			}
 
-			// case 5. (s와 s의 db와 nearChild를 색교체 후, nearChild를 db와 반대쪽으로 회전.)
-			//          1. s가 오른쪽에 있을 경우.
-			//             --> db와 가까운 쪽은 s의 왼쪽 자식.
-			//             --> s는 p의 왼쪽에 달려있으므로, 우회전.
-			//          2. s가 왼쪽에 있을 경우.
-			//             --> db와 가까운 쪽은 s의 오른쪽 자식.
-			//             --> s는 p의 오른쪽에 달려있으므로, 좌회전.)
+				// case 5. (s와 s의 db와 nearChild를 색교체 후, nearChild를 db와 반대쪽으로 회전.)
+				//          1. s가 오른쪽에 있을 경우.
+				//             --> db와 가까운 쪽은 s의 왼쪽 자식.
+				//             --> s는 p의 왼쪽에 달려있으므로, 우회전.
+				//          2. s가 왼쪽에 있을 경우.
+				//             --> db와 가까운 쪽은 s의 오른쪽 자식.
+				//             --> s는 p의 오른쪽에 달려있으므로, 좌회전.)
 			else if (getColor(farChild) == BLACK && getColor(nearChild) == RED)
 			{
 				node::swap(nearChild, s, COLOR);
@@ -401,11 +458,11 @@ namespace ft
 				fixDoubleBlack(db, p);
 			}
 
-			// case 6. (s의 db에 대한 farChild가 RED)
-			//   --> s는 BLACK일 것, farChild의 자식은 모두 BLACK.
-			//       이진트리 속성에 의해 nearChild의 색은 무조건 BLACK.
-			//   따라서, p와 s를 색교환하고, s를 db쪽으로 회전해서 균형을 맞춤.
-			//   이후 farChild, db색을 모두 BLACK으로 칠하면, db의 색에 관계없이 BLACK노드 개수가 균형.
+				// case 6. (s의 db에 대한 farChild가 RED)
+				//   --> s는 BLACK일 것, farChild의 자식은 모두 BLACK.
+				//       이진트리 속성에 의해 nearChild의 색은 무조건 BLACK.
+				//   따라서, p와 s를 색교환하고, s를 db쪽으로 회전해서 균형을 맞춤.
+				//   이후 farChild, db색을 모두 BLACK으로 칠하면, db의 색에 관계없이 BLACK노드 개수가 균형.
 			else if (getColor(farChild) == RED)
 			{
 				node::swap(p, s, COLOR);
@@ -417,13 +474,13 @@ namespace ft
 					db->setColor(BLACK);
 				farChild->setColor(BLACK);
 			}
-
 		}
 
 	public:
 		tree()
-			: _root(nullptr)
-			, _comp(Compare()) {}
+				: _root(nullptr)
+				, _end(new node(T(), nullptr))
+				, _comp(Compare()) {}
 		virtual ~tree() {}
 
 		void	print() const
@@ -435,7 +492,8 @@ namespace ft
 		{
 			if (_root == nullptr)
 			{
-				_root = new node(value, nullptr);
+				_end->setLeftChild(_root = new node(value, _end));
+				_root->setColor(BLACK);
 				return;
 			}
 			tryFixDoubleRed(insert(_root, value));
@@ -452,7 +510,7 @@ namespace ft
 
 int main()
 {
-	ft::tree<int> tree;
+	ft::tree<const int> tree;
 
 	tree.insert(8);
 	tree.insert(18);
