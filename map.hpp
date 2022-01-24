@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/03 17:35:17 by smun              #+#    #+#             */
-/*   Updated: 2022/01/24 17:40:15 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/24 20:06:14 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,6 @@ namespace ft
 
 	private:
 		enum { BLACK, RED };
-		enum { ALL = -1, COLOR = 0x1, VALUE = 0x2 };
 		class node;
 
 		typedef node			node_type;
@@ -62,8 +61,8 @@ namespace ft
 
 		Compare				_compare;
 		node_pointer		_root;
-		node_pointer		_begin_ptr;
 		node_pointer		_end_ptr;
+		node_pointer		_begin_ptr;
 		size_type			_size;
 		allocator_type		_allocator;
 		node_allocator_type	_node_allocator;
@@ -106,8 +105,8 @@ namespace ft
 			, _node_allocator(node_allocator_type(_allocator))
 			, _root()
 			, _begin_ptr(_end_ptr)
-			, _size()
 			, _end_ptr(createEndNode())
+			, _size()
 		{
 		}
 
@@ -117,8 +116,8 @@ namespace ft
 			, _node_allocator(node_allocator_type(_allocator))
 			, _root()
 			, _begin_ptr(_end_ptr)
-			, _size()
 			, _end_ptr(createEndNode())
+			, _size()
 		{
 		}
 
@@ -128,8 +127,8 @@ namespace ft
 			, _node_allocator(origin._node_allocator)
 			, _root()
 			, _begin_ptr(_end_ptr)
-			, _size()
 			, _end_ptr(createEndNode())
+			, _size()
 		{
 			insert(origin.begin(), origin.end());
 		}
@@ -146,8 +145,8 @@ namespace ft
 			, _node_allocator(node_allocator_type(_allocator))
 			, _root()
 			, _begin_ptr(_end_ptr)
-			, _size()
 			, _end_ptr(createEndNode())
+			, _size()
 		{
 			insert(first, last);
 		}
@@ -195,12 +194,12 @@ namespace ft
 
 		T&	operator[](Key const& key)
 		{
-			node_pointer	parent;
-			node_pointer&	place = findPlace(_root, key, parent);
+			node_pointer	parent = _end_ptr;
+			node_pointer*	place = findPlace(&_root, key, parent);
 			value_type		value(key, T());
 
 			insertNodeAt(parent, place, value, false);
-			return place->getValue().second;
+			return (*place)->getValue().second;
 		}
 
 
@@ -233,16 +232,16 @@ namespace ft
 		ft::pair<iterator, bool>	insert(const_reference value)
 		{
 			node_pointer	parent;
-			node_pointer&	place = findPlace(_root, value.first, parent);
+			node_pointer*	place = findPlace(&_root, value.first, parent);
 			bool			inserted = insertNodeAt(parent, place, value, true);
 
-			return ft::make_pair<iterator, bool>(iterator(place), inserted);
+			return ft::make_pair<iterator, bool>(iterator(*place), inserted);
 		}
 
 		iterator	insert(iterator hint, const_reference value)
 		{
 			node_pointer	parent;
-			node_pointer&	place = findPlaceWithHint(hint, value.first, parent);
+			node_pointer*	place = findPlaceWithHint(hint, value.first, parent);
 
 			insertNodeAt(parent, place, value, true);
 			return iterator(place);
@@ -391,7 +390,12 @@ namespace ft
 
 			node();
 			node& operator=(node const&);
-			node(node const&);
+			node(node const& o)
+					: _value(value_type())
+					, _parent(o._parent)
+					, _left(o._left)
+					, _right(o._right)
+					, _color(o._color) {}
 
 		public:
 			node(value_type const& value, node_pointer parent)
@@ -443,19 +447,43 @@ namespace ft
 				return _right->getMaximum();
 			}
 
-			static void	swap(node_pointer a, node_pointer b, int flag)
+			static void	swapColor(node_pointer a, node_pointer b)
 			{
-				if (flag & COLOR)
+				if (a != nullptr && b != nullptr)
+					ft::swap(a->_color, b->_color);
+				else if (a != nullptr)
+					a->setColor(BLACK);
+				else if (b != nullptr)
+					b->setColor(BLACK);
+			}
+
+			static void swapNodes(node* n,node* suc)
+			{
+				node new_n = *suc;
+				node** new_n_place = suc->getPlace();
+				node new_suc = *n;
+				node** new_suc_place = n->getPlace();
+				if (suc->getParent() == n)
 				{
-					if (a != nullptr && b != nullptr)
-						ft::swap(a->_color, b->_color);
-					else if (a != nullptr)
-						a->setColor(BLACK);
-					else if (b != nullptr)
-						b->setColor(BLACK);
+					new_n._parent = n;
+					if (suc->isOnLeft())
+						new_suc._left = n;
+					else
+						new_suc._right = n;
+					new_n_place = nullptr;
 				}
-				if (flag & VALUE)
-					ft::swap(a->_value, b->_value);
+				n->setParent(new_n.getParent());
+				n->setLeftChild(new_n.getLeftChild());
+				n->setRightChild(new_n.getRightChild());
+				n->setColor(new_n.getColor());
+				if (new_n_place)
+					*new_n_place = n;
+				suc->setParent(new_suc.getParent());
+				suc->setLeftChild(new_suc.getLeftChild());
+				suc->setRightChild(new_suc.getRightChild());
+				suc->setColor(new_suc.getColor());
+				if (new_suc_place)
+					*new_suc_place = suc;
 			}
 		};
 
@@ -502,7 +530,7 @@ namespace ft
 		{
 			if (_root == n)
 			{
-				_end_ptrsetLeftChild(_root = as);
+				_end_ptr->setLeftChild(_root = as);
 				return;
 			}
 			node_pointer p = n->getParent();
@@ -536,39 +564,34 @@ namespace ft
 		node_pointer	findNode(Key const& key)
 		{
 			node_pointer	parent;
-			node_pointer&	place = findPlace(_root, key);
+			node_pointer*	place = findPlace(&_root, key, parent);
 
-			return place;
+			return *place;
 		}
 
-		node_pointer&	findPlace(node_pointer& root, Key const& key, node_pointer& parent)
+		node_pointer*	findPlace(node_pointer* place, Key const& key, node_pointer& parent)
 		{
-			node_pointer	current = root;
-			node_pointer&	ret = root;
-
-			parent = current->getParent();
-			while (current != nullptr)
+			while ((*place) != nullptr)
 			{
-				if (_compare(current->getValue().first, key))
+				parent = (*place)->getParent();
+				if (_compare((*place)->getValue().first, key))
 				{
-					parent = ret;
-					ret = current->getLeftChild();
-					current = ret;
+					parent = *place;
+					place = &((*place)->getRightChild());
 				}
-				else if (_compare(key, current->getValue().first))
+				else if (_compare(key, (*place)->getValue().first))
 				{
-					parent = ret;
-					ret = current->getRightChild();
-					current = ret;
+					parent = *place;
+					place = &((*place)->getLeftChild());
 				}
 				else
 					break;
 			}
-			return ret;
+			return place;
 		}
 
-		// Find node by using hint, and return node_pointer REFERENCE.
-		node_pointer&	findPlaceWithHint(const_iterator hint, Key const& key, node_pointer& parent)
+		// Find node by using hint, and return node_pointer place.
+		node_pointer*	findPlaceWithHint(const_iterator hint, Key const& key, node_pointer& parent)
 		{
 			if (hint == end() || _compare(key, hint->first)) // key < hint
 			{
@@ -576,11 +599,11 @@ namespace ft
 				if (prev == begin() || _compare((--prev)->first, key)) // --hint < key (*valid hint*)
 				{
 					if (hint->base()->getLeftChild() == nullptr)
-						return (parent = hint->base())->getLeftChild();
+						return &((parent = hint->base())->getLeftChild());
 					else
-						return (parent = prev->base())->getRightChild();
+						return &((parent = prev->base())->getRightChild());
 				}
-				return find(_root, key, parent); // invalid hint
+				return findPlace(&_root, key, parent); // invalid hint
 			}
 			else if (_compare(hint->first, key)) // hint < key
 			{
@@ -588,37 +611,37 @@ namespace ft
 				if (next == end() || _compare(key, next)) // key < ++hint (*valid hint*)
 				{
 					if (hint->base()->getRightChild() == nullptr)
-						return (parent = hint->base())->getRightChild();
+						return &((parent = hint->base())->getRightChild());
 					else
-						return (parent = next->base())->getLeftChild();
+						return &((parent = next->base())->getLeftChild());
 				}
-				return find(_root, key, parent); // invalid hint
+				return findPlace(&_root, key, parent); // invalid hint
 			}
 			else // hint == key
 			{
 				parent = hint->base()->getParent();
 				if (parent->getLeftChild() == hint->base())
-					return parent->getLeftChild();
+					return &(parent->getLeftChild());
 				else
-					return parent->getRightChild();
+					return &(parent->getRightChild());
 			}
 		}
 
-		bool	insertNodeAt(node_pointer parent, node_pointer& place, const_reference value, bool overwrite)
+		bool	insertNodeAt(node_pointer parent, node_pointer* place, const_reference value, bool overwrite)
 		{
-			if (place != nullptr)
+			if ((*place) != nullptr)
 			{
 				if (overwrite)
-					place->getValue().second = value.second;
+					(*place)->getValue().second = value.second;
 				return false;
 			}
 			else
 			{
-				tryFixDoubleRed(place = createNode(value, parent));
-				if (place == _root)
-					_end_ptr->setLeftChild(place);
+				tryFixDoubleRed((*place) = createNode(value, parent));
+				if ((*place) == _root)
+					_end_ptr->setLeftChild((*place));
 				if (_begin_ptr == _end_ptr || _compare(value.first, _begin_ptr->getValue().first))
-					_begin_ptr = place;
+					_begin_ptr = (*place);
 				++_size;
 				return true;
 			}
@@ -657,14 +680,14 @@ namespace ft
 				{
 					if (n->isOnRight())
 						leftRotate(descendant_of_g = n);
-					node::swap(descendant_of_g, g, COLOR);
+					node::swapColor(descendant_of_g, g);
 					rightRotate(descendant_of_g);
 				}
 				else
 				{
 					if (n->isOnLeft())
 						rightRotate(descendant_of_g = n);
-					node::swap(descendant_of_g, g, COLOR);
+					node::swapColor(descendant_of_g, g);
 					leftRotate(descendant_of_g);
 				}
 			}
@@ -684,8 +707,9 @@ namespace ft
 			if (n->getChildCount() == 2)
 			{
 				node_pointer suc = n->getRightChild()->getMinimum();
-				node::swap(n, suc, VALUE);
-				n = suc;
+				node::swapNodes(n, suc);
+				if (_root == n)
+					_root = suc;
 			}
 			node_pointer c = n->getFirstChild();
 			node_pointer p = n->getParent();
@@ -713,7 +737,7 @@ namespace ft
 			node_pointer s = siblingOf(p, db);
 			if (getColor(s) == RED)
 			{
-				node::swap(db, p, COLOR);
+				node::swapColor(db, p);
 				if (s->isOnLeft())
 					rightRotate(s);
 				else
@@ -735,7 +759,7 @@ namespace ft
 			}
 			else if (getColor(farChild) == BLACK && getColor(nearChild) == RED)
 			{
-				node::swap(nearChild, s, COLOR);
+				node::swapColor(nearChild, s);
 				if (s->isOnRight())
 					rightRotate(nearChild);
 				else
@@ -744,7 +768,7 @@ namespace ft
 			}
 			else if (getColor(farChild) == RED)
 			{
-				node::swap(p, s, COLOR);
+				node::swapColor(p, s);
 				if (s->isOnRight())
 					leftRotate(s);
 				else

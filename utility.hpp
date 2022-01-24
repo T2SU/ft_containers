@@ -6,12 +6,14 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 22:10:39 by smun              #+#    #+#             */
-/*   Updated: 2022/01/02 13:33:28 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/24 18:15:19 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef UTILITY_HPP
 # define UTILITY_HPP
+
+# include "algorithm.hpp"
 
 namespace ft
 {
@@ -23,6 +25,8 @@ namespace ft
 		T2	second;
 
 		pair()
+			: first()
+			, second()
 		{
 		}
 
