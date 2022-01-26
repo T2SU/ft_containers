@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/03 17:35:17 by smun              #+#    #+#             */
-/*   Updated: 2022/01/24 20:52:55 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/26 20:03:45 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -457,7 +457,7 @@ namespace ft
 					b->setColor(BLACK);
 			}
 
-			static void swapNodes(node* n,node* suc)
+			static void swapNodes(node_pointer n, node_pointer suc)
 			{
 				node new_n = *suc;
 				node** new_n_place = suc->getPlace();
