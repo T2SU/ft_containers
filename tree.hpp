@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:54:13 by smun              #+#    #+#             */
-/*   Updated: 2022/01/27 17:16:34 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/27 17:48:50 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,22 +28,6 @@ namespace ft
 		{
 		private:
 			typedef node*	NodePtr;
-
-			struct plan
-			{
-				node* parent;
-				node* left;
-				node* right;
-				int color;
-				node** place;
-
-				plan(node const& o)
-					: parent(o.getParent())
-					, left(o.getLeft())
-					, right(o.getRight())
-					, color(o.getColor())
-					, place(o.getPlace()) {}
-			};
 
 			Value	_value;
 			NodePtr	_parent;
@@ -80,9 +64,27 @@ namespace ft
 			void			setRightChild(NodePtr const x)	{ if ((_right = x)) _right->setParent(this); }
 			NodePtr			getMinimum()					{ return _left ? _left->getMinimum() : this; }
 			NodePtr			getMaximum()					{ return _right ? _right->getMaximum() : this; }
+			NodePtr*		getPlace()	const				{ return isOnLeft() ? &(_parent->_left) : &(_parent->_right); }
 
 			static void		swapColor(NodePtr a, NodePtr b);
 			static void		swapNodes(NodePtr n, NodePtr suc);
+
+		private:
+			struct plan
+			{
+				node* parent;
+				node* left;
+				node* right;
+				int color;
+				node** place;
+
+				plan(node const& o)
+					: parent(o._parent)
+					, left(o._left)
+					, right(o._right)
+					, color(o._color)
+					, place(o.getPlace()) {}
+			};
 		};
 
 	public:
@@ -661,7 +663,7 @@ namespace ft
 			else
 				fixDoubleBlack(c, p);
 		}
-		if (!_key_compare(_begin_ptr->getValue(), n->getValue()))
+		if (!_key_compare(_begin_ptr->getValue().first, n->getValue().first))
 			_begin_ptr = (_root ? _root->getMinimum() : _end_ptr);
 		_node_allocator.deallocate(n, 1);
 	}
