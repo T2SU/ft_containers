@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:54:13 by smun              #+#    #+#             */
-/*   Updated: 2022/01/26 21:52:57 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/27 17:16:34 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 
 namespace ft
 {
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	class tree
 	{
 	private:
@@ -45,7 +45,7 @@ namespace ft
 					, place(o.getPlace()) {}
 			};
 
-			Value		_value;
+			Value	_value;
 			NodePtr	_parent;
 			NodePtr	_left;
 			NodePtr	_right;
@@ -81,14 +81,14 @@ namespace ft
 			NodePtr			getMinimum()					{ return _left ? _left->getMinimum() : this; }
 			NodePtr			getMaximum()					{ return _right ? _right->getMaximum() : this; }
 
-			static int		getColor(node const* const n) { return n ? n->getColor() : BLACK; }
-
 			static void		swapColor(NodePtr a, NodePtr b);
 			static void		swapNodes(NodePtr n, NodePtr suc);
 		};
 
 	public:
 		typedef Allocator									allocator_type;
+		typedef Key											key_type;
+		typedef T											mapped_type;
 		typedef typename allocator_type::value_type			value_type;
 		typedef typename allocator_type::size_type			size_type;
 		typedef typename allocator_type::difference_type	difference_type;
@@ -104,13 +104,15 @@ namespace ft
 
 		typedef typename Allocator::template rebind<node_type>::other	node_allocator_type;
 
-		Compare				_value_compare;
+		Compare				_key_compare;
 		node_pointer		_root;
 		node_pointer		_end_ptr;
 		node_pointer		_begin_ptr;
 		size_type			_size;
 		allocator_type		_allocator;
 		node_allocator_type	_node_allocator;
+
+		static int		getColor(node const* const n) { return n ? n->getColor() : BLACK; }
 
 	public:
 		class TreeIterator
@@ -127,18 +129,70 @@ namespace ft
 			typedef bidirectional_iterator_tag		iterator_category;
 
 			TreeIterator() : current() {}
-			virtual ~TreeIterator() {}
 			explicit TreeIterator(node_pointer iter) : current(iter) {}
 			TreeIterator(TreeIterator const& origin) : current(origin.base()) {}
+			virtual ~TreeIterator() {}
 
-			TreeIterator& operator=(TreeIterator const& another);
-			node_pointer	base() const;
-			reference		operator*() const;
-			pointer			operator->() const;
-			TreeIterator&	operator++();
-			TreeIterator	operator++(int);
-			TreeIterator&	operator--();
-			TreeIterator	operator--(int);
+			TreeIterator&	operator=(TreeIterator const& another)
+			{
+				if (this != & another)
+					current = another.base();
+				return *this;
+			}
+
+			node_pointer	base() const		{ return current; }
+			reference		operator*() const	{ return current->getValue(); }
+			pointer			operator->() const	{ return &operator*(); }
+
+			TreeIterator&	operator++()
+			{
+				if (current->getRightChild() != nullptr)
+				{
+					current = current->getRightChild()->getMinimum();
+					return *this;
+				}
+				while (current->isOnRight())
+					current = current->getParent();
+				current = current->getParent();
+				return *this;
+			}
+
+			TreeIterator	operator++(int)
+			{
+				TreeIterator tmp(*this);
+				++(*this);
+				return tmp;
+			}
+
+			TreeIterator&	operator--()
+			{
+				if (current->getLeftChild() != nullptr)
+				{
+					current = current->getLeftChild()->getMaximum();
+					return *this;
+				}
+				while (current->isOnLeft())
+					current = current->getParent();
+				current = current->getParent();
+				return *this;
+			}
+
+			TreeIterator	operator--(int)
+			{
+				TreeIterator tmp(*this);
+				--(*this);
+				return tmp;
+			}
+
+			friend bool	operator==(TreeIterator const& lhs, TreeIterator const& rhs)
+			{
+				return lhs.base() == rhs.base();
+			}
+
+			friend bool	operator!=(TreeIterator const& lhs, TreeIterator const& rhs)
+			{
+				return lhs.base() != rhs.base();
+			}
 		};
 
 		template<typename TreeIter>
@@ -167,19 +221,84 @@ namespace ft
 				return *this;
 			}
 
-			node_pointer	base() const 		{ return treeIter.base(); }
-			reference operator*() const			{ return *treeIter; }
-			pointer	operator->() const			{ return treeIter.operator->(); }
-			ConstTreeIterator& operator++()		{ ++treeIter; return *this; }
-			ConstTreeIterator& operator++(int)	{ ConstTreeIterator tmp(*this); ++treeIter; return tmp; }
-			ConstTreeIterator& operator--()		{ --treeIter; return *this; }
-			ConstTreeIterator& operator--(int)	{ ConstTreeIterator tmp(*this); --treeIter; return tmp; }
+			node_pointer		base() const 		{ return treeIter.base(); }
+			reference			operator*() const	{ return *treeIter; }
+			pointer				operator->() const	{ return treeIter.operator->(); }
+			ConstTreeIterator&	operator++()		{ ++treeIter; return *this; }
+			ConstTreeIterator&	operator++(int)		{ ConstTreeIterator tmp(*this); ++treeIter; return tmp; }
+			ConstTreeIterator&	operator--()		{ --treeIter; return *this; }
+			ConstTreeIterator&	operator--(int)		{ ConstTreeIterator tmp(*this); --treeIter; return tmp; }
+
+			friend bool	operator==(ConstTreeIterator const& lhs, ConstTreeIterator const& rhs)
+			{
+				return lhs.base() == rhs.base();
+			}
+
+			friend bool	operator!=(ConstTreeIterator const& lhs, ConstTreeIterator const& rhs)
+			{
+				return lhs.base() == rhs.base();
+			}
 		};
 
-		typedef TreeIterator<value_type, node_pointer, difference_type>		iterator;
-		typedef ConstTreeIterator<iterator>									const_iterator;
-		typedef ft::reverse_iterator<iterator>								reverse_iterator;
-		typedef ft::reverse_iterator<const_iterator>						const_reverse_iterator;
+		explicit tree(Compare const& cmp, Allocator const& alloc = Allocator())
+			: _key_compare(cmp)
+			, _allocator(alloc)
+			, _node_allocator(node_allocator_type(_allocator))
+			, _root()
+			, _begin_ptr(_end_ptr)
+			, _end_ptr(createEndNode())
+			, _size()
+		{}
+
+		tree(tree const& origin)
+			: _key_compare(origin._key_compare)
+			, _allocator(origin._allocator)
+			, _node_allocator(origin._node_allocator)
+			, _root()
+			, _begin_ptr(_end_ptr)
+			, _end_ptr(createEndNode())
+			, _size()
+		{
+			insert(origin.begin(), origin.end());
+		}
+
+		template<typename InputIt>
+		tree(
+			typename ft::enable_if<ft::is_input_iterator<InputIt>::value, InputIt>::type first,
+			typename ft::enable_if<ft::is_input_iterator<InputIt>::value, InputIt>::type last,
+			Compare const& comp = Compare(),
+			Allocator const& alloc = Allocator()
+		)
+			: _key_compare(comp)
+			, _allocator(alloc)
+			, _node_allocator(node_allocator_type(_allocator))
+			, _root()
+			, _begin_ptr(_end_ptr)
+			, _end_ptr(createEndNode())
+			, _size()
+		{
+			insert(first, last);
+		}
+
+		virtual ~tree()
+		{
+			clear();
+			destroyNode(_end_ptr);
+		}
+
+		tree&	operator=(tree const& other)
+		{
+			clear();
+			insert(other.begin(), other.end());
+		}
+
+		allocator_type	get_allocator() const { return _allocator; }
+
+
+		typedef TreeIterator								iterator;
+		typedef ConstTreeIterator<iterator>					const_iterator;
+		typedef ft::reverse_iterator<iterator>				reverse_iterator;
+		typedef ft::reverse_iterator<const_iterator>		const_reverse_iterator;
 
 		iterator					begin()			{ return iterator(_begin_ptr); }
 		const_iterator				begin() const	{ return const_iterator(_begin_ptr);}
@@ -205,40 +324,42 @@ namespace ft
 
 		void			erase(iterator pos);
 		void			erase(iterator first, iterator last);
-		size_type		erase(Value const& value);
+		size_type		erase(Key const& key);
 		void			swap(tree& other);
 
-		size_type		count(Value const& value) const;
-		iterator		find(Value const& value);
-		const_iterator	find(Value const& value) const;
+		size_type		count(Key const& key) const;
+		iterator		find(Key const& key);
+		const_iterator	find(Key const& key) const;
 
-		node_pointer	upper_bound(Value const& value);
-		node_pointer	lower_bound(Value const& value);
+		node_pointer	upper_bound(Key const& key);
+		node_pointer	lower_bound(Key const& key);
+
+		T&				operator[](Key const& key);
 
 	private:
 		static bool			isDoubleRed(node_pointer const n);
 		static node_pointer	getChildByNear(node_pointer sib);
 		static node_pointer	getChildByFar(node_pointer sib);
 		node_pointer		siblingOf(node_pointer const p, node_pointer const n);
-		node_pointer		createEndNode();
 		void				transplant(node_pointer n, node_pointer as);
 		void				leftRotate(node_pointer n);
 		void				rightRotate(node_pointer n);
-		node_pointer		findNode(Value const& value);
-		node_pointer&		findPlace(node_pointer& place, Value const& value, node_pointer& parent);
-		node_pointer&		findPlaceWithHint(const_iterator hint, Value const& value, node_pointer& parent);
+		node_pointer		findNode(Key const& key);
+		node_pointer&		findPlace(node_pointer& place, Key const& key, node_pointer& parent);
+		node_pointer&		findPlaceWithHint(const_iterator hint, Key const& key, node_pointer& parent);
 		bool				insertNodeAt(node_pointer parent, node_pointer& place, const_reference value, bool overwrite);
 		void				tryFixDoubleRed(node_pointer n);
 		void				destroyNode(node_pointer n);
 		void				deleteNode(node_pointer n);
 		void				fixDoubleBlack(node_pointer db, node_pointer p);
 		node_pointer		createNode(const_reference value, node_pointer parent);
+		node_pointer		createEndNode() { return createNode(Value(), nullptr); }
 
 	};
 
-# define TREE tree<Value, Compare, Allocator>
+# define TREE tree<Key, T, Value, Compare, Allocator>
 
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	void
 	TREE::node::swapColor(TREE::node *a, TREE::node *b)
 	{
@@ -250,7 +371,7 @@ namespace ft
 			b->setColor(BLACK);
 	}
 
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	void
 	TREE::node::swapNodes(TREE::node *n, TREE::node *suc)
 	{
@@ -280,14 +401,14 @@ namespace ft
 			*new_suc.place = suc;
 	}
 
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	bool
 	TREE::isDoubleRed(node_pointer const n)
 	{
 		return tree::getColor(n) == RED && tree::getColor(n->getParent()) == RED;
 	}
 
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	typename TREE::node_pointer
 	TREE::getChildByNear(node_pointer sib)
 	{
@@ -298,7 +419,7 @@ namespace ft
 			return sib->getRightChild();
 	}
 
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	typename TREE::node_pointer
 	TREE::getChildByFar(node_pointer sib)
 	{
@@ -309,7 +430,7 @@ namespace ft
 			return sib->getLeftChild();
 	}
 
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	typename TREE::node_pointer
 	TREE::siblingOf(node_pointer const p, node_pointer const n)
 	{
@@ -320,14 +441,7 @@ namespace ft
 		return p->getLeftChild();
 	}
 
-	template<typename Value, typename Compare, typename Allocator>
-	typename TREE::node_pointer
-	createEndNode()
-	{
-		return createNode(value_type(), nullptr);
-	}
-
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	void
 	TREE::transplant(node_pointer n, node_pointer as)
 	{
@@ -344,7 +458,7 @@ namespace ft
 		n->setParent(nullptr);
 	}
 
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	void
 	TREE::leftRotate(node_pointer n)
 	{
@@ -356,7 +470,7 @@ namespace ft
 		p->setRightChild(x);
 	}
 
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	void
 	TREE::rightRotate(node_pointer n)
 	{
@@ -368,33 +482,33 @@ namespace ft
 		p->setLeftChild(x);
 	}
 
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	typename TREE::node_pointer
-	TREE::findNode(Value const& value)
+	TREE::findNode(Key const& key)
 	{
 		node_pointer	parent;
-		node_pointer*	place = findPlace(&_root, vallue, parent);
+		node_pointer&	place = findPlace(_root, key, parent);
 
-		return *place;
+		return place;
 	}
 
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	typename TREE::node_pointer&
-	TREE::findPlace(node_pointer& place, Value const& value, node_pointer& parent)
+	TREE::findPlace(node_pointer& place, Key const& key, node_pointer& parent)
 	{
 		node_pointer	current = place;
 		node_pointer*	ret = &place;
 		while (current != nullptr)
 		{
 			parent = current->getParent();
-			if (_value_compare(current->getValue().first, key))
+			if (_key_compare(current->getValue().first, key))
 			{
 				parent = current;
 				node_pointer& rc = current->getRightChild();
 				ret = &rc;
 				current = rc;
 			}
-			else if (_value_compare(value, current->getValue()))
+			else if (_key_compare(key, current->getValue().first))
 			{
 				parent = current;
 				node_pointer& lc = current->getLeftChild();
@@ -407,33 +521,33 @@ namespace ft
 		return *ret;
 	}
 
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	typename TREE::node_pointer&
-	TREE::findPlaceWithHint(const_iterator hint, Value const& value, node_pointer& parent)
+	TREE::findPlaceWithHint(const_iterator hint, Key const& key, node_pointer& parent)
 	{
-		if (hint == end() || _value_compare(value, *hint)) // key < hint
+		if (hint == end() || _key_compare(key, hint->first)) // key < hint
 		{
 			const_iterator prev = hint;
-			if (prev == begin() || _value_compare(*(--prev), value)) // --hint < key (*valid hint*)
+			if (prev == begin() || _key_compare((--prev)->first, key)) // --hint < key (*valid hint*)
 			{
 				if (hint->base()->getLeftChild() == nullptr)
 					return (parent = hint->base())->getLeftChild();
 				else
 					return (parent = prev->base())->getRightChild();
 			}
-			return findPlace(_root, value, parent); // invalid hint
+			return findPlace(_root, key, parent); // invalid hint
 		}
-		else if (_value_compare(*hint, value)) // hint < key
+		else if (_key_compare(*hint, key)) // hint < key
 		{
 			const_iterator next = ++hint;
-			if (next == end() || _value_compare(value, *next)) // key < ++hint (*valid hint*)
+			if (next == end() || _key_compare(key, next->first)) // key < ++hint (*valid hint*)
 			{
 				if (hint->base()->getRightChild() == nullptr)
 					return (parent = hint->base())->getRightChild();
 				else
 					return (parent = next->base())->getLeftChild();
 			}
-			return findPlace(_root, value, parent); // invalid hint
+			return findPlace(_root, key, parent); // invalid hint
 		}
 		else // hint == key
 		{
@@ -445,7 +559,7 @@ namespace ft
 		}
 	}
 
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	bool
 	TREE::insertNodeAt(node_pointer parent, node_pointer& place, const_reference value, bool overwrite)
 	{
@@ -460,14 +574,14 @@ namespace ft
 			tryFixDoubleRed(place = createNode(value, parent));
 			if (place == _root)
 				_end_ptr->setLeftChild(place);
-			if (_begin_ptr == _end_ptr || _value_compare(value, _begin_ptr->getValue()))
+			if (_begin_ptr == _end_ptr || _key_compare(value.first, _begin_ptr->getValue().first))
 				_begin_ptr = place;
 			++_size;
 			return true;
 		}
 	}
 
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	void
 	TREE::tryFixDoubleRed(node_pointer n)
 	{
@@ -515,7 +629,7 @@ namespace ft
 		}
 	}
 
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	void
 	TREE::destroyNode(node_pointer n)
 	{
@@ -526,7 +640,7 @@ namespace ft
 	}
 
 	// https://medium.com/analytics-vidhya/deletion-in-red-black-rb-tree-92301e1474ea
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	void
 	TREE::deleteNode(node_pointer n)
 	{
@@ -547,12 +661,12 @@ namespace ft
 			else
 				fixDoubleBlack(c, p);
 		}
-		if (!_value_compare(_begin_ptr->getValue(), n->getValue()))
+		if (!_key_compare(_begin_ptr->getValue(), n->getValue()))
 			_begin_ptr = (_root ? _root->getMinimum() : _end_ptr);
 		_node_allocator.deallocate(n, 1);
 	}
 
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	void
 	TREE::fixDoubleBlack(node_pointer db, node_pointer p)
 	{
@@ -607,7 +721,7 @@ namespace ft
 		}
 	}
 
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	typename TREE::node_pointer
 	TREE::createNode(const_reference value, node_pointer parent)
 	{
@@ -617,7 +731,7 @@ namespace ft
 	}
 
 
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	void
 	TREE::clear()
 	{
@@ -627,29 +741,29 @@ namespace ft
 		_end_ptr->setLeftChild(nullptr);
 	}
 
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	ft::pair<typename TREE::iterator, bool>
 	TREE::insert(const_reference value)
 	{
 		node_pointer	parent;
-		node_pointer*	place = findPlace(&_root, value.first, parent);
+		node_pointer&	place = findPlace(_root, value.first, parent);
 		bool			inserted = insertNodeAt(parent, place, value, true);
 
 		return ft::make_pair<iterator, bool>(iterator(*place), inserted);
 	}
 
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	typename TREE::iterator
 	TREE::insert(iterator hint, const_reference value)
 	{
 		node_pointer	parent;
-		node_pointer*	place = findPlaceWithHint(hint, value.first, parent);
+		node_pointer&	place = findPlaceWithHint(hint, value.first, parent);
 
 		insertNodeAt(parent, place, value, true);
 		return iterator(place);
 	}
 
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	template<typename InputIt>
 	typename ft::enable_if<ft::is_input_iterator<InputIt>::value, void>::type
 	TREE::insert(InputIt first, InputIt last)
@@ -658,7 +772,7 @@ namespace ft
 			insert(*(first++));
 	}
 
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	void
 	TREE::erase(iterator pos)
 	{
@@ -666,7 +780,7 @@ namespace ft
 		--_size;
 	}
 
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	void
 	TREE::erase(iterator first, iterator last)
 	{
@@ -674,9 +788,9 @@ namespace ft
 			erase(first++);
 	}
 
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	typename TREE::size_type
-	TREE::erase(Value const& value)
+	TREE::erase(Key const& key)
 	{
 		if (_root == nullptr)
 			return 0;
@@ -689,10 +803,10 @@ namespace ft
 		return 1;
 	}
 
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	void	TREE::swap(tree& other)
 	{
-		ft::swap(_value_compare, other._value_compare);
+		ft::swap(_key_compare, other._key_compare);
 		ft::swap(_root, other._root);
 		ft::swap(_begin_ptr, other._begin_ptr);
 		ft::swap(_end_ptr, other._end_ptr);
@@ -701,45 +815,45 @@ namespace ft
 		ft::swap(_node_allocator, other._node_allocator);
 	}
 
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	typename TREE::size_type
-	TREE::count(Value const& value) const
+	TREE::count(Key const& key) const
 	{
 		return findNode(key) ? 1 : 0;
 	}
 
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	typename TREE::iterator
-	TREE::find(Value const& value)
+	TREE::find(Key const& key)
 	{
-		node_pointer	place = findNode(value);
+		node_pointer	place = findNode(key);
 
 		if (place == nullptr)
 			return end();
 		return iterator(place);
 	}
 
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	typename TREE::const_iterator
-	TREE::find(Value const& value) const
+	TREE::find(Key const& key) const
 	{
-		node_pointer	place = findNode(value);
+		node_pointer	place = findNode(key);
 
 		if (place == nullptr)
 			return end();
 		return const_iterator(place);
 	}
 
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	typename TREE::node_pointer
-	TREE::upper_bound(Value const& value)
+	TREE::upper_bound(Key const& key)
 	{
 		node_pointer	ret = _root;
 		node_pointer	n = _root;
 
 		while (n != nullptr)
 		{
-			if (_value_compare(value, n->getValue()))
+			if (_key_compare(key, n->getValue().first))
 			{
 				ret = n;
 				n = n->getLeftChild();
@@ -750,16 +864,16 @@ namespace ft
 		return ret;
 	}
 
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	typename TREE::node_pointer
-	TREE::lower_bound(Value const& value)
+	TREE::lower_bound(Key const& key)
 	{
 		node_pointer	ret = _root;
 		node_pointer	n = _root;
 
 		while (n != nullptr)
 		{
-			if (!_value_compare(n->getValue(), value))
+			if (!_key_compare(n->getValue().first, key))
 			{
 				ret = n;
 				n = n->getLeftChild();
@@ -770,65 +884,50 @@ namespace ft
 		return ret;
 	}
 
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
+	T&
+	TREE::operator[](Key const& key)
+	{
+		node_pointer	parent = _end_ptr;
+		node_pointer&	place = findPlace(_root, key, parent);
+
+		insertNodeAt(parent, place, value_type(key, T()), false);
+		return place->getValue().second;
+	}
+
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	bool	operator==(TREE const& lhs, TREE const& rhs)
 	{
 		return lhs.size() == rhs.size() && ft::equal(lhs.begin(), lhs.end(), rhs.begin());
 	}
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	bool	operator<(TREE const& lhs, TREE const& rhs)
 	{
 		return ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 	}
 
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	bool	operator!=(TREE const& lhs, TREE const& rhs)
 	{
 		return !(lhs == rhs);
 	}
 
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	bool	operator>(TREE const& lhs, TREE const& rhs)
 	{
 		return rhs < lhs;
 	}
 
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	bool	operator>=(TREE const& lhs, TREE const& rhs)
 	{
 		return !(lhs < rhs);
 	}
 
-	template<typename Value, typename Compare, typename Allocator>
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	bool	operator<=(TREE const& lhs, TREE const& rhs)
 	{
 		return !(rhs < lhs);
-	}
-
-	template<typename Value, typename Compare, typename Allocator>
-	bool	operator==(typename TREE::TreeIterator const& lhs, typename TREE::TreeIterator const& rhs)
-	{
-		return lhs.base() == rhs.base();
-	}
-
-	template<typename Value, typename Compare, typename Allocator>
-	bool	operator!=(typename TREE::TreeIterator const& lhs, typename TREE::TreeIterator const& rhs)
-	{
-		return lhs.base() != rhs.base();
-	}
-
-	template<typename Value, typename Compare, typename Allocator>
-	template<typename TreeIter>
-	bool	operator==(TREE::ConstTreeIterator<TreeIter> const& lhs, TREE::ConstTreeIterator<TreeIter> const& rhs)
-	{
-		return lhs.base() == rhs.base();
-	}
-
-	template<typename Value, typename Compare, typename Allocator>
-	template<typename TreeIter>
-	bool	operator!=(TREE::ConstTreeIterator<TreeIter> const& lhs, TREE::ConstTreeIterator<TreeIter> const& rhs)
-	{
-		return lhs.base() != rhs.base();
 	}
 
 # undef TREE
