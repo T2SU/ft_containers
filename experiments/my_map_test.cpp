@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/21 23:09:06 by smun              #+#    #+#             */
-/*   Updated: 2022/01/28 11:35:27 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/28 16:12:06 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,15 @@
 
 int main()
 {
-	ft::map<int, std::string> m;
+	ft::map<std::pair<int, std::string>, std::string> m;
 
+	std::cout << "size: " << m.size() << std::endl;
+
+	ft::map<std::pair<int, std::string>, std::string>::iterator it;
+	for (it = m.begin(); it != m.end(); ++it)
+			std::cout << "[(" << it->first.first << "," << it->first.second << ")-" << it->second << "]" << std::endl;
+
+	/*
 	m[7]	= "i am 7";
 	m[15]	= "i am 15!!";
 	m[3]	= "numb 3";
@@ -50,6 +57,7 @@ int main()
 	std::cout << "size: " << m.size() << std::endl;
 	for (it = m.end(); it != m.begin(); )
 		std::cout << (--it)->second << std::endl;
+	*/
 
 	return 0;
 }
