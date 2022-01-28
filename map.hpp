@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/03 17:35:17 by smun              #+#    #+#             */
-/*   Updated: 2022/01/27 16:15:26 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/28 11:25:05 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -202,13 +202,17 @@ namespace ft
 		ft::pair<iterator, iterator>
 		equal_range(Key const& key)
 		{
+			iterator	it = find(key);
 
+			return ft::make_pair(it, it);
 		}
 
 		ft::pair<const_iterator, const_iterator>
 		equal_range(Key const& key) const
 		{
+			iterator	it = find(key);
 
+			return ft::make_pair(it, it);
 		}
 
 		iterator	lower_bound(Key const& key)

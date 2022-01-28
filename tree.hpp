@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:54:13 by smun              #+#    #+#             */
-/*   Updated: 2022/01/27 17:48:50 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/28 11:46:25 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,12 +107,12 @@ namespace ft
 		typedef typename Allocator::template rebind<node_type>::other	node_allocator_type;
 
 		Compare				_key_compare;
+		allocator_type		_allocator;
+		node_allocator_type	_node_allocator;
 		node_pointer		_root;
 		node_pointer		_end_ptr;
 		node_pointer		_begin_ptr;
 		size_type			_size;
-		allocator_type		_allocator;
-		node_allocator_type	_node_allocator;
 
 		static int		getColor(node const* const n) { return n ? n->getColor() : BLACK; }
 
@@ -247,8 +247,8 @@ namespace ft
 			, _allocator(alloc)
 			, _node_allocator(node_allocator_type(_allocator))
 			, _root()
-			, _begin_ptr(_end_ptr)
 			, _end_ptr(createEndNode())
+			, _begin_ptr(_end_ptr)
 			, _size()
 		{}
 
@@ -257,8 +257,8 @@ namespace ft
 			, _allocator(origin._allocator)
 			, _node_allocator(origin._node_allocator)
 			, _root()
-			, _begin_ptr(_end_ptr)
 			, _end_ptr(createEndNode())
+			, _begin_ptr(_end_ptr)
 			, _size()
 		{
 			insert(origin.begin(), origin.end());
@@ -275,8 +275,8 @@ namespace ft
 			, _allocator(alloc)
 			, _node_allocator(node_allocator_type(_allocator))
 			, _root()
-			, _begin_ptr(_end_ptr)
 			, _end_ptr(createEndNode())
+			, _begin_ptr(_end_ptr)
 			, _size()
 		{
 			insert(first, last);
@@ -741,6 +741,7 @@ namespace ft
 		_root = nullptr;
 		_size = 0;
 		_end_ptr->setLeftChild(nullptr);
+		_begin_ptr = _end_ptr;
 	}
 
 	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
