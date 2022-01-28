@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 19:04:19 by smun              #+#    #+#             */
-/*   Updated: 2022/01/28 14:44:56 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/28 15:45:00 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,8 +47,8 @@ static void	TestStringVector(ft::pair<int, int*> numpair)
 
 static void	TestPairStringMap(ft::pair<int, int*> numpair)
 {
-	typedef ft::VectorTest<std::map<std::pair<int, std::string>, std::string> >	ExpectedContTest;
-	typedef ft::VectorTest<ft::map<std::pair<int, std::string>, std::string> >	YourContTest;
+	typedef ft::MapTest<std::map<std::pair<int, std::string>, std::string> >	ExpectedContTest;
+	typedef ft::MapTest<ft::map<std::pair<int, std::string>, std::string> >	YourContTest;
 
 	ft::UnitTest<ExpectedContTest, YourContTest> ut1;
 
@@ -121,7 +121,7 @@ int main(int argc, char* argv[])
 	if (flags & StringVector)
 		TestStringVector(numpair);
 	if (flags & PairStringMap)
-		TestStringVector(numpair);
+		TestPairStringMap(numpair);
 
 	delete[] numpair.second;
 	return 0;

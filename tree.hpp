@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:54:13 by smun              #+#    #+#             */
-/*   Updated: 2022/01/28 14:58:32 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/28 15:44:35 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,7 +131,7 @@ namespace ft
 			typedef bidirectional_iterator_tag		iterator_category;
 
 			TreeIterator() : current() {}
-			explicit TreeIterator(node_pointer iter) : current(iter) {}
+			TreeIterator(node_pointer iter) : current(iter) {}
 			TreeIterator(TreeIterator const& origin) : current(origin.base()) {}
 			virtual ~TreeIterator() {}
 
@@ -212,9 +212,9 @@ namespace ft
 			typedef value_type const&					reference;
 			typedef bidirectional_iterator_tag			iterator_category;
 
-			virtual ~ConstTreeIterator() {}
 			ConstTreeIterator(TreeIter const& mi) : treeIter(mi) {}
 			ConstTreeIterator(ConstTreeIterator const& origin) : treeIter(origin.treeIter) {}
+			virtual ~ConstTreeIterator() {}
 
 			ConstTreeIterator& operator=(ConstTreeIterator const& another)
 			{
