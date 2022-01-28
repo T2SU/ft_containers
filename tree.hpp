@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:54:13 by smun              #+#    #+#             */
-/*   Updated: 2022/01/28 11:46:25 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/28 14:58:32 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ namespace ft
 	class tree
 	{
 	private:
-		enum { BLACK, RED };
+		enum { NodeColor_Black, NodeColor_Red };
 
 		class node
 		{
@@ -45,7 +45,7 @@ namespace ft
 				, _parent(parent)
 				, _left(nullptr)
 				, _right(nullptr)
-				, _color(RED)
+				, _color(NodeColor_Red)
 			{}
 			virtual ~node() {}
 
@@ -114,7 +114,7 @@ namespace ft
 		node_pointer		_begin_ptr;
 		size_type			_size;
 
-		static int		getColor(node const* const n) { return n ? n->getColor() : BLACK; }
+		static int		getColor(node const* const n) { return n ? n->getColor() : NodeColor_Black; }
 
 	public:
 		class TreeIterator
@@ -368,9 +368,9 @@ namespace ft
 		if (a != nullptr && b != nullptr)
 			ft::swap(a->_color, b->_color);
 		else if (a != nullptr)
-			a->setColor(BLACK);
+			a->setColor(NodeColor_Black);
 		else if (b != nullptr)
-			b->setColor(BLACK);
+			b->setColor(NodeColor_Black);
 	}
 
 	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
@@ -407,7 +407,7 @@ namespace ft
 	bool
 	TREE::isDoubleRed(node_pointer const n)
 	{
-		return tree::getColor(n) == RED && tree::getColor(n->getParent()) == RED;
+		return tree::getColor(n) == NodeColor_Red && tree::getColor(n->getParent()) == NodeColor_Red;
 	}
 
 	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
@@ -591,8 +591,8 @@ namespace ft
 			return;
 		if (_root == n)
 		{
-			if (getColor(n) == RED)
-				n->setColor(BLACK);
+			if (getColor(n) == NodeColor_Red)
+				n->setColor(NodeColor_Black);
 			return;
 		}
 
@@ -602,16 +602,16 @@ namespace ft
 
 		if (p == _root || !isDoubleRed(n))
 			return;
-		if (getColor(u) == RED)
+		if (getColor(u) == NodeColor_Red)
 		{
-			u->setColor(BLACK);
-			p->setColor(BLACK);
-			g->setColor(RED);
+			u->setColor(NodeColor_Black);
+			p->setColor(NodeColor_Black);
+			g->setColor(NodeColor_Red);
 			tryFixDoubleRed(g);
 		}
 		if (!isDoubleRed(n))
 			return;
-		if (getColor(u) == BLACK)
+		if (getColor(u) == NodeColor_Black)
 		{
 			node_pointer descendant_of_g = p;
 			if (p->isOnLeft())
@@ -656,10 +656,10 @@ namespace ft
 		node_pointer c = n->getFirstChild();
 		node_pointer p = n->getParent();
 		transplant(n, c);
-		if (getColor(n) == BLACK)
+		if (getColor(n) == NodeColor_Black)
 		{
-			if (getColor(c) == RED)
-				c->setColor(BLACK);
+			if (getColor(c) == NodeColor_Red)
+				c->setColor(NodeColor_Black);
 			else
 				fixDoubleBlack(c, p);
 		}
@@ -674,12 +674,12 @@ namespace ft
 	{
 		if (db == _root) // reached root node
 		{
-			db->setColor(BLACK);
+			db->setColor(NodeColor_Black);
 			return;
 		}
 
 		node_pointer s = siblingOf(p, db);
-		if (getColor(s) == RED)
+		if (getColor(s) == NodeColor_Red)
 		{
 			node::swapColor(db, p);
 			if (s->isOnLeft())
@@ -693,15 +693,15 @@ namespace ft
 		node_pointer nearChild = getChildByNear(s);
 		node_pointer farChild = getChildByFar(s);
 
-		if (getColor(nearChild) == BLACK && getColor(farChild) == BLACK)
+		if (getColor(nearChild) == NodeColor_Black && getColor(farChild) == NodeColor_Black)
 		{
-			s->setColor(RED);
-			if (getColor(p) == RED)
-				p->setColor(BLACK);
+			s->setColor(NodeColor_Red);
+			if (getColor(p) == NodeColor_Red)
+				p->setColor(NodeColor_Black);
 			else
 				fixDoubleBlack(p, p->getParent());
 		}
-		else if (getColor(farChild) == BLACK && getColor(nearChild) == RED)
+		else if (getColor(farChild) == NodeColor_Black && getColor(nearChild) == NodeColor_Red)
 		{
 			node::swapColor(nearChild, s);
 			if (s->isOnRight())
@@ -710,16 +710,16 @@ namespace ft
 				leftRotate(nearChild);
 			fixDoubleBlack(db, p);
 		}
-		else if (getColor(farChild) == RED)
+		else if (getColor(farChild) == NodeColor_Red)
 		{
 			node::swapColor(p, s);
 			if (s->isOnRight())
 				leftRotate(s);
 			else
 				rightRotate(s);
-			if (getColor(db) == RED)
-				db->setColor(BLACK);
-			farChild->setColor(BLACK);
+			if (getColor(db) == NodeColor_Red)
+				db->setColor(NodeColor_Black);
+			farChild->setColor(NodeColor_Black);
 		}
 	}
 

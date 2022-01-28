@@ -6,12 +6,13 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 19:04:19 by smun              #+#    #+#             */
-/*   Updated: 2022/01/03 17:14:39 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/28 14:44:56 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "tests/lib/unittest.hpp"
 #include "tests/vector.hpp"
+#include "tests/map.hpp"
 #include "utility.hpp"
 
 /* Test contents are belongs to following files:
@@ -44,24 +45,38 @@ static void	TestStringVector(ft::pair<int, int*> numpair)
 	END_EVAL;
 }
 
+static void	TestPairStringMap(ft::pair<int, int*> numpair)
+{
+	typedef ft::VectorTest<std::map<std::pair<int, std::string>, std::string> >	ExpectedContTest;
+	typedef ft::VectorTest<ft::map<std::pair<int, std::string>, std::string> >	YourContTest;
 
+	ft::UnitTest<ExpectedContTest, YourContTest> ut1;
 
+	BEGIN_EVAL;
+	REGISTER_EVAL(1, ut1, BasicTest1);
+	END_EVAL;
+}
 
 enum
 {
-	Undefined = 0,
-	StringVector = 1 << 0
+	All = -1,
+	StringVector = 1 << 0,
+	PairStringMap = 1 << 1
 };
 
 static int	parseCategories(int argc, char* argv[])
 {
-	int	ret = Undefined;
+	int	ret = 0;
 	for (int i = 1; i < argc; ++i)
 	{
 		const std::string	arg(argv[i]);
 		if (arg == "--stringvector")
-			ret = StringVector;
+			ret |= StringVector;
+		if (arg == "--pairstringmap")
+			ret |= PairStringMap;
 	}
+	if (ret == 0)
+		ret = All;
 	return ret;
 }
 
@@ -103,7 +118,9 @@ int main(int argc, char* argv[])
 	int	flags = parseCategories(argc, argv);
 	ft::pair<int, int*>	numpair = parseNumbers(argc, argv);
 
-	if (flags == Undefined || flags == StringVector)
+	if (flags & StringVector)
+		TestStringVector(numpair);
+	if (flags & PairStringMap)
 		TestStringVector(numpair);
 
 	delete[] numpair.second;
