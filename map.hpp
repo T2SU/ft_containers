@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/03 17:35:17 by smun              #+#    #+#             */
-/*   Updated: 2022/01/28 11:25:05 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/29 15:54:37 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,8 +87,8 @@ namespace ft
 
 		template<typename InputIt>
 		map(
-			typename ft::enable_if<ft::is_input_iterator<InputIt>::value, InputIt>::type first,
-			typename ft::enable_if<ft::is_input_iterator<InputIt>::value, InputIt>::type last,
+			InputIt first,
+			InputIt last,
 			Compare const& comp = Compare(),
 			Allocator const& alloc = Allocator()
 		)

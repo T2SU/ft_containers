@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 10:56:57 by smun              #+#    #+#             */
-/*   Updated: 2022/01/29 15:28:26 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/29 19:14:21 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,8 +92,8 @@ namespace ft
 		/* Parameterized Constructor (Source iterator and Allocator) */
 		template <typename InputIt>
 		vector(
-				typename ft::enable_if<ft::is_input_iterator<InputIt>::value, InputIt>::type first,
-				typename ft::enable_if<ft::is_input_iterator<InputIt>::value, InputIt>::type last,
+				InputIt first,
+				InputIt last,
 				const Allocator& alloc = Allocator()
 			)
 		: _begin_ptr(nullptr)
@@ -438,6 +438,12 @@ namespace ft
 	bool	operator>=(vector<T, Allocator> const& lhs, vector<T, Allocator> const& rhs)
 	{
 		return !(lhs < rhs);
+	}
+
+	template<typename T>
+	void	swap(ft::vector<T>& o1, ft::vector<T>& o2)
+	{
+		o1.swap(o2);
 	}
 }
 

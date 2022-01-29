@@ -6,14 +6,12 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 19:42:47 by smun              #+#    #+#             */
-/*   Updated: 2022/01/29 15:35:34 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/29 17:47:03 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef TYPE_TRAITS_HPP
 # define TYPE_TRAITS_HPP
-
-# include "iterator.hpp"
 
 namespace ft
 {
@@ -71,6 +69,16 @@ namespace ft
 		operator D*();
 	};
 
+	// https://www.boost.org/doc/libs/1_36_0/boost/type_traits/is_convertible.hpp
+	template<typename From, typename To>
+	struct is_convertible_to
+	{
+		static no check(...);
+		static yes check(To);
+		static From from;
+		static const bool value = sizeof(check(from)) == sizeof(yes);
+	};
+
 	template <typename B, typename D>
 	struct is_base_of
 	{
@@ -81,41 +89,9 @@ namespace ft
 	public:
 		static const bool value = sizeof(check(_Host<B, D>(), int())) == sizeof(yes);
 	};
+
 	template <typename T>
 	struct is_base_of<T, T> : public true_type {};
-
-	template <typename Type>
-	struct has_iterator_typedef
-	{
-	private:
-		template <typename What>
-		static no check(...);
-		template <typename What>
-		static yes check(
-			typename void_t<typename What::iterator_category>::type* = 0,
-			typename void_t<typename What::difference_type>::type* = 0,
-			typename void_t<typename What::value_type>::type* = 0,
-			typename void_t<typename What::pointer>::type* = 0,
-			typename void_t<typename What::reference>::type* = 0
-		);
-	public:
-		static const bool value = sizeof(check<Type>(0, 0, 0, 0, 0)) == sizeof(yes);
-	};
-
-	template <typename It, typename B, bool = has_iterator_typedef<It>::value>
-	struct is_iterator_and_category_derived_from : public integral_constant<bool, is_base_of<B, typename iterator_traits<It>::iterator_category>::value> {};
-
-	template <typename It, typename B>
-	struct is_iterator_and_category_derived_from<It, B, false> : public false_type {};
-
-	template <typename It> struct is_input_iterator
-	 : public is_iterator_and_category_derived_from<It, std::input_iterator_tag> {};
-	template <typename It> struct is_output_iterator
-	 : public is_iterator_and_category_derived_from<It, std::output_iterator_tag> {};
-	template <typename It> struct is_bidirectional_iterator
-	 : public is_iterator_and_category_derived_from<It, std::bidirectional_iterator_tag> {};
-	template <typename It> struct is_random_access_iterator
-	 : public is_iterator_and_category_derived_from<It, std::random_access_iterator_tag> {};
 
 	inline int					convert_to_integral(int val) { return val; }
 	inline unsigned				convert_to_integral(unsigned val) { return val; }

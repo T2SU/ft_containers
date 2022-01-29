@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 22:48:46 by smun              #+#    #+#             */
-/*   Updated: 2022/01/29 14:53:38 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/29 19:10:36 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,13 @@ namespace ft
 
 		IteratorWrapper() : current() {}
 		virtual ~IteratorWrapper() {}
-		explicit IteratorWrapper(Iter iter) : current(iter) {}
+		IteratorWrapper(Iter iter) : current(iter) {}
 		IteratorWrapper(IteratorWrapper const& origin) : current(origin.base()) {}
+
+		template<typename Tp>
+		IteratorWrapper(IteratorWrapper<Tp> const& another,
+			typename ft::enable_if<ft::is_convertible_to<Tp, Iter>::value, Iter>::type* = 0)
+			: current(another.base()) {}
 
 		IteratorWrapper& operator=(IteratorWrapper<Iter> const& another)
 		{
@@ -113,45 +118,45 @@ namespace ft
 		}
 	};
 
-	template<typename Iter>
-	bool	operator==(IteratorWrapper<Iter> const& lhs, IteratorWrapper<Iter> const& rhs)
+	template<typename Iter1, typename Iter2>
+	bool	operator==(IteratorWrapper<Iter1> const& lhs, IteratorWrapper<Iter2> const& rhs)
 	{
 		return lhs.base() == rhs.base();
 	}
 
-	template<typename Iter>
-	bool	operator!=(IteratorWrapper<Iter> const& lhs, IteratorWrapper<Iter> const& rhs)
+	template<typename Iter1, typename Iter2>
+	bool	operator!=(IteratorWrapper<Iter1> const& lhs, IteratorWrapper<Iter2> const& rhs)
 	{
 		return lhs.base() != rhs.base();
 	}
 
-	template<typename Iter>
-	bool	operator<(IteratorWrapper<Iter> const& lhs, IteratorWrapper<Iter> const& rhs)
+	template<typename Iter1, typename Iter2>
+	bool	operator<(IteratorWrapper<Iter1> const& lhs, IteratorWrapper<Iter2> const& rhs)
 	{
 		return lhs.base() < rhs.base();
 	}
 
-	template<typename Iter>
-	bool	operator<=(IteratorWrapper<Iter> const& lhs, IteratorWrapper<Iter> const& rhs)
+	template<typename Iter1, typename Iter2>
+	bool	operator<=(IteratorWrapper<Iter1> const& lhs, IteratorWrapper<Iter2> const& rhs)
 	{
 		return lhs.base() <= rhs.base();
 	}
 
-	template<typename Iter>
-	bool	operator>(IteratorWrapper<Iter> const& lhs, IteratorWrapper<Iter> const& rhs)
+	template<typename Iter1, typename Iter2>
+	bool	operator>(IteratorWrapper<Iter1> const& lhs, IteratorWrapper<Iter2> const& rhs)
 	{
 		return lhs.base() > rhs.base();
 	}
 
-	template<typename Iter>
-	bool	operator>=(IteratorWrapper<Iter> const& lhs, IteratorWrapper<Iter> const& rhs)
+	template<typename Iter1, typename Iter2>
+	bool	operator>=(IteratorWrapper<Iter1> const& lhs, IteratorWrapper<Iter2> const& rhs)
 	{
 		return lhs.base() >= rhs.base();
 	}
 
-	template<typename Iter>
-	typename IteratorWrapper<Iter>::difference_type
-	operator-(IteratorWrapper<Iter> const& x, IteratorWrapper<Iter> const& y)
+	template<typename Iter1, typename Iter2>
+	typename IteratorWrapper<Iter1>::difference_type
+	operator-(IteratorWrapper<Iter1> const& x, IteratorWrapper<Iter2> const& y)
 	{
 		return x.base() - y.base();
 	}
