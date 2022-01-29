@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 14:33:40 by smun              #+#    #+#             */
-/*   Updated: 2022/01/29 09:44:16 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/29 14:47:20 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,8 +36,15 @@ namespace ft
 			typename Map::const_iterator it = map.begin();
 			typename Map::const_iterator end = map.end();
 			for (; it != end; ++it)
-				std::cout << "[(" << it->first.first << "," << it->first.second << ")-" << it->second << "]" << std::endl;
+				std::cout << (it->first) << "-" << (it->second) << std::endl;
 		}
+
+		template<typename V>
+		static V	makePairForTest(int k, std::string v)
+		{
+			return V(k, v);
+		}
+
 
 	public:
 		MapTest() {}

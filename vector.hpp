@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 10:56:57 by smun              #+#    #+#             */
-/*   Updated: 2022/01/02 15:49:32 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/29 14:16:58 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -398,7 +398,7 @@ namespace ft
 		void	DeconstructFromEnd(size_type n)
 		{
 			while (n-- > 0)
-				_allocator.destroy((_end_ptr)--);
+				_allocator.destroy(--(_end_ptr));
 		}
 	};
 

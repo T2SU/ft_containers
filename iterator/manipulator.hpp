@@ -6,12 +6,12 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 19:00:42 by smun              #+#    #+#             */
-/*   Updated: 2022/01/01 18:06:27 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/29 14:53:29 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef MANIPULATOR_HPP
-# define MANIPULATOR_HPP
+#ifndef ITERATOR_MANIPULATOR_HPP
+# define ITERATOR_MANIPULATOR_HPP
 
 # include "base.hpp"
 # include <algorithm>

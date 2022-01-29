@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:54:13 by smun              #+#    #+#             */
-/*   Updated: 2022/01/29 09:46:22 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/29 14:30:09 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -532,29 +532,29 @@ namespace ft
 			const_iterator prev = hint;
 			if (prev == begin() || _key_compare((--prev)->first, key)) // --hint < key (*valid hint*)
 			{
-				if (hint->base()->getLeftChild() == nullptr)
-					return (parent = hint->base())->getLeftChild();
+				if (hint.base()->getLeftChild() == nullptr)
+					return (parent = hint.base())->getLeftChild();
 				else
-					return (parent = prev->base())->getRightChild();
+					return (parent = prev.base())->getRightChild();
 			}
 			return findPlace(_root, key, parent); // invalid hint
 		}
-		else if (_key_compare(*hint, key)) // hint < key
+		else if (_key_compare(hint->first, key)) // hint < key
 		{
 			const_iterator next = ++hint;
 			if (next == end() || _key_compare(key, next->first)) // key < ++hint (*valid hint*)
 			{
-				if (hint->base()->getRightChild() == nullptr)
-					return (parent = hint->base())->getRightChild();
+				if (hint.base()->getRightChild() == nullptr)
+					return (parent = hint.base())->getRightChild();
 				else
-					return (parent = next->base())->getLeftChild();
+					return (parent = next.base())->getLeftChild();
 			}
 			return findPlace(_root, key, parent); // invalid hint
 		}
 		else // hint == key
 		{
-			parent = hint->base()->getParent();
-			if (parent->getLeftChild() == hint->base())
+			parent = hint.base()->getParent();
+			if (parent->getLeftChild() == hint.base())
 				return parent->getLeftChild();
 			else
 				return parent->getRightChild();
@@ -573,7 +573,8 @@ namespace ft
 		}
 		else
 		{
-			tryFixDoubleRed(place = createNode(value, parent));
+			place = createNode(value, parent);
+			tryFixDoubleRed(place);
 			if (place == _root)
 				_end_ptr->setLeftChild(place);
 			if (_begin_ptr == _end_ptr || _key_compare(value.first, _begin_ptr->getValue().first))
@@ -752,7 +753,7 @@ namespace ft
 		node_pointer&	place = findPlace(_root, value.first, parent);
 		bool			inserted = insertNodeAt(parent, place, value, true);
 
-		return ft::make_pair<iterator, bool>(iterator(*place), inserted);
+		return ft::make_pair<iterator, bool>(iterator(place), inserted);
 	}
 
 	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>

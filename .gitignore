@@ -11,3 +11,4 @@ cmake-build-debug/
 *.nam
 *.til
 *.i64
+containers_test/

@@ -6,12 +6,12 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 22:48:46 by smun              #+#    #+#             */
-/*   Updated: 2021/12/25 19:58:31 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/29 14:53:38 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef WRAPPER_HPP
-# define WRAPPER_HPP
+#ifndef ITERATOR_WRAPPER_HPP
+# define ITERATOR_WRAPPER_HPP
 
 # include "base.hpp"
 

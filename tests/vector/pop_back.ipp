@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/02 16:04:31 by smun              #+#    #+#             */
-/*   Updated: 2022/01/03 17:01:54 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/29 14:07:00 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,8 @@ void	Pop_Back(value_type val1)
 		PrintSizeAndCapacity(vec1);
 		vec1.push_back(val1);
 	}
+	int size = vec1.size();
+	std::cout << size << std::endl;
 	for (int i = 0; i < 8; i++)
 	{
 		PrintSizeAndCapacity(vec1);

@@ -6,12 +6,12 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 18:58:18 by smun              #+#    #+#             */
-/*   Updated: 2022/01/01 18:04:42 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/29 14:53:32 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef BASE_HPP
-# define BASE_HPP
+#ifndef ITERATOR_BASE_HPP
+# define ITERATOR_BASE_HPP
 
 # include <cstddef>
 
