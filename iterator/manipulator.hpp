@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 19:00:42 by smun              #+#    #+#             */
-/*   Updated: 2022/01/29 14:53:29 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/29 15:34:39 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ namespace ft
 		typedef typename iterator_traits<Iter>::difference_type		difference_type;
 
 
-		difference_type	distance(Iter& another, input_iterator_tag) const
+		difference_type	distance(Iter& another, std::input_iterator_tag) const
 		{
 			difference_type r(0);
 			Iter i = iter;
@@ -44,19 +44,19 @@ namespace ft
 			return r;
 		}
 
-		difference_type	distance(Iter& another, random_access_iterator_tag) const
+		difference_type	distance(Iter& another, std::random_access_iterator_tag) const
 		{
 			return another - iter;
 		}
 
-		Iter	advance(difference_type n, input_iterator_tag)
+		Iter	advance(difference_type n, std::input_iterator_tag)
 		{
 			for (; n > 0; --n)
 				++iter;
 			return iter;
 		}
 
-		Iter	advance(difference_type n, bidirectional_iterator_tag)
+		Iter	advance(difference_type n, std::bidirectional_iterator_tag)
 		{
 			if (n > 0)
 				for (; n > 0; --n)
@@ -67,35 +67,10 @@ namespace ft
 			return iter;
 		}
 
-		Iter	advance(difference_type n, random_access_iterator_tag)
+		Iter	advance(difference_type n, std::random_access_iterator_tag)
 		{
 			iter += n;
 			return iter;
-		}
-
-		difference_type	distance(Iter& another, std::random_access_iterator_tag) const
-		{
-			return distance(another, ft::random_access_iterator_tag());
-		}
-
-		difference_type	distance(Iter& another, std::input_iterator_tag) const
-		{
-			return distance(another, ft::input_iterator_tag());
-		}
-
-		Iter	advance(difference_type n, std::input_iterator_tag)
-		{
-			return advance(n, ft::input_iterator_tag());
-		}
-
-		Iter	advance(difference_type n, std::bidirectional_iterator_tag)
-		{
-			return advance(n, ft::bidirectional_iterator_tag());
-		}
-
-		Iter	advance(difference_type n, std::random_access_iterator_tag)
-		{
-			return advance(n, ft::random_access_iterator_tag());
 		}
 
 	public:

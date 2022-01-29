@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 19:42:47 by smun              #+#    #+#             */
-/*   Updated: 2021/12/25 19:32:05 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/29 15:35:34 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,13 +109,13 @@ namespace ft
 	struct is_iterator_and_category_derived_from<It, B, false> : public false_type {};
 
 	template <typename It> struct is_input_iterator
-	 : public is_iterator_and_category_derived_from<It, input_iterator_tag> {};
+	 : public is_iterator_and_category_derived_from<It, std::input_iterator_tag> {};
 	template <typename It> struct is_output_iterator
-	 : public is_iterator_and_category_derived_from<It, output_iterator_tag> {};
+	 : public is_iterator_and_category_derived_from<It, std::output_iterator_tag> {};
 	template <typename It> struct is_bidirectional_iterator
-	 : public is_iterator_and_category_derived_from<It, bidirectional_iterator_tag> {};
+	 : public is_iterator_and_category_derived_from<It, std::bidirectional_iterator_tag> {};
 	template <typename It> struct is_random_access_iterator
-	 : public is_iterator_and_category_derived_from<It, random_access_iterator_tag> {};
+	 : public is_iterator_and_category_derived_from<It, std::random_access_iterator_tag> {};
 
 	inline int					convert_to_integral(int val) { return val; }
 	inline unsigned				convert_to_integral(unsigned val) { return val; }
