@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:54:13 by smun              #+#    #+#             */
-/*   Updated: 2022/01/29 14:30:09 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/29 21:54:34 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,75 +18,163 @@
 
 namespace ft
 {
+	enum { NodeColor_Black, NodeColor_Red };
+
+	template<typename Value>
+	class Node
+	{
+	private:
+		typedef Node*		NodePtr;
+		typedef const Node*	ConstNodePtr;
+
+		Value	_value;
+		NodePtr	_parent;
+		NodePtr	_left;
+		NodePtr	_right;
+		int		_color;
+
+		Node();
+		Node& operator=(Node const&);
+		Node(Node const&);
+
+	public:
+		Node(Value const& value, NodePtr parent)
+			: _value(value)
+			, _parent(parent)
+			, _left(nullptr)
+			, _right(nullptr)
+			, _color(NodeColor_Red)
+		{}
+		virtual ~Node() {}
+
+		int				getColor() const				{ return _color; }
+		void			setColor(int color)				{ _color = color; }
+		Value&			getValue()						{ return _value; }
+		NodePtr&		getParent()						{ return _parent; }
+		ConstNodePtr&	getParent() const				{ return _parent; }
+		void			setParent(NodePtr p)			{ _parent = p; }
+		NodePtr&		getLeftChild()					{ return _left; }
+		ConstNodePtr&	getLeftChild() const			{ return _left; }
+		NodePtr&		getRightChild()					{ return _right; }
+		ConstNodePtr&	getRightChild() const			{ return _right; }
+		bool			isOnLeft() const				{ return _parent->_left == this; }
+		bool			isOnRight() const				{ return _parent->_right == this; }
+		int				getChildCount() const			{ return (_left ? 1 : 0) + (_right ? 1 : 0); }
+		NodePtr&		getFirstChild()					{ return _left ? _left : _right; }
+		ConstNodePtr&	getFirstChild() const			{ return _left ? _left : _right; }
+		void			setLeftChild(NodePtr const x)	{ if ((_left = x)) _left->setParent(this); }
+		void			setRightChild(NodePtr const x)	{ if ((_right = x)) _right->setParent(this); }
+		NodePtr			getMinimum()					{ return _left ? _left->getMinimum() : this; }
+		ConstNodePtr	getMinimum() const				{ return _left ? _left->getMinimum() : this; }
+		NodePtr			getMaximum()					{ return _right ? _right->getMaximum() : this; }
+		ConstNodePtr	getMaximum() const				{ return _right ? _right->getMaximum() : this; }
+		NodePtr*		getPlace()						{ return isOnLeft() ? &(_parent->_left) : &(_parent->_right); }
+
+		static void		swapColor(NodePtr a, NodePtr b);
+		static void		swapNodes(NodePtr n, NodePtr suc);
+
+	private:
+		struct Plan
+		{
+			Node* parent;
+			Node* left;
+			Node* right;
+			int color;
+			Node** place;
+
+			Plan(Node const& o)
+				: parent(o._parent)
+				, left(o._left)
+				, right(o._right)
+				, color(o._color)
+				, place(o.getPlace()) {}
+		};
+	};
+
+	template<typename NodePtr, typename ValueType, typename DifferenceType>
+	class TreeIterator
+	{
+	private:
+		NodePtr	current;
+
+	public:
+		typedef	NodePtr						NodePointer;
+		typedef ValueType					value_type;
+		typedef DifferenceType				difference_type;
+		typedef ValueType*					pointer;
+		typedef ValueType&					reference;
+		typedef bidirectional_iterator_tag	iterator_category;
+
+		TreeIterator() : current() {}
+		TreeIterator(NodePointer iter) : current(iter) {}
+		TreeIterator(TreeIterator const& origin) : current(origin.base()) {}
+		virtual ~TreeIterator() {}
+
+		TreeIterator&	operator=(TreeIterator const& another)
+		{
+			if (this != & another)
+				current = another.base();
+			return *this;
+		}
+
+		NodePointer		base() const		{ return current; }
+		reference		operator*() const	{ return current->getValue(); }
+		pointer			operator->() const	{ return &operator*(); }
+
+		TreeIterator&	operator++()
+		{
+			if (current->getRightChild() != nullptr)
+			{
+				current = current->getRightChild()->getMinimum();
+				return *this;
+			}
+			while (current->isOnRight())
+				current = current->getParent();
+			current = current->getParent();
+			return *this;
+		}
+
+		TreeIterator	operator++(int)
+		{
+			TreeIterator tmp(*this);
+			++(*this);
+			return tmp;
+		}
+
+		TreeIterator&	operator--()
+		{
+			if (current->getLeftChild() != nullptr)
+			{
+				current = current->getLeftChild()->getMaximum();
+				return *this;
+			}
+			while (current->isOnLeft())
+				current = current->getParent();
+			current = current->getParent();
+			return *this;
+		}
+
+		TreeIterator	operator--(int)
+		{
+			TreeIterator tmp(*this);
+			--(*this);
+			return tmp;
+		}
+
+		friend bool	operator==(TreeIterator const& lhs, TreeIterator const& rhs)
+		{
+			return lhs.base() == rhs.base();
+		}
+
+		friend bool	operator!=(TreeIterator const& lhs, TreeIterator const& rhs)
+		{
+			return lhs.base() != rhs.base();
+		}
+	};
+
 	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	class tree
 	{
-	private:
-		enum { NodeColor_Black, NodeColor_Red };
-
-		class node
-		{
-		private:
-			typedef node*	NodePtr;
-
-			Value	_value;
-			NodePtr	_parent;
-			NodePtr	_left;
-			NodePtr	_right;
-			int		_color;
-
-			node();
-			node& operator=(node const&);
-			node(node const&);
-
-		public:
-			node(Value const& value, NodePtr parent)
-				: _value(value)
-				, _parent(parent)
-				, _left(nullptr)
-				, _right(nullptr)
-				, _color(NodeColor_Red)
-			{}
-			virtual ~node() {}
-
-			int				getColor() const				{ return _color; }
-			void			setColor(int color)				{ _color = color; }
-			Value&			getValue()						{ return _value; }
-			NodePtr&		getParent()						{ return _parent; }
-			void			setParent(NodePtr p)			{ _parent = p; }
-			NodePtr&		getLeftChild()					{ return _left; }
-			NodePtr&		getRightChild()					{ return _right; }
-			bool			isOnLeft() const				{ return _parent->_left == this; }
-			bool			isOnRight() const				{ return _parent->_right == this; }
-			int				getChildCount() const			{ return (_left ? 1 : 0) + (_right ? 1 : 0); }
-			NodePtr&		getFirstChild()					{ return _left ? _left : _right; }
-			void			setLeftChild(NodePtr const x)	{ if ((_left = x)) _left->setParent(this); }
-			void			setRightChild(NodePtr const x)	{ if ((_right = x)) _right->setParent(this); }
-			NodePtr			getMinimum()					{ return _left ? _left->getMinimum() : this; }
-			NodePtr			getMaximum()					{ return _right ? _right->getMaximum() : this; }
-			NodePtr*		getPlace()	const				{ return isOnLeft() ? &(_parent->_left) : &(_parent->_right); }
-
-			static void		swapColor(NodePtr a, NodePtr b);
-			static void		swapNodes(NodePtr n, NodePtr suc);
-
-		private:
-			struct plan
-			{
-				node* parent;
-				node* left;
-				node* right;
-				int color;
-				node** place;
-
-				plan(node const& o)
-					: parent(o._parent)
-					, left(o._left)
-					, right(o._right)
-					, color(o._color)
-					, place(o.getPlace()) {}
-			};
-		};
-
 	public:
 		typedef Allocator									allocator_type;
 		typedef Key											key_type;
@@ -100,152 +188,29 @@ namespace ft
 		typedef typename allocator_type::const_pointer		const_pointer;
 
 	private:
-		typedef node		node_type;
-		typedef node_type*	node_pointer;
-		typedef node_type&	node_reference;
+		typedef Node				NodeType;
+		typedef NodeType*			NodePointer;
+		typedef NodeType&			NodeReference;
+		typedef const NodeType*		ConstNodePointer;
+		typedef const NodeType&		ConstNodeReference;
 
-		typedef typename Allocator::template rebind<node_type>::other	node_allocator_type;
+		typedef typename Allocator::template rebind<NodeType>::other	NodeAllocatorType;
 
 		Compare				_key_compare;
 		allocator_type		_allocator;
-		node_allocator_type	_node_allocator;
-		node_pointer		_root;
-		node_pointer		_end_ptr;
-		node_pointer		_begin_ptr;
+		NodeAllocatorType	_Node_allocator;
+		NodePointer			_root;
+		NodePointer			_end_ptr;
+		NodePointer			_begin_ptr;
 		size_type			_size;
 
-		static int		getColor(node const* const n) { return n ? n->getColor() : NodeColor_Black; }
+		static int		getColor(Node const* const n) { return n ? n->getColor() : NodeColor_Black; }
 
 	public:
-		class TreeIterator
-		{
-		private:
-			tree::node_pointer	current;
-
-		public:
-			typedef	tree::node_pointer				node_pointer;
-			typedef tree::value_type				value_type;
-			typedef tree::difference_type			difference_type;
-			typedef tree::value_type*				pointer;
-			typedef tree::value_type&				reference;
-			typedef bidirectional_iterator_tag		iterator_category;
-
-			TreeIterator() : current() {}
-			TreeIterator(node_pointer iter) : current(iter) {}
-			TreeIterator(TreeIterator const& origin) : current(origin.base()) {}
-			virtual ~TreeIterator() {}
-
-			TreeIterator&	operator=(TreeIterator const& another)
-			{
-				if (this != & another)
-					current = another.base();
-				return *this;
-			}
-
-			node_pointer	base() const		{ return current; }
-			reference		operator*() const	{ return current->getValue(); }
-			pointer			operator->() const	{ return &operator*(); }
-
-			TreeIterator&	operator++()
-			{
-				if (current->getRightChild() != nullptr)
-				{
-					current = current->getRightChild()->getMinimum();
-					return *this;
-				}
-				while (current->isOnRight())
-					current = current->getParent();
-				current = current->getParent();
-				return *this;
-			}
-
-			TreeIterator	operator++(int)
-			{
-				TreeIterator tmp(*this);
-				++(*this);
-				return tmp;
-			}
-
-			TreeIterator&	operator--()
-			{
-				if (current->getLeftChild() != nullptr)
-				{
-					current = current->getLeftChild()->getMaximum();
-					return *this;
-				}
-				while (current->isOnLeft())
-					current = current->getParent();
-				current = current->getParent();
-				return *this;
-			}
-
-			TreeIterator	operator--(int)
-			{
-				TreeIterator tmp(*this);
-				--(*this);
-				return tmp;
-			}
-
-			friend bool	operator==(TreeIterator const& lhs, TreeIterator const& rhs)
-			{
-				return lhs.base() == rhs.base();
-			}
-
-			friend bool	operator!=(TreeIterator const& lhs, TreeIterator const& rhs)
-			{
-				return lhs.base() != rhs.base();
-			}
-		};
-
-		template<typename TreeIter>
-		class ConstTreeIterator
-		{
-		private:
-			TreeIter treeIter;
-			ConstTreeIterator();
-
-		public:
-			typedef typename TreeIter::node_pointer		node_pointer;
-			typedef typename TreeIter::value_type		value_type;
-			typedef typename TreeIter::difference_type	difference_type;
-			typedef value_type const*					pointer;
-			typedef value_type const&					reference;
-			typedef bidirectional_iterator_tag			iterator_category;
-
-			ConstTreeIterator(TreeIter const& mi) : treeIter(mi) {}
-			ConstTreeIterator(ConstTreeIterator const& origin) : treeIter(origin.treeIter) {}
-			virtual ~ConstTreeIterator() {}
-
-			ConstTreeIterator& operator=(ConstTreeIterator const& another)
-			{
-				if (this != &another)
-					treeIter = another.treeIter;
-				return *this;
-			}
-
-			node_pointer		base() const 		{ return treeIter.base(); }
-			reference			operator*() const	{ return *treeIter; }
-			pointer				operator->() const	{ return treeIter.operator->(); }
-			ConstTreeIterator&	operator++()		{ ++treeIter; return *this; }
-			ConstTreeIterator&	operator++(int)		{ ConstTreeIterator tmp(*this); ++treeIter; return tmp; }
-			ConstTreeIterator&	operator--()		{ --treeIter; return *this; }
-			ConstTreeIterator&	operator--(int)		{ ConstTreeIterator tmp(*this); --treeIter; return tmp; }
-
-			friend bool	operator==(ConstTreeIterator const& lhs, ConstTreeIterator const& rhs)
-			{
-				return lhs.base() == rhs.base();
-			}
-
-			friend bool	operator!=(ConstTreeIterator const& lhs, ConstTreeIterator const& rhs)
-			{
-				return lhs.base() != rhs.base();
-			}
-		};
-
 		explicit tree(Compare const& cmp, Allocator const& alloc = Allocator())
 			: _key_compare(cmp)
 			, _allocator(alloc)
-			, _node_allocator(node_allocator_type(_allocator))
+			, _Node_allocator(NodeAllocatorType(_allocator))
 			, _root()
 			, _end_ptr(createEndNode())
 			, _begin_ptr(_end_ptr)
@@ -255,7 +220,7 @@ namespace ft
 		tree(tree const& origin)
 			: _key_compare(origin._key_compare)
 			, _allocator(origin._allocator)
-			, _node_allocator(origin._node_allocator)
+			, _Node_allocator(origin._Node_allocator)
 			, _root()
 			, _end_ptr(createEndNode())
 			, _begin_ptr(_end_ptr)
@@ -273,7 +238,7 @@ namespace ft
 		)
 			: _key_compare(comp)
 			, _allocator(alloc)
-			, _node_allocator(node_allocator_type(_allocator))
+			, _Node_allocator(NodeAllocatorType(_allocator))
 			, _root()
 			, _end_ptr(createEndNode())
 			, _begin_ptr(_end_ptr)
@@ -296,11 +261,11 @@ namespace ft
 
 		allocator_type	get_allocator() const { return _allocator; }
 
+		typedef TreeIterator<NodePointer, value_type, difference_type>				iterator;
+		typedef TreeIterator<ConstNodePointer, const value_type, difference_type>	const_iterator;
 
-		typedef TreeIterator								iterator;
-		typedef ConstTreeIterator<iterator>					const_iterator;
-		typedef ft::reverse_iterator<iterator>				reverse_iterator;
-		typedef ft::reverse_iterator<const_iterator>		const_reverse_iterator;
+		typedef ft::reverse_iterator<iterator>						reverse_iterator;
+		typedef ft::reverse_iterator<const_iterator>				const_reverse_iterator;
 
 		iterator					begin()			{ return iterator(_begin_ptr); }
 		const_iterator				begin() const	{ return const_iterator(_begin_ptr);}
@@ -333,37 +298,38 @@ namespace ft
 		iterator		find(Key const& key);
 		const_iterator	find(Key const& key) const;
 
-		node_pointer	upper_bound(Key const& key);
-		node_pointer	lower_bound(Key const& key);
+		NodePointer	upper_bound(Key const& key);
+		NodePointer	lower_bound(Key const& key);
 
 		T&				operator[](Key const& key);
 
 	private:
-		static bool			isDoubleRed(node_pointer const n);
-		static node_pointer	getChildByNear(node_pointer sib);
-		static node_pointer	getChildByFar(node_pointer sib);
-		node_pointer		siblingOf(node_pointer const p, node_pointer const n);
-		void				transplant(node_pointer n, node_pointer as);
-		void				leftRotate(node_pointer n);
-		void				rightRotate(node_pointer n);
-		node_pointer		findNode(Key const& key);
-		node_pointer&		findPlace(node_pointer& place, Key const& key, node_pointer& parent);
-		node_pointer&		findPlaceWithHint(const_iterator hint, Key const& key, node_pointer& parent);
-		bool				insertNodeAt(node_pointer parent, node_pointer& place, const_reference value, bool overwrite);
-		void				tryFixDoubleRed(node_pointer n);
-		void				destroyNode(node_pointer n);
-		void				deleteNode(node_pointer n);
-		void				fixDoubleBlack(node_pointer db, node_pointer p);
-		node_pointer		createNode(const_reference value, node_pointer parent);
-		node_pointer		createEndNode() { return createNode(Value(), nullptr); }
+		static bool			isDoubleRed(NodePointer const n);
+		static NodePointer	getChildByNear(NodePointer sib);
+		static NodePointer	getChildByFar(NodePointer sib);
+		NodePointer			siblingOf(NodePointer const p, NodePointer const n);
+		void				transplant(NodePointer n, NodePointer as);
+		void				leftRotate(NodePointer n);
+		void				rightRotate(NodePointer n);
+		NodePointer			findNode(Key const& key);
+		ConstNodePointer	findNode(Key const& key) const;
+		NodePointer&		findPlace(NodePointer& place, Key const& key, NodePointer& parent);
+		NodePointer&		findPlaceWithHint(const_iterator hint, Key const& key, NodePointer& parent);
+		bool				insertNodeAt(NodePointer parent, NodePointer& place, const_reference value, bool overwrite);
+		void				tryFixDoubleRed(NodePointer n);
+		void				destroyNode(NodePointer n);
+		void				deleteNode(NodePointer n);
+		void				fixDoubleBlack(NodePointer db, NodePointer p);
+		NodePointer			createNode(const_reference value, NodePointer parent);
+		NodePointer			createEndNode() { return createNode(Value(), nullptr); }
 
 	};
 
 # define TREE tree<Key, T, Value, Compare, Allocator>
 
-	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
+	template<typename Value>
 	void
-	TREE::node::swapColor(TREE::node *a, TREE::node *b)
+	Node<Value>::swapColor(Node<Value> *a, Node<Value> *b)
 	{
 		if (a != nullptr && b != nullptr)
 			ft::swap(a->_color, b->_color);
@@ -373,12 +339,12 @@ namespace ft
 			b->setColor(NodeColor_Black);
 	}
 
-	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
+	template<typename Value>
 	void
-	TREE::node::swapNodes(TREE::node *n, TREE::node *suc)
+	Node<Value>::swapNodes(Node<Value> *n, Node<Value> *suc)
 	{
-		plan	new_n(*suc);
-		plan	new_suc(*n);
+		Plan	new_n(*suc);
+		Plan	new_suc(*n);
 
 		if (suc->getParent() == n)
 		{
@@ -405,14 +371,14 @@ namespace ft
 
 	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	bool
-	TREE::isDoubleRed(node_pointer const n)
+	TREE::isDoubleRed(NodePointer const n)
 	{
 		return tree::getColor(n) == NodeColor_Red && tree::getColor(n->getParent()) == NodeColor_Red;
 	}
 
 	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
-	typename TREE::node_pointer
-	TREE::getChildByNear(node_pointer sib)
+	typename TREE::NodePointer
+	TREE::getChildByNear(NodePointer sib)
 	{
 		bool dbIsOnLeft = !sib->isOnLeft();
 		if (dbIsOnLeft)
@@ -422,8 +388,8 @@ namespace ft
 	}
 
 	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
-	typename TREE::node_pointer
-	TREE::getChildByFar(node_pointer sib)
+	typename TREE::NodePointer
+	TREE::getChildByFar(NodePointer sib)
 	{
 		bool dbIsOnLeft = !sib->isOnLeft();
 		if (dbIsOnLeft)
@@ -433,8 +399,8 @@ namespace ft
 	}
 
 	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
-	typename TREE::node_pointer
-	TREE::siblingOf(node_pointer const p, node_pointer const n)
+	typename TREE::NodePointer
+	TREE::siblingOf(NodePointer const p, NodePointer const n)
 	{
 		if (n == _root)
 			return nullptr;
@@ -445,14 +411,14 @@ namespace ft
 
 	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	void
-	TREE::transplant(node_pointer n, node_pointer as)
+	TREE::transplant(NodePointer n, NodePointer as)
 	{
 		if (_root == n)
 		{
 			_end_ptr->setLeftChild(_root = as);
 			return;
 		}
-		node_pointer p = n->getParent();
+		NodePointer p = n->getParent();
 		if (p->getLeftChild() == n)
 			p->setLeftChild(as);
 		if (p->getRightChild() == n)
@@ -462,10 +428,10 @@ namespace ft
 
 	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	void
-	TREE::leftRotate(node_pointer n)
+	TREE::leftRotate(NodePointer n)
 	{
-		node_pointer const p = n->getParent();
-		node_pointer const x = n->getLeftChild();
+		NodePointer const p = n->getParent();
+		NodePointer const x = n->getLeftChild();
 
 		transplant(p, n);
 		n->setLeftChild(p);
@@ -474,10 +440,10 @@ namespace ft
 
 	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	void
-	TREE::rightRotate(node_pointer n)
+	TREE::rightRotate(NodePointer n)
 	{
-		node_pointer const p = n->getParent();
-		node_pointer const x = n->getRightChild();
+		NodePointer const p = n->getParent();
+		NodePointer const x = n->getRightChild();
 
 		transplant(p, n);
 		n->setRightChild(p);
@@ -485,35 +451,52 @@ namespace ft
 	}
 
 	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
-	typename TREE::node_pointer
-	TREE::findNode(Key const& key)
+	typename TREE::ConstNodePointer
+	TREE::findNode(Key const& key) const
 	{
-		node_pointer	parent;
-		node_pointer&	place = findPlace(_root, key, parent);
+		ConstNodePointer	current = _root;
 
-		return place;
+		while (current != nullptr)
+		{
+			if (_key_compare(current->getValue().first, key))
+				current = current->getRightChild();
+			else if (_key_compare(key, current->getValue().first))
+				current = current->getLeftChild();
+			else
+				break;
+		}
+		return current;
 	}
 
 	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
-	typename TREE::node_pointer&
-	TREE::findPlace(node_pointer& place, Key const& key, node_pointer& parent)
+	typename TREE::NodePointer
+	TREE::findNode(Key const& key)
 	{
-		node_pointer	current = place;
-		node_pointer*	ret = &place;
+		return const_cast<typename TREE::NodePointer>(
+			static_cast<const TREE*>(this)->findNode(key)
+		);
+	}
+
+	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
+	typename TREE::NodePointer&
+	TREE::findPlace(NodePointer& place, Key const& key, NodePointer& parent)
+	{
+		NodePointer	current = place;
+		NodePointer*	ret = &place;
 		while (current != nullptr)
 		{
 			parent = current->getParent();
 			if (_key_compare(current->getValue().first, key))
 			{
 				parent = current;
-				node_pointer& rc = current->getRightChild();
+				NodePointer& rc = current->getRightChild();
 				ret = &rc;
 				current = rc;
 			}
 			else if (_key_compare(key, current->getValue().first))
 			{
 				parent = current;
-				node_pointer& lc = current->getLeftChild();
+				NodePointer& lc = current->getLeftChild();
 				ret = &lc;
 				current = lc;
 			}
@@ -524,8 +507,8 @@ namespace ft
 	}
 
 	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
-	typename TREE::node_pointer&
-	TREE::findPlaceWithHint(const_iterator hint, Key const& key, node_pointer& parent)
+	typename TREE::NodePointer&
+	TREE::findPlaceWithHint(const_iterator hint, Key const& key, NodePointer& parent)
 	{
 		if (hint == end() || _key_compare(key, hint->first)) // key < hint
 		{
@@ -563,7 +546,7 @@ namespace ft
 
 	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	bool
-	TREE::insertNodeAt(node_pointer parent, node_pointer& place, const_reference value, bool overwrite)
+	TREE::insertNodeAt(NodePointer parent, NodePointer& place, const_reference value, bool overwrite)
 	{
 		if (place != nullptr)
 		{
@@ -586,7 +569,7 @@ namespace ft
 
 	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	void
-	TREE::tryFixDoubleRed(node_pointer n)
+	TREE::tryFixDoubleRed(NodePointer n)
 	{
 		if (n == nullptr)
 			return;
@@ -597,9 +580,9 @@ namespace ft
 			return;
 		}
 
-		node_pointer p = n->getParent();
-		node_pointer g = p->getParent();
-		node_pointer u = siblingOf(g, p);
+		NodePointer p = n->getParent();
+		NodePointer g = p->getParent();
+		NodePointer u = siblingOf(g, p);
 
 		if (p == _root || !isDoubleRed(n))
 			return;
@@ -614,19 +597,19 @@ namespace ft
 			return;
 		if (getColor(u) == NodeColor_Black)
 		{
-			node_pointer descendant_of_g = p;
+			NodePointer descendant_of_g = p;
 			if (p->isOnLeft())
 			{
 				if (n->isOnRight())
 					leftRotate(descendant_of_g = n);
-				node::swapColor(descendant_of_g, g);
+				Node::swapColor(descendant_of_g, g);
 				rightRotate(descendant_of_g);
 			}
 			else
 			{
 				if (n->isOnLeft())
 					rightRotate(descendant_of_g = n);
-				node::swapColor(descendant_of_g, g);
+				Node::swapColor(descendant_of_g, g);
 				leftRotate(descendant_of_g);
 			}
 		}
@@ -634,7 +617,7 @@ namespace ft
 
 	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	void
-	TREE::destroyNode(node_pointer n)
+	TREE::destroyNode(NodePointer n)
 	{
 		if (n == nullptr)
 			return;
@@ -645,17 +628,17 @@ namespace ft
 	// https://medium.com/analytics-vidhya/deletion-in-red-black-rb-tree-92301e1474ea
 	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	void
-	TREE::deleteNode(node_pointer n)
+	TREE::deleteNode(NodePointer n)
 	{
 		if (n->getChildCount() == 2)
 		{
-			node_pointer suc = n->getRightChild()->getMinimum();
-			node::swapNodes(n, suc);
+			NodePointer suc = n->getRightChild()->getMinimum();
+			Node::swapNodes(n, suc);
 			if (_root == n)
 				_root = suc;
 		}
-		node_pointer c = n->getFirstChild();
-		node_pointer p = n->getParent();
+		NodePointer c = n->getFirstChild();
+		NodePointer p = n->getParent();
 		transplant(n, c);
 		if (getColor(n) == NodeColor_Black)
 		{
@@ -666,23 +649,23 @@ namespace ft
 		}
 		if (!_key_compare(_begin_ptr->getValue().first, n->getValue().first))
 			_begin_ptr = (_root ? _root->getMinimum() : _end_ptr);
-		_node_allocator.deallocate(n, 1);
+		_Node_allocator.deallocate(n, 1);
 	}
 
 	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	void
-	TREE::fixDoubleBlack(node_pointer db, node_pointer p)
+	TREE::fixDoubleBlack(NodePointer db, NodePointer p)
 	{
-		if (db == _root) // reached root node
+		if (db == _root) // reached root Node
 		{
 			db->setColor(NodeColor_Black);
 			return;
 		}
 
-		node_pointer s = siblingOf(p, db);
+		NodePointer s = siblingOf(p, db);
 		if (getColor(s) == NodeColor_Red)
 		{
-			node::swapColor(db, p);
+			Node::swapColor(db, p);
 			if (s->isOnLeft())
 				rightRotate(s);
 			else
@@ -691,8 +674,8 @@ namespace ft
 			return;
 		}
 
-		node_pointer nearChild = getChildByNear(s);
-		node_pointer farChild = getChildByFar(s);
+		NodePointer nearChild = getChildByNear(s);
+		NodePointer farChild = getChildByFar(s);
 
 		if (getColor(nearChild) == NodeColor_Black && getColor(farChild) == NodeColor_Black)
 		{
@@ -704,7 +687,7 @@ namespace ft
 		}
 		else if (getColor(farChild) == NodeColor_Black && getColor(nearChild) == NodeColor_Red)
 		{
-			node::swapColor(nearChild, s);
+			Node::swapColor(nearChild, s);
 			if (s->isOnRight())
 				rightRotate(nearChild);
 			else
@@ -713,7 +696,7 @@ namespace ft
 		}
 		else if (getColor(farChild) == NodeColor_Red)
 		{
-			node::swapColor(p, s);
+			Node::swapColor(p, s);
 			if (s->isOnRight())
 				leftRotate(s);
 			else
@@ -725,11 +708,11 @@ namespace ft
 	}
 
 	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
-	typename TREE::node_pointer
-	TREE::createNode(const_reference value, node_pointer parent)
+	typename TREE::NodePointer
+	TREE::createNode(const_reference value, NodePointer parent)
 	{
-		node_pointer ptr = _node_allocator.allocate(1);
-		_node_allocator.construct(ptr, value, parent);
+		NodePointer ptr = _Node_allocator.allocate(1);
+		_Node_allocator.construct(ptr, value, parent);
 		return ptr;
 	}
 
@@ -749,8 +732,8 @@ namespace ft
 	ft::pair<typename TREE::iterator, bool>
 	TREE::insert(const_reference value)
 	{
-		node_pointer	parent;
-		node_pointer&	place = findPlace(_root, value.first, parent);
+		NodePointer	parent;
+		NodePointer&	place = findPlace(_root, value.first, parent);
 		bool			inserted = insertNodeAt(parent, place, value, true);
 
 		return ft::make_pair<iterator, bool>(iterator(place), inserted);
@@ -760,8 +743,8 @@ namespace ft
 	typename TREE::iterator
 	TREE::insert(iterator hint, const_reference value)
 	{
-		node_pointer	parent;
-		node_pointer&	place = findPlaceWithHint(hint, value.first, parent);
+		NodePointer	parent;
+		NodePointer&	place = findPlaceWithHint(hint, value.first, parent);
 
 		insertNodeAt(parent, place, value, true);
 		return iterator(place);
@@ -799,7 +782,7 @@ namespace ft
 		if (_root == nullptr)
 			return 0;
 
-		node_pointer	place = findNode(key);
+		NodePointer	place = findNode(key);
 		if (place == nullptr)
 			return 0;
 		deleteNode(place);
@@ -816,7 +799,7 @@ namespace ft
 		ft::swap(_end_ptr, other._end_ptr);
 		ft::swap(_size, other._size);
 		ft::swap(_allocator, other._allocator);
-		ft::swap(_node_allocator, other._node_allocator);
+		ft::swap(_Node_allocator, other._Node_allocator);
 	}
 
 	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
@@ -830,7 +813,7 @@ namespace ft
 	typename TREE::iterator
 	TREE::find(Key const& key)
 	{
-		node_pointer	place = findNode(key);
+		NodePointer	place = findNode(key);
 
 		if (place == nullptr)
 			return end();
@@ -841,7 +824,7 @@ namespace ft
 	typename TREE::const_iterator
 	TREE::find(Key const& key) const
 	{
-		node_pointer	place = findNode(key);
+		NodePointer	place = findNode(key);
 
 		if (place == nullptr)
 			return end();
@@ -849,11 +832,11 @@ namespace ft
 	}
 
 	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
-	typename TREE::node_pointer
+	typename TREE::NodePointer
 	TREE::upper_bound(Key const& key)
 	{
-		node_pointer	ret = _root;
-		node_pointer	n = _root;
+		NodePointer	ret = _root;
+		NodePointer	n = _root;
 
 		while (n != nullptr)
 		{
@@ -869,11 +852,11 @@ namespace ft
 	}
 
 	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
-	typename TREE::node_pointer
+	typename TREE::NodePointer
 	TREE::lower_bound(Key const& key)
 	{
-		node_pointer	ret = _root;
-		node_pointer	n = _root;
+		NodePointer	ret = _root;
+		NodePointer	n = _root;
 
 		while (n != nullptr)
 		{
@@ -892,8 +875,8 @@ namespace ft
 	T&
 	TREE::operator[](Key const& key)
 	{
-		node_pointer	parent = _end_ptr;
-		node_pointer&	place = findPlace(_root, key, parent);
+		NodePointer	parent = _end_ptr;
+		NodePointer&	place = findPlace(_root, key, parent);
 
 		insertNodeAt(parent, place, value_type(key, T()), false);
 		return place->getValue().second;
