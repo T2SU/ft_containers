@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:54:13 by smun              #+#    #+#             */
-/*   Updated: 2022/01/28 15:44:35 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/29 09:46:22 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -238,7 +238,7 @@ namespace ft
 
 			friend bool	operator!=(ConstTreeIterator const& lhs, ConstTreeIterator const& rhs)
 			{
-				return lhs.base() == rhs.base();
+				return lhs.base() != rhs.base();
 			}
 		};
 

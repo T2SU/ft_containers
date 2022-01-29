@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 14:33:40 by smun              #+#    #+#             */
-/*   Updated: 2022/01/28 15:39:32 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/29 09:44:16 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,8 @@ namespace ft
 		void PrintElements(Map const& map)
 		{
 			typename Map::const_iterator it = map.begin();
-			for (; it != map.end(); ++it)
+			typename Map::const_iterator end = map.end();
+			for (; it != end; ++it)
 				std::cout << "[(" << it->first.first << "," << it->first.second << ")-" << it->second << "]" << std::endl;
 		}
 
