@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 18:59:30 by smun              #+#    #+#             */
-/*   Updated: 2022/01/30 13:34:27 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/30 21:19:15 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,6 +93,16 @@ namespace ft
 			reverse_iterator const tmp(*this);
 			++current;
 			return tmp;
+		}
+
+		reverse_iterator	operator+(difference_type n) const
+		{
+			return reverse_iterator(current - n);
+		}
+
+		reverse_iterator	operator-(difference_type n) const
+		{
+			return reverse_iterator(current + n);
 		}
 
 		reverse_iterator&	operator+=(difference_type n)
