@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:54:13 by smun              #+#    #+#             */
-/*   Updated: 2022/01/30 20:44:10 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/30 20:56:10 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -564,7 +564,7 @@ namespace ft
 			const_iterator prev = hint;
 			if (prev == begin() || _key_compare((--prev)->first, key)) // --hint < key (*valid hint*)
 			{
-				if (hint.base() == _end_ptr)
+				if (hint.base() == _end_ptr && _end_ptr->getLeftChild() == nullptr)
 					return _root;
 				else if (hint.base()->getLeftChild() == nullptr)
 					return (parent = hint.base())->getLeftChild();
@@ -786,7 +786,7 @@ namespace ft
 	{
 		NodePointer	parent;
 		NodePointer&	place = findPlace(_root, value.first, parent);
-		bool			inserted = insertNodeAt(parent, place, value, true);
+		bool			inserted = insertNodeAt(parent, place, value, false);
 
 		return ft::make_pair<iterator, bool>(iterator(place), inserted);
 	}
@@ -798,7 +798,7 @@ namespace ft
 		NodePointer	parent;
 		NodePointer&	place = findPlaceWithHint(hint, value.first, parent);
 
-		insertNodeAt(parent, place, value, true);
+		insertNodeAt(parent, place, value, false);
 		return iterator(place);
 	}
 
