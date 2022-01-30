@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/03 17:35:17 by smun              #+#    #+#             */
-/*   Updated: 2022/01/30 17:56:10 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/30 20:21:22 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,8 +104,12 @@ namespace ft
 
 		map&	operator=(map const& other)
 		{
-			clear();
-			insert(other.begin(), other.end());
+			if (this != &other)
+			{
+				clear();
+				insert(other.begin(), other.end());
+			}
+			return *this;
 		}
 
 		allocator_type	get_allocator() const	{ return _tree.get_allocator(); }

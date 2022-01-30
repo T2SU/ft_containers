@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/25 14:24:52 by smun              #+#    #+#             */
-/*   Updated: 2022/01/30 15:12:06 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/30 18:22:06 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,15 +46,13 @@ int main()
 	v = ft::is_convertible_to<iterator, const_iterator>::value;
 	std::cout << v << std::endl;
 
-	/*ft::map<int, int>::iterator it = m.begin();
+	ft::map<int, int>::iterator it = m.begin();
 	ft::map<int, int>::const_iterator it2 = m.end();
 
-	bool v = it != it2;
-	std::cout << v << std::endl;
-
 	it2 = it;
-	bool v2 = it == it2;
-	std::cout << v2 << std::endl;*/
+	bool v4 = it == it2;
+
+	std::cout << v4 << std::endl;
 
 	return 0;
 }

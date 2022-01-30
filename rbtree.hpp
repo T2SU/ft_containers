@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:54:13 by smun              #+#    #+#             */
-/*   Updated: 2022/01/30 17:56:05 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/30 20:44:10 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,12 +57,12 @@ namespace ft
 		bool			isOnLeft() const				{ return _parent->_left == this; }
 		bool			isOnRight() const				{ return _parent->_right == this; }
 		int				getChildCount() const			{ return (_left ? 1 : 0) + (_right ? 1 : 0); }
-		NodePtr&		getFirstChild()					{ return _left ? _left : _right; }
+		NodePtr&		getFirstChild() 				{ return _left ? _left : _right; }
 		void			setLeftChild(NodePtr const x)	{ if ((_left = x)) _left->setParent(this); }
 		void			setRightChild(NodePtr const x)	{ if ((_right = x)) _right->setParent(this); }
 		NodePtr			getMinimum()					{ return _left ? _left->getMinimum() : this; }
 		NodePtr			getMaximum()					{ return _right ? _right->getMaximum() : this; }
-		NodePtr*		getPlace()						{ return isOnLeft() ? &(_parent->_left) : &(_parent->_right); }
+		NodePtr*		getPlace() const				{ return isOnLeft() ? &(_parent->_left) : &(_parent->_right); }
 
 		NodePtr			getPrev()
 		{
@@ -105,40 +105,37 @@ namespace ft
 		};
 	};
 
-	template<typename NodePtr, typename Pointer, typename Reference, typename DifferenceType>
+	template<typename NodePtr, typename ValueType, typename DifferenceType>
 	class TreeIterator
 	{
 	private:
-		NodePtr	current;
+		NodePtr	_current;
 
 	public:
 		typedef	NodePtr						NodePointer;
+		typedef ValueType					value_type;
 		typedef DifferenceType				difference_type;
-		typedef Pointer						pointer;
-		typedef Reference					reference;
+		typedef ValueType*					pointer;
+		typedef ValueType&					reference;
 		typedef bidirectional_iterator_tag	iterator_category;
 
-		TreeIterator() : current() {}
-		TreeIterator(NodePointer ptr) : current(ptr) {}
-		TreeIterator(TreeIterator const& origin) : current(origin.base()) {}
+		TreeIterator() : _current() {}
+		TreeIterator(NodePointer ptr) : _current(ptr) {}
+		TreeIterator(TreeIterator const& origin) : _current(origin.base()) {}
 		virtual ~TreeIterator() {}
 
 		TreeIterator&	operator=(TreeIterator const& another)
 		{
 			if (this != & another)
-				current = another.base();
+				_current = another.base();
 			return *this;
 		}
 
-		NodePointer		base() const			{ return current; }
-		reference		operator*() const		{ return current->getValue(); }
-		pointer			operator->() const		{ return &(current->getValue()); }
-
-		TreeIterator&	operator++()
-		{
-			current = current->getNext();
-			return *this;
-		}
+		NodePointer		base() const			{ return _current; }
+		reference		operator*() const		{ return _current->getValue(); }
+		pointer			operator->() const		{ return &(_current->getValue()); }
+		TreeIterator&	operator++()			{ _current = _current->getNext(); return *this; }
+		TreeIterator&	operator--()			{ _current = _current->getPrev(); return *this; }
 
 		const TreeIterator	operator++(int)
 		{
@@ -147,49 +144,61 @@ namespace ft
 			return tmp;
 		}
 
-		TreeIterator&	operator--()
-		{
-			current = current->getPrev();
-			return *this;
-		}
-
 		const TreeIterator	operator--(int)
 		{
 			TreeIterator const tmp(*this);
 			--(*this);
 			return tmp;
 		}
+
+		friend bool	operator==(TreeIterator const& lhs, TreeIterator const& rhs)
+		{
+			return lhs.base() == rhs.base();
+		}
+
+		friend bool	operator!=(TreeIterator const& lhs, TreeIterator const& rhs)
+		{
+			return !(lhs == rhs);
+		}
 	};
 
-	template<typename TreeIter>
+	template<typename NodePtr, typename ValueType, typename DifferenceType>
 	class ConstTreeIterator
 	{
+	public:
+		typedef	NodePtr						NodePointer;
+		typedef ValueType					value_type;
+		typedef DifferenceType				difference_type;
+		typedef ValueType*					pointer;
+		typedef ValueType&					reference;
+		typedef bidirectional_iterator_tag	iterator_category;
+
 	private:
-		TreeIter	_treeIter;
+		NodePointer	_current;
 
 	public:
-		typedef	typename TreeIter::NodePointer	NodePointer;
-		typedef	typename TreeIter::reference	reference;
-		typedef	typename TreeIter::pointer		pointer;
-
-		ConstTreeIterator() : _treeIter() {}
-		ConstTreeIterator(NodePointer ptr) : _treeIter(TreeIter(ptr)) {}
-		ConstTreeIterator(TreeIter treeIter) : _treeIter(treeIter) {}
-		ConstTreeIterator(ConstTreeIterator const& origin) : _treeIter(origin._treeIter) {}
+		ConstTreeIterator()
+			: _current() {}
+		ConstTreeIterator(TreeIterator<NodePtr, ValueType, DifferenceType> treeIter)
+			: _current(treeIter.base()) {}
+		ConstTreeIterator(NodePointer current)
+			: _current(current) {}
+		ConstTreeIterator(ConstTreeIterator const& origin)
+			: _current(origin._current) {}
 		virtual ~ConstTreeIterator() {}
 
 		ConstTreeIterator&	operator=(ConstTreeIterator const& another)
 		{
 			if (this != & another)
-				_treeIter = another._treeIter;
+				_current = another._current;
 			return *this;
 		}
 
-		NodePointer		base() const		{ return _treeIter.base(); }
-		reference		operator*() const	{ return _treeIter.operator*(); }
-		pointer			operator->() const	{ return _treeIter.operator->(); }
-		ConstTreeIterator&	operator++()	{ ++_treeIter; return *this; }
-		ConstTreeIterator&	operator--()	{ --_treeIter; return *this; }
+		NodePointer		base() const		{ return _current; }
+		reference		operator*() const	{ return _current->getValue(); }
+		pointer			operator->() const	{ return &(_current->getValue()); }
+		ConstTreeIterator&	operator++()	{ _current = _current->getNext(); return *this; }
+		ConstTreeIterator&	operator--()	{ _current = _current->getPrev(); return *this; }
 
 		ConstTreeIterator const	operator++(int)
 		{
@@ -203,6 +212,16 @@ namespace ft
 			ConstTreeIterator const tmp(*this);
 			--(*this);
 			return tmp;
+		}
+
+		friend bool	operator==(ConstTreeIterator const& lhs, ConstTreeIterator const& rhs)
+		{
+			return lhs.base() == rhs.base();
+		}
+
+		friend bool	operator!=(ConstTreeIterator const& lhs, ConstTreeIterator const& rhs)
+		{
+			return !(lhs == rhs);
 		}
 	};
 
@@ -293,8 +312,8 @@ namespace ft
 
 		allocator_type	get_allocator() const { return _allocator; }
 
-		typedef TreeIterator<NodePointer, pointer, reference, difference_type>	iterator;
-		typedef ConstTreeIterator<iterator>										const_iterator;
+		typedef TreeIterator<NodePointer, value_type, difference_type>		iterator;
+		typedef ConstTreeIterator<NodePointer, value_type, difference_type>	const_iterator;
 
 		typedef ft::reverse_iterator<iterator>				reverse_iterator;
 		typedef ft::reverse_iterator<const_iterator>		const_reverse_iterator;
@@ -353,8 +372,8 @@ namespace ft
 		void				leftRotate(NodePointer n);
 		void				rightRotate(NodePointer n);
 		NodePointer			findNode(Key const& key) const;
-		NodePointer&		findPlace(NodePointer& place, Key const& key, NodePointer& parent) const;
-		NodePointer&		findPlaceWithHint(const_iterator hint, Key const& key, NodePointer& parent) const;
+		NodePointer&		findPlace(NodePointer& place, Key const& key, NodePointer& parent);
+		NodePointer&		findPlaceWithHint(const_iterator hint, Key const& key, NodePointer& parent);
 		bool				insertNodeAt(NodePointer parent, NodePointer& place, const_reference value, bool overwrite);
 		void				tryFixDoubleRed(NodePointer n);
 		void				destroyNode(NodePointer n);
@@ -363,42 +382,6 @@ namespace ft
 		NodePointer			createNode(const_reference value, NodePointer parent);
 		NodePointer			createEndNode() { return createNode(Value(), nullptr); }
 	};
-
-	template<typename NodePtr, typename Pointer, typename Reference, typename DifferenceType>
-	bool
-	operator==(
-		TreeIterator<NodePtr, Pointer, Reference, DifferenceType> const& lhs,
-		TreeIterator<NodePtr, Pointer, Reference, DifferenceType> const& rhs)
-	{
-		return lhs.base() == rhs.base();
-	}
-
-	template<typename NodePtr, typename Pointer, typename Reference, typename DifferenceType>
-	bool
-	operator!=(
-		TreeIterator<NodePtr, Pointer, Reference, DifferenceType> const& lhs,
-		TreeIterator<NodePtr, Pointer, Reference, DifferenceType> const& rhs)
-	{
-		return lhs.base() != rhs.base();
-	}
-
-	template<typename TreeIter>
-	bool
-	operator==(
-		ConstTreeIterator<TreeIter> const& lhs,
-		ConstTreeIterator<TreeIter> const& rhs)
-	{
-		return lhs.base() == rhs.base();
-	}
-
-	template<typename TreeIter>
-	bool
-	operator!=(
-		ConstTreeIterator<TreeIter> const& lhs,
-		ConstTreeIterator<TreeIter> const& rhs)
-	{
-		return lhs.base() != rhs.base();
-	}
 
 # define TREE tree<Key, T, Value, Compare, Allocator>
 
@@ -545,7 +528,7 @@ namespace ft
 
 	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	typename TREE::NodePointer&
-	TREE::findPlace(NodePointer& place, Key const& key, NodePointer& parent) const
+	TREE::findPlace(NodePointer& place, Key const& key, NodePointer& parent)
 	{
 		NodePointer	current = place;
 		NodePointer*	ret = &place;
@@ -574,14 +557,16 @@ namespace ft
 
 	template<typename Key, typename T, typename Value, typename Compare, typename Allocator>
 	typename TREE::NodePointer&
-	TREE::findPlaceWithHint(const_iterator hint, Key const& key, NodePointer& parent) const
+	TREE::findPlaceWithHint(const_iterator hint, Key const& key, NodePointer& parent)
 	{
 		if (hint == end() || _key_compare(key, hint->first)) // key < hint
 		{
 			const_iterator prev = hint;
 			if (prev == begin() || _key_compare((--prev)->first, key)) // --hint < key (*valid hint*)
 			{
-				if (hint.base()->getLeftChild() == nullptr)
+				if (hint.base() == _end_ptr)
+					return _root;
+				else if (hint.base()->getLeftChild() == nullptr)
 					return (parent = hint.base())->getLeftChild();
 				else
 					return (parent = prev.base())->getRightChild();
@@ -724,7 +709,8 @@ namespace ft
 	{
 		if (db == _root) // reached root Node
 		{
-			db->setColor(NodeColor_Black);
+			if (db != nullptr)
+				db->setColor(NodeColor_Black);
 			return;
 		}
 
