@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/03 17:35:17 by smun              #+#    #+#             */
-/*   Updated: 2022/01/29 21:08:20 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/30 17:56:10 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 
 # include <functional>
 # include <memory>
-# include "tree.hpp"
+# include "rbtree.hpp"
 
 namespace ft
 {
@@ -128,15 +128,8 @@ namespace ft
 		void		clear()						{ _tree.clear(); }
 		T&			operator[](Key const& key)	{ return _tree[key]; }
 
-		ft::pair<iterator, bool>	insert(const_reference value)
-		{
-			return _tree.insert(value);
-		}
-
-		iterator	insert(iterator hint, const_reference value)
-		{
-			return _tree.insert(hint, value);
-		}
+		ft::pair<iterator, bool>	insert(const_reference value)					{ return _tree.insert(value); }
+		iterator					insert(iterator hint, const_reference value)	{ return _tree.insert(hint, value); }
 
 		template<typename InputIt>
 		typename ft::enable_if<ft::is_input_iterator<InputIt>::value, void>::type
@@ -145,22 +138,11 @@ namespace ft
 			_tree.insert(first, last);
 		}
 
-		void	erase(iterator pos)
-		{
-			_tree.erase(pos);
-		}
+		void		erase(iterator pos)						{ _tree.erase(pos); }
+		void		erase(iterator first, iterator last)	{ _tree.erase(first, last); }
+		size_type	erase(Key const& key)					{ return _tree.erase(key); }
 
-		void	erase(iterator first, iterator last)
-		{
-			_tree.erase(first, last);
-		}
-
-		size_type	erase(Key const& key)
-		{
-			return _tree.erase(key);
-		}
-
-		void	swap(map& other)
+		void		swap(map& other)
 		{
 			_tree.swap(other._tree);
 			ft::swap(_key_compare, other._key_compare);
@@ -184,55 +166,40 @@ namespace ft
 			return it->second;
 		}
 
-		size_type	count(Key const& key) const
-		{
-			return _tree.count(key);
-		}
-
-		iterator	find(Key const& key)
-		{
-			return _tree.find(key);
-		}
-
-		const_iterator	find(Key const& key) const
-		{
-			return _tree.find(key);
-		}
+		size_type		count(Key const& key) const	{ return _tree.count(key); }
+		iterator		find(Key const& key)		{ return _tree.find(key); }
+		const_iterator	find(Key const& key) const	{ return _tree.find(key); }
 
 		ft::pair<iterator, iterator>
 		equal_range(Key const& key)
 		{
-			iterator	it = find(key);
-
-			return ft::make_pair(it, it);
+			return _tree.equal_range(key);
 		}
 
 		ft::pair<const_iterator, const_iterator>
 		equal_range(Key const& key) const
 		{
-			iterator	it = find(key);
-
-			return ft::make_pair(it, it);
-		}
-
-		iterator	lower_bound(Key const& key)
-		{
-			return _tree.lower_bound(key);
+			return _tree.equal_range(key);
 		}
 
 		const_iterator	lower_bound(Key const& key) const
 		{
-			return _tree.lower_bound(key);
+			return const_iterator(_tree.lower_bound(key));
 		}
 
-		iterator	upper_bound(Key const& key)
+		iterator	lower_bound(Key const& key)
 		{
-			return _tree.upper_bound(key);
+			return iterator(_tree.lower_bound(key));
 		}
 
 		const_iterator	upper_bound(Key const& key) const
 		{
-			return _tree.upper_bound(key);
+			return const_iterator(_tree.upper_bound(key));
+		}
+
+		iterator	upper_bound(Key const& key)
+		{
+			return iterator(_tree.upper_bound(key));
 		}
 	};
 }

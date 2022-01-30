@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/24 17:36:20 by smun              #+#    #+#             */
-/*   Updated: 2022/01/24 17:38:33 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/30 15:35:16 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -255,7 +255,7 @@ namespace ft
 			return n->getColor();
 		}
 
-		node*	siblingOf(node* const p, node* const n)
+		node*	siblingOf(node* const p, node* const n) const
 		{
 			if (n == _root)
 				return nullptr;

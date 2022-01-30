@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/25 14:24:52 by smun              #+#    #+#             */
-/*   Updated: 2022/01/29 19:38:13 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/30 15:12:06 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,9 +23,30 @@
 
 int main()
 {
+	using std::string;
+
+	string hello = "hello";
+
 	ft::map<int, int> m;
 
-	ft::map<int, int>::iterator it = m.begin();
+	typedef ft::map<int, int>::pointer			pointer;
+	typedef ft::map<int, int>::const_pointer	const_pointer;
+	typedef ft::map<int, int>::reference		reference;
+	typedef ft::map<int, int>::const_reference	const_reference;
+
+	bool v = ft::is_convertible_to<pointer, const_pointer>::value;
+	std::cout << v << std::endl;
+
+	v = ft::is_convertible_to<reference, const_reference>::value;
+	std::cout << v << std::endl;
+
+	typedef ft::map<int, int>::iterator			iterator;
+	typedef ft::map<int, int>::const_iterator	const_iterator;
+
+	v = ft::is_convertible_to<iterator, const_iterator>::value;
+	std::cout << v << std::endl;
+
+	/*ft::map<int, int>::iterator it = m.begin();
 	ft::map<int, int>::const_iterator it2 = m.end();
 
 	bool v = it != it2;
@@ -33,7 +54,7 @@ int main()
 
 	it2 = it;
 	bool v2 = it == it2;
-	std::cout << v2 << std::endl;
+	std::cout << v2 << std::endl;*/
 
 	return 0;
 }
