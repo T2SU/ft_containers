@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:54:13 by smun              #+#    #+#             */
-/*   Updated: 2022/01/29 21:54:34 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/30 13:40:43 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,9 +134,9 @@ namespace ft
 			return *this;
 		}
 
-		TreeIterator	operator++(int)
+		const TreeIterator	operator++(int)
 		{
-			TreeIterator tmp(*this);
+			TreeIterator const tmp(*this);
 			++(*this);
 			return tmp;
 		}
@@ -154,21 +154,11 @@ namespace ft
 			return *this;
 		}
 
-		TreeIterator	operator--(int)
+		const TreeIterator	operator--(int)
 		{
-			TreeIterator tmp(*this);
+			TreeIterator const tmp(*this);
 			--(*this);
 			return tmp;
-		}
-
-		friend bool	operator==(TreeIterator const& lhs, TreeIterator const& rhs)
-		{
-			return lhs.base() == rhs.base();
-		}
-
-		friend bool	operator!=(TreeIterator const& lhs, TreeIterator const& rhs)
-		{
-			return lhs.base() != rhs.base();
 		}
 	};
 
@@ -324,6 +314,24 @@ namespace ft
 		NodePointer			createEndNode() { return createNode(Value(), nullptr); }
 
 	};
+
+	template<typename NodePtr, typename ValueType, typename DifferenceType>
+	bool
+	operator==(
+		TreeIterator<NodePtr, ValueType, DifferenceType> const& lhs,
+		TreeIterator<NodePtr, ValueType, DifferenceType> const& rhs)
+	{
+		return lhs.base() == rhs.base();
+	}
+
+	template<typename NodePtr, typename ValueType, typename DifferenceType>
+	bool
+	operator!=(
+		TreeIterator<NodePtr, ValueType, DifferenceType> const& lhs,
+		TreeIterator<NodePtr, ValueType, DifferenceType> const& rhs)
+	{
+		return lhs.base() != rhs.base();
+	}
 
 # define TREE tree<Key, T, Value, Compare, Allocator>
 

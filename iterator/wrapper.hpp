@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 22:48:46 by smun              #+#    #+#             */
-/*   Updated: 2022/01/29 19:22:04 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/30 13:34:56 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,9 +70,9 @@ namespace ft
 			return *this;
 		}
 
-		IteratorWrapper	operator++(int)
+		const IteratorWrapper	operator++(int)
 		{
-			IteratorWrapper tmp(*this);
+			IteratorWrapper const tmp(*this);
 			++current;
 			return tmp;
 		}
@@ -83,21 +83,11 @@ namespace ft
 			return *this;
 		}
 
-		IteratorWrapper	operator--(int)
+		const IteratorWrapper	operator--(int)
 		{
-			IteratorWrapper tmp(*this);
+			IteratorWrapper const tmp(*this);
 			--current;
 			return tmp;
-		}
-
-		IteratorWrapper	operator+(difference_type n) const
-		{
-			return IteratorWrapper(current + n);
-		}
-
-		IteratorWrapper	operator-(difference_type n) const
-		{
-			return IteratorWrapper(current - n);
 		}
 
 		IteratorWrapper&	operator+=(difference_type n)
