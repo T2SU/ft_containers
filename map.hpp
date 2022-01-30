@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/03 17:35:17 by smun              #+#    #+#             */
-/*   Updated: 2022/01/30 20:21:22 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/30 21:05:18 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -205,7 +205,45 @@ namespace ft
 		{
 			return iterator(_tree.upper_bound(key));
 		}
+
+		friend bool	operator==(map const& lhs, map const& rhs)
+		{
+			return lhs._tree == rhs._tree;
+		}
+
+		friend bool	operator!=(map const& lhs, map const& rhs)
+		{
+			return !(lhs == rhs);
+		}
+
+		friend bool	operator<(map const& lhs, map const& rhs)
+		{
+			return lhs._tree < rhs._tree;
+		}
+
+		friend bool	operator>(map const& lhs, map const& rhs)
+		{
+			return rhs._tree < lhs._tree;
+		}
+
+		friend bool	operator>=(map const& lhs, map const& rhs)
+		{
+			return !(lhs < rhs);
+		}
+
+		friend bool	operator<=(map const& lhs, map const& rhs)
+		{
+			return !(rhs < lhs);
+		}
+
 	};
+
+	template<typename Key, typename T, typename Compare, typename Allocator>
+	void	swap(map<Key, T, Compare, Allocator>& o1, map<Key, T, Compare, Allocator>& o2)
+	{
+		o1.swap(o2);
+	}
+
 }
 
 #endif
