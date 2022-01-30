@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:54:13 by smun              #+#    #+#             */
-/*   Updated: 2022/01/30 20:56:10 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/30 21:12:48 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -169,8 +169,8 @@ namespace ft
 		typedef	NodePtr						NodePointer;
 		typedef ValueType					value_type;
 		typedef DifferenceType				difference_type;
-		typedef ValueType*					pointer;
-		typedef ValueType&					reference;
+		typedef const ValueType*			pointer;
+		typedef const ValueType&			reference;
 		typedef bidirectional_iterator_tag	iterator_category;
 
 	private:
