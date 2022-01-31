@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 19:42:47 by smun              #+#    #+#             */
-/*   Updated: 2022/01/29 17:47:03 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/31 12:59:52 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,14 +61,6 @@ namespace ft
 	typedef char (&yes)[1];
 	typedef char (&no)[2];
 
-	// `is_base_of` trick idea from boost
-	template <typename B, typename D>
-	struct _Host
-	{
-		operator B*() const;
-		operator D*();
-	};
-
 	// https://www.boost.org/doc/libs/1_36_0/boost/type_traits/is_convertible.hpp
 	template<typename From, typename To>
 	struct is_convertible_to
@@ -77,6 +69,14 @@ namespace ft
 		static yes check(To);
 		static From from;
 		static const bool value = sizeof(check(from)) == sizeof(yes);
+	};
+
+	// `is_base_of` trick idea from boost
+	template <typename B, typename D>
+	struct _Host
+	{
+		operator B*() const;
+		operator D*();
 	};
 
 	template <typename B, typename D>

@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/03 17:35:17 by smun              #+#    #+#             */
-/*   Updated: 2022/01/30 21:05:18 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/31 13:48:02 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,64 @@ namespace ft
 		};
 
 	private:
-		typedef tree<key_type, mapped_type, value_type, key_compare, allocator_type>	tree_type;
+		template<typename KeyType, typename ValueType, typename CompareType>
+		class map_value_compare
+			: private CompareType
+		{
+		private:
+		public:
+			map_value_compare() : CompareType() {}
+			map_value_compare(CompareType c) : CompareType(c) {}
+			map_value_compare(map_value_compare const& c) : CompareType(c) {}
+			map_value_compare& operator=(map_value_compare const& o)
+			{
+				if (this != &o)
+					static_cast<CompareType*>(this)->operator=(o);
+				return *this;
+			}
+			virtual ~map_value_compare() {}
+			const map_value_compare& key_comp() const { return *this; }
+
+			bool operator()(ValueType const& lhs, ValueType const& rhs) const
+			{
+				return static_cast<const CompareType&>(*this)(lhs.first, rhs.first);
+			}
+			bool operator()(ValueType const& lhs, KeyType const& rhs) const
+			{
+				return static_cast<const CompareType&>(*this)(lhs.first, rhs);
+			}
+			bool operator()(KeyType const& lhs, ValueType const& rhs) const
+			{
+				return static_cast<const CompareType&>(*this)(lhs, rhs.first);
+			}
+			void	swap(map_value_compare const&, map_value_compare const&)
+			{
+			}
+		};
+
+		template<typename KeyType, typename MappedType, typename ValueType>
+		class map_value_creator
+			: private std::unary_function<KeyType, ValueType>
+		{
+		private:
+			map_value_creator(map_value_creator const&);
+			map_value_creator& operator=(map_value_creator const&);
+		public:
+			map_value_creator() {}
+			virtual ~map_value_creator() {}
+			ValueType	operator()(KeyType const& key) const
+			{
+				return ValueType(key, MappedType());
+			}
+			void	swap(map_value_creator const&, map_value_creator const&)
+			{
+			}
+		};
+
+	private:
+		typedef	map_value_compare<key_type, value_type, Compare>		value_comp_type;
+		typedef	map_value_creator<key_type, mapped_type, value_type>	value_creator_type;
+		typedef tree<key_type, value_type, value_comp_type, value_creator_type, allocator_type>	tree_type;
 
 		key_compare	_key_compare;
 		tree_type	_tree;
@@ -130,7 +187,7 @@ namespace ft
 		size_type	max_size() const	{ return _tree.max_size(); }
 
 		void		clear()						{ _tree.clear(); }
-		T&			operator[](Key const& key)	{ return _tree[key]; }
+		T&			operator[](Key const& key)	{ return _tree.get_place(key).second; }
 
 		ft::pair<iterator, bool>	insert(const_reference value)					{ return _tree.insert(value); }
 		iterator					insert(iterator hint, const_reference value)	{ return _tree.insert(hint, value); }

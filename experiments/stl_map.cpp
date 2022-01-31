@@ -6,12 +6,13 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/21 11:44:08 by smun              #+#    #+#             */
-/*   Updated: 2022/01/21 12:18:22 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/31 13:08:43 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <map>
 #include <iostream>
+#include <set>
 #include <string>
 
 int main(void)
@@ -27,7 +28,7 @@ int main(void)
 	for (; it != m.end(); it++)
 		std::cout << it->first << " - '" << it->second << "'" << std::endl;
 
-	std::map<int, std::string>::value_compare v;
+	std::set<int> s;
 
 	return 0;
 }
