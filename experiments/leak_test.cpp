@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/31 17:27:47 by smun              #+#    #+#             */
-/*   Updated: 2022/01/31 19:05:58 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/31 19:27:06 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,9 @@
 #include <map>
 #include "../map.hpp"
 
-#define _map std::map
-#define _make_pair std::make_pair
-typedef std::plus<int> Compare;
+#define _map ft::map
+#define _make_pair ft::make_pair
+typedef std::minus<int> Compare;
 
 static void fillMap(_map<int, int, Compare>& mp)
 {

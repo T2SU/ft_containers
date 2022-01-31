@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:54:13 by smun              #+#    #+#             */
-/*   Updated: 2022/01/31 18:05:54 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/31 19:26:38 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -540,19 +540,19 @@ namespace ft
 		while (current != nullptr)
 		{
 			parent = current->getParent();
-			if (_value_compare(current->getValue(), value))
-			{
-				parent = current;
-				NodePointer& rc = current->getRightChild();
-				ret = &rc;
-				current = rc;
-			}
-			else if (_value_compare(value, current->getValue()))
+			if (_value_compare(value, current->getValue()))
 			{
 				parent = current;
 				NodePointer& lc = current->getLeftChild();
 				ret = &lc;
 				current = lc;
+			}
+			else if (_value_compare(current->getValue(), value))
+			{
+				parent = current;
+				NodePointer& rc = current->getRightChild();
+				ret = &rc;
+				current = rc;
 			}
 			else
 				break;
@@ -611,7 +611,7 @@ namespace ft
 			tryFixDoubleRed(place);
 			if (place == _root)
 				_end_ptr->setLeftChild(place);
-			if (_begin_ptr == _end_ptr || _value_compare(value, _begin_ptr->getValue()))
+			if (_begin_ptr == _end_ptr || _begin_ptr->getMinimum() == node)
 				_begin_ptr = place;
 			++_size;
 			return true;
