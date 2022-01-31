@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 22:10:39 by smun              #+#    #+#             */
-/*   Updated: 2022/01/24 20:18:51 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/31 17:08:28 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ namespace ft
 		{
 		}
 
-		pair(T1 first, T2 second)
+		pair(T1 const& first, T2 const& second)
 			: first(first)
 			, second(second)
 		{
@@ -41,6 +41,13 @@ namespace ft
 		}
 
 		pair(pair<T1, T2> const& origin)
+			: first(origin.first)
+			, second(origin.second)
+		{
+		}
+
+		template<typename U1, typename U2>
+		pair(pair<U1, U2> const& origin)
 			: first(origin.first)
 			, second(origin.second)
 		{

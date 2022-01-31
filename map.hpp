@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/03 17:35:17 by smun              #+#    #+#             */
-/*   Updated: 2022/01/31 14:29:31 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/31 17:04:14 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -194,8 +194,8 @@ namespace ft
 		void		clear()						{ _tree.clear(); }
 		T&			operator[](Key const& key)	{ return _tree[key].second; }
 
-		ft::pair<iterator, bool>	insert(const_reference value)					{ return _tree.insert(value); }
-		iterator					insert(iterator hint, const_reference value)	{ return _tree.insert(hint, value); }
+		ft::pair<iterator, bool>	insert(const value_type& value)					{ return _tree.insert(value); }
+		iterator					insert(iterator hint, const value_type& value)	{ return _tree.insert(hint, value); }
 
 		template<typename InputIt>
 		typename ft::enable_if<ft::is_input_iterator<InputIt>::value, void>::type
