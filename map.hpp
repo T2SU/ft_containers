@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/03 17:35:17 by smun              #+#    #+#             */
-/*   Updated: 2022/01/31 13:48:02 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/31 13:49:45 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -187,7 +187,7 @@ namespace ft
 		size_type	max_size() const	{ return _tree.max_size(); }
 
 		void		clear()						{ _tree.clear(); }
-		T&			operator[](Key const& key)	{ return _tree.get_place(key).second; }
+		T&			operator[](Key const& key)	{ return _tree[key].second; }
 
 		ft::pair<iterator, bool>	insert(const_reference value)					{ return _tree.insert(value); }
 		iterator					insert(iterator hint, const_reference value)	{ return _tree.insert(hint, value); }
