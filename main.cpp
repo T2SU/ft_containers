@@ -6,13 +6,15 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 19:04:19 by smun              #+#    #+#             */
-/*   Updated: 2022/01/31 13:08:12 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/31 16:47:33 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "tests/lib/unittest.hpp"
 #include "tests/vector.hpp"
 #include "tests/map.hpp"
+#include "tests/stack.hpp"
+#include "tests/set.hpp"
 #include "utility.hpp"
 
 /* Test contents are belongs to following files:
@@ -58,11 +60,37 @@ static void	TestPairStringMap(ft::pair<int, int*> numpair)
 	END_EVAL;
 }
 
+static void	TestStringStack(ft::pair<int, int*> numpair)
+{
+	typedef ft::StackTest<std::stack<std::string> >	ExpectedContTest;
+	typedef ft::StackTest<ft::stack<std::string> >		YourContTest;
+
+	ft::UnitTest<ExpectedContTest, YourContTest> ut1;
+
+	BEGIN_EVAL;
+	REGISTER_EVAL(1, ut1, BasicTest1);
+	END_EVAL;
+}
+
+static void	TestStringSet(ft::pair<int, int*> numpair)
+{
+	typedef ft::SetTest<std::set<std::string> >	ExpectedContTest;
+	typedef ft::SetTest<ft::set<std::string> >		YourContTest;
+
+	ft::UnitTest<ExpectedContTest, YourContTest> ut1;
+
+	BEGIN_EVAL;
+	REGISTER_EVAL(1, ut1, BasicTest1);
+	END_EVAL;
+}
+
 enum
 {
 	All = -1,
 	StringVector = 1 << 0,
-	PairStringMap = 1 << 1
+	PairStringMap = 1 << 1,
+	StringStack = 1 << 2,
+	StringSet = 1 << 3
 };
 
 static int	parseCategories(int argc, char* argv[])
@@ -75,6 +103,10 @@ static int	parseCategories(int argc, char* argv[])
 			ret |= StringVector;
 		if (arg == "--pairstringmap")
 			ret |= PairStringMap;
+		if (arg == "--stringstack")
+			ret |= StringStack;
+		if (arg == "--stringset")
+			ret |= StringSet;
 	}
 	if (ret == 0)
 		ret = All;
@@ -126,9 +158,29 @@ int main(int argc, char* argv[])
 
 
 	if (flags & StringVector)
+	{
+		std::cout << "[[ vector<std::string> ]]" << std::endl;
 		TestStringVector(numpair);
+		std::cout << std::endl;
+	}
 	if (flags & PairStringMap)
+	{
+		std::cout << "[[ map<int, std::string> ]]" << std::endl;
 		TestPairStringMap(numpair);
+		std::cout << std::endl;
+	}
+	if (flags & StringStack)
+	{
+		std::cout << "[[ stack<std::string> ]]" << std::endl;
+		TestStringStack(numpair);
+		std::cout << std::endl;
+	}
+	if (flags & StringSet)
+	{
+		std::cout << "[[ set<std::string> ]]" << std::endl;
+		TestStringSet(numpair);
+		std::cout << std::endl;
+	}
 
 	delete[] numpair.second;
 	return 0;
