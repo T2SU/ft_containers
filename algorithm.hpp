@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 22:10:09 by smun              #+#    #+#             */
-/*   Updated: 2021/12/25 15:03:02 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/31 18:58:53 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,10 +74,10 @@ namespace ft
 	template <typename T1, typename T2 = T1>
 	struct equal_to
 	{
-		bool operator()(T1 const& x, T2 const& y) const
-		{
-			return x == y;
-		}
+		bool operator()(T1 const& x, T1 const& y) const { return x == y; }
+		bool operator()(T1 const& x, T2 const& y) const { return x == y; }
+		bool operator()(T2 const& x, T2 const& y) const { return x == y; }
+		bool operator()(T2 const& x, T1 const& y) const { return x == y; }
 	};
 
 	template <typename Type, class Compare>

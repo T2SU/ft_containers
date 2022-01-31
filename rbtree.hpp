@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:54:13 by smun              #+#    #+#             */
-/*   Updated: 2022/01/31 17:04:55 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/31 18:05:54 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -677,6 +677,7 @@ namespace ft
 			return;
 		destroyNode(n->getLeftChild());
 		destroyNode(n->getRightChild());
+		_node_allocator.deallocate(n, 1);
 	}
 
 	// https://medium.com/analytics-vidhya/deletion-in-red-black-rb-tree-92301e1474ea
@@ -720,7 +721,7 @@ namespace ft
 		NodePointer s = siblingOf(p, db);
 		if (getColor(s) == NodeColor_Red)
 		{
-			NodeType::swapColor(db, p);
+			NodeType::swapColor(s, p);
 			if (s->isOnLeft())
 				rightRotate(s);
 			else
@@ -967,7 +968,7 @@ namespace ft
 	template<typename Key, typename Value, typename Compare, typename ValueCreator, typename Allocator>
 	bool	operator<(TREE const& lhs, TREE const& rhs)
 	{
-		return ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+		return ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(), Compare());
 	}
 
 	template<typename Key, typename Value, typename Compare, typename ValueCreator, typename Allocator>

@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/21 23:09:06 by smun              #+#    #+#             */
-/*   Updated: 2022/01/31 17:07:40 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/31 17:15:22 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include <iostream>
 #include <string>
 #include <map>
+#include <cstdlib>
 
 int main()
 {
@@ -54,7 +55,7 @@ int main()
 
 	m.clear();
 
-	std::cout << "size: " << m.size() << std::endl;
+	/*std::cout << "size: " << m.size() << std::endl;
 	std::cout << std::endl;
 	m.erase(3);
 	m.erase(15);
@@ -63,7 +64,10 @@ int main()
 
 	std::cout << "size: " << m.size() << std::endl;
 	for (it = m.end(); it != m.begin(); )
-		std::cout << (--it)->second << std::endl;
+		std::cout << (--it)->second << std::endl;*/
+
+	std::system("leaks my_map_test.out");
+
 
 
 	return 0;
