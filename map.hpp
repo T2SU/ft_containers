@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/03 17:35:17 by smun              #+#    #+#             */
-/*   Updated: 2022/01/31 13:49:45 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/31 14:29:31 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,7 @@ namespace ft
 			map_value_compare& operator=(map_value_compare const& o)
 			{
 				if (this != &o)
-					static_cast<CompareType*>(this)->operator=(o);
+					static_cast<CompareType&>(*this).operator=(o);
 				return *this;
 			}
 			virtual ~map_value_compare() {}
@@ -140,6 +140,11 @@ namespace ft
 		map(Compare const& comp, Allocator const& alloc = Allocator())
 			: _key_compare(comp)
 			, _tree(key_comp(), alloc)
+		{}
+
+		map(map const& other)
+			: _key_compare(other._key_compare)
+			, _tree(other._tree)
 		{}
 
 		template<typename InputIt>

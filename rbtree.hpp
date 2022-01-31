@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:54:13 by smun              #+#    #+#             */
-/*   Updated: 2022/01/31 13:42:47 by smun             ###   ########.fr       */
+/*   Updated: 2022/01/31 15:28:22 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -343,7 +343,7 @@ namespace ft
 		void		clear();
 
 		ft::pair<iterator, bool>	insert(const_reference value);
-		iterator					insert(iterator hint, const_reference value);
+		iterator					insert(const_iterator hint, const_reference value);
 
 		template<typename InputIt>
 		typename ft::enable_if<ft::is_input_iterator<InputIt>::value, void>::type
@@ -375,9 +375,10 @@ namespace ft
 		void				leftRotate(NodePointer n);
 		void				rightRotate(NodePointer n);
 		NodePointer			findNode(key_type const& key) const;
-		NodePointer&		findPlace(NodePointer& place, key_type const& key, NodePointer& parent);
-		NodePointer&		findPlaceWithHint(const_iterator hint, key_type const& key, NodePointer& parent);
-		bool				insertNodeAt(NodePointer parent, NodePointer& place, const_reference value, bool overwrite);
+		template<typename KeyOrValue>
+		NodePointer&		findPlace(NodePointer& place, KeyOrValue value, NodePointer& parent);
+		NodePointer&		findPlaceWithHint(const_iterator hint, const_reference value, NodePointer& parent);
+		bool				insertNodeAt(NodePointer parent, NodePointer& place, NodePointer& node, const_reference value);
 		void				tryFixDoubleRed(NodePointer n);
 		void				destroyNode(NodePointer n);
 		void				deleteNode(NodePointer n);
@@ -530,22 +531,23 @@ namespace ft
 	}
 
 	template<typename Key, typename Value, typename Compare, typename ValueCreator, typename Allocator>
+	template<typename KeyOrValue>
 	typename TREE::NodePointer&
-	TREE::findPlace(NodePointer& place, Key const& key, NodePointer& parent)
+	TREE::findPlace(NodePointer& place, KeyOrValue value, NodePointer& parent)
 	{
 		NodePointer	current = place;
 		NodePointer*	ret = &place;
 		while (current != nullptr)
 		{
 			parent = current->getParent();
-			if (_value_compare(current->getValue(), key))
+			if (_value_compare(current->getValue(), value))
 			{
 				parent = current;
 				NodePointer& rc = current->getRightChild();
 				ret = &rc;
 				current = rc;
 			}
-			else if (_value_compare(key, current->getValue()))
+			else if (_value_compare(value, current->getValue()))
 			{
 				parent = current;
 				NodePointer& lc = current->getLeftChild();
@@ -560,12 +562,12 @@ namespace ft
 
 	template<typename Key, typename Value, typename Compare, typename ValueCreator, typename Allocator>
 	typename TREE::NodePointer&
-	TREE::findPlaceWithHint(const_iterator hint, Key const& key, NodePointer& parent)
+	TREE::findPlaceWithHint(const_iterator hint, const_reference value, NodePointer& parent)
 	{
-		if (hint == end() || _value_compare(key, *hint)) // key < hint
+		if (hint == end() || _value_compare(value, *hint)) // key < hint
 		{
 			const_iterator prev = hint;
-			if (prev == begin() || _value_compare(*(--prev), key)) // --hint < key (*valid hint*)
+			if (prev == begin() || _value_compare(*(--prev), value)) // --hint < key (*valid hint*)
 			{
 				if (hint.base() == _end_ptr && _end_ptr->getLeftChild() == nullptr)
 					return _root;
@@ -574,19 +576,19 @@ namespace ft
 				else
 					return (parent = prev.base())->getRightChild();
 			}
-			return findPlace(_root, key, parent); // invalid hint
+			return findPlace(_root, value, parent); // invalid hint
 		}
-		else if (_value_compare(*hint, key)) // hint < key
+		else if (_value_compare(*hint, value)) // hint < key
 		{
 			const_iterator next = ++hint;
-			if (next == end() || _value_compare(key, *next)) // key < ++hint (*valid hint*)
+			if (next == end() || _value_compare(value, *next)) // key < ++hint (*valid hint*)
 			{
 				if (hint.base()->getRightChild() == nullptr)
 					return (parent = hint.base())->getRightChild();
 				else
 					return (parent = next.base())->getLeftChild();
 			}
-			return findPlace(_root, key, parent); // invalid hint
+			return findPlace(_root, value, parent); // invalid hint
 		}
 		else // hint == key
 		{
@@ -600,17 +602,12 @@ namespace ft
 
 	template<typename Key, typename Value, typename Compare, typename ValueCreator, typename Allocator>
 	bool
-	TREE::insertNodeAt(NodePointer parent, NodePointer& place, const_reference value, bool overwrite)
+	TREE::insertNodeAt(NodePointer parent, NodePointer& place, NodePointer& node, const_reference value)
 	{
-		if (place != nullptr)
+		if (place == nullptr)
 		{
-			if (overwrite)
-				place->getValue().second = value.second;
-			return false;
-		}
-		else
-		{
-			place = createNode(value, parent);
+			node = createNode(value, parent);
+			place = node;
 			tryFixDoubleRed(place);
 			if (place == _root)
 				_end_ptr->setLeftChild(place);
@@ -619,6 +616,9 @@ namespace ft
 			++_size;
 			return true;
 		}
+		else
+			node = place;
+		return false;
 	}
 
 	template<typename Key, typename Value, typename Compare, typename ValueCreator, typename Allocator>
@@ -787,22 +787,24 @@ namespace ft
 	ft::pair<typename TREE::iterator, bool>
 	TREE::insert(const_reference value)
 	{
-		NodePointer	parent;
-		NodePointer&	place = findPlace(_root, value.first, parent);
-		bool			inserted = insertNodeAt(parent, place, value, false);
+		NodePointer		parent;
+		NodePointer		new_node;
+		NodePointer&	place = findPlace(_root, value, parent);
+		bool			inserted = insertNodeAt(parent, place, new_node, value);
 
-		return ft::make_pair<iterator, bool>(iterator(place), inserted);
+		return ft::make_pair<iterator, bool>(iterator(new_node), inserted);
 	}
 
 	template<typename Key, typename Value, typename Compare, typename ValueCreator, typename Allocator>
 	typename TREE::iterator
-	TREE::insert(iterator hint, const_reference value)
+	TREE::insert(const_iterator hint, const_reference value)
 	{
-		NodePointer	parent;
-		NodePointer&	place = findPlaceWithHint(hint, value.first, parent);
+		NodePointer		parent;
+		NodePointer		new_node;
+		NodePointer&	place = findPlaceWithHint(hint, value, parent);
 
-		insertNodeAt(parent, place, value, false);
-		return iterator(place);
+		insertNodeAt(parent, place, new_node, value);
+		return iterator(new_node);
 	}
 
 	template<typename Key, typename Value, typename Compare, typename ValueCreator, typename Allocator>
@@ -948,11 +950,12 @@ namespace ft
 	Value&
 	TREE::operator[](Key const& key)
 	{
-		NodePointer	parent = _end_ptr;
+		NodePointer		parent = _end_ptr;
+		NodePointer		node;
 		NodePointer&	place = findPlace(_root, key, parent);
 
 		if (place == nullptr)
-			insertNodeAt(parent, place, _value_creator(key), false);
+			insertNodeAt(parent, place, node, _value_creator(key));
 		return place->getValue();
 	}
 
