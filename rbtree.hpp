@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:54:13 by smun              #+#    #+#             */
-/*   Updated: 2022/02/02 15:49:51 by smun             ###   ########.fr       */
+/*   Updated: 2022/02/02 18:32:52 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -610,10 +610,10 @@ namespace ft
 			node = createNode(value, parent);
 			place = node;
 			tryFixDoubleRed(place);
-			if (place == _root)
-				_end_ptr->setLeftChild(place);
+			if (node == _root)
+				_end_ptr->setLeftChild(node);
 			if (_begin_ptr == _end_ptr || _begin_ptr->getMinimum() == node)
-				_begin_ptr = place;
+				_begin_ptr = node;
 			++_size;
 			return true;
 		}
@@ -957,7 +957,10 @@ namespace ft
 		NodePointer&	place = findPlace(_root, key, parent);
 
 		if (place == nullptr)
+		{
 			insertNodeAt(parent, place, node, _value_creator(key));
+			return node->getValue();
+		}
 		return place->getValue();
 	}
 

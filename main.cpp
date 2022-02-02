@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 19:04:19 by smun              #+#    #+#             */
-/*   Updated: 2022/02/02 17:48:34 by smun             ###   ########.fr       */
+/*   Updated: 2022/02/02 18:39:38 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,7 @@ static void	TestPairStringMap(ft::pair<int, int*> numpair)
 
 	BEGIN_EVAL;
 	REGISTER_EVAL(1, ut1, BasicTest1);
+	REGISTER_EVAL(2, ut1, BasicTest2);
 	END_EVAL;
 }
 

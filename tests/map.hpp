@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 14:33:40 by smun              #+#    #+#             */
-/*   Updated: 2022/01/29 14:47:20 by smun             ###   ########.fr       */
+/*   Updated: 2022/02/02 18:39:22 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,10 +39,10 @@ namespace ft
 				std::cout << (it->first) << "-" << (it->second) << std::endl;
 		}
 
-		template<typename V>
-		static V	makePairForTest(int k, std::string v)
+		typedef typename Map::value_type Pair;
+		static Pair	makePairForTest(int k, std::string v)
 		{
-			return V(k, v);
+			return Pair(k, v);
 		}
 
 
@@ -56,6 +56,7 @@ namespace ft
 		typedef typename Map::size_type		size_type;
 
 		# include "map/basictest1.ipp"
+		# include "map/basictest2.ipp"
 	};
 }
 
