@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 19:04:19 by smun              #+#    #+#             */
-/*   Updated: 2022/01/31 16:47:33 by smun             ###   ########.fr       */
+/*   Updated: 2022/02/02 17:48:34 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,12 +150,6 @@ int main(int argc, char* argv[])
 {
 	int	flags = parseCategories(argc, argv);
 	ft::pair<int, int*>	numpair = parseNumbers(argc, argv);
-
-	ft::map<int, int> m;
-	ft::vector<int> v;
-	//ft::map<int, int>::
-	//ft::vector<int>::
-
 
 	if (flags & StringVector)
 	{
