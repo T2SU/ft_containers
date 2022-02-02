@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 22:10:39 by smun              #+#    #+#             */
-/*   Updated: 2022/01/31 17:08:28 by smun             ###   ########.fr       */
+/*   Updated: 2022/02/02 12:18:57 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,15 +94,15 @@ namespace ft
 	}
 
 	template<typename T1, typename T2>
-	bool	operator>(pair<T1, T2> const& lhs, pair<T1, T2> const& rhs)
-	{
-		return rhs < lhs;
-	}
-
-	template<typename T1, typename T2>
 	bool	operator<=(pair<T1, T2> const& lhs, pair<T1, T2> const& rhs)
 	{
 		return !(rhs < lhs);
+	}
+
+	template<typename T1, typename T2>
+	bool	operator>(pair<T1, T2> const& lhs, pair<T1, T2> const& rhs)
+	{
+		return rhs < lhs;
 	}
 
 	template<typename T1, typename T2>

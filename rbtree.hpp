@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/26 18:54:13 by smun              #+#    #+#             */
-/*   Updated: 2022/01/31 19:26:38 by smun             ###   ########.fr       */
+/*   Updated: 2022/02/02 12:30:39 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -968,7 +968,7 @@ namespace ft
 	template<typename Key, typename Value, typename Compare, typename ValueCreator, typename Allocator>
 	bool	operator<(TREE const& lhs, TREE const& rhs)
 	{
-		return ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(), Compare());
+		return ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 	}
 
 	template<typename Key, typename Value, typename Compare, typename ValueCreator, typename Allocator>
