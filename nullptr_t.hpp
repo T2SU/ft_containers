@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/02 15:47:51 by smun              #+#    #+#             */
-/*   Updated: 2022/02/02 15:51:11 by smun             ###   ########.fr       */
+/*   Updated: 2022/02/02 15:55:02 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define NULLPTR_T_HPP
 
 # if __cplusplus < 201103L
+#  ifndef nullptr
 class nullptr_t
 {
 public:
@@ -33,6 +34,7 @@ private:
 	void operator&() const;
 
 } nullptr = {};
+#  endif
 # endif
 
 #endif
