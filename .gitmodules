@@ -1,0 +1,6 @@
+[submodule "containers_test"]
+	path = containers_test
+	url = git@github.com:T2SU/containers_test.git
+[submodule "ft_containers-unit-test"]
+	path = ft_containers-unit-test
+	url = git@github.com:T2SU/ft_containers-unit-test.git
