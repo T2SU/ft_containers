@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 10:56:57 by smun              #+#    #+#             */
-/*   Updated: 2022/02/02 15:49:39 by smun             ###   ########.fr       */
+/*   Updated: 2022/02/02 16:29:31 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,7 @@ namespace ft
 
 			void	Rollback(vector& v)
 			{
+				v.CallDestroy(v._begin_ptr, v.size());
 				v._allocator.deallocate(v._begin_ptr, v._cap);
 				v._begin_ptr = _begin_ptr;
 				v._end_ptr = _end_ptr;
@@ -133,6 +134,7 @@ namespace ft
 		/* Destructor */
 		virtual ~vector()
 		{
+			CallDestroy(_begin_ptr, size());
 			_allocator.deallocate(_begin_ptr, capacity());
 			_begin_ptr = nullptr;
 			_end_ptr = nullptr;
@@ -372,6 +374,12 @@ namespace ft
 			return ft::max(2 * cap, n);
 		}
 
+		void	CallDestroy(pointer p, size_type n)
+		{
+			while(n-- > 0)
+				_allocator.destroy(p);
+		}
+
 		void	EnsureStorage(size_type n)
 		{
 			if (n > max_size())
@@ -389,6 +397,7 @@ namespace ft
 				_allocator.construct(target++, *(first++));
 
 			// Deallocate previous memory
+			CallDestroy(_begin_ptr, size());
 			_allocator.deallocate(_begin_ptr, oldcap);
 
 			// Relocate to new memory (and set new capacity)
