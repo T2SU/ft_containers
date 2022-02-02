@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/03 17:35:17 by smun              #+#    #+#             */
-/*   Updated: 2022/01/31 17:04:14 by smun             ###   ########.fr       */
+/*   Updated: 2022/02/02 14:31:46 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -305,7 +305,15 @@ namespace ft
 	{
 		o1.swap(o2);
 	}
+}
 
+namespace std
+{
+	template<typename Key, typename T, typename Compare, typename Allocator>
+	void	swap(map<Key, T, Compare, Allocator>& o1, map<Key, T, Compare, Allocator>& o2)
+	{
+		o1.swap(o2);
+	}
 }
 
 #endif

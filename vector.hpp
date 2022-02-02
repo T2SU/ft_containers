@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 10:56:57 by smun              #+#    #+#             */
-/*   Updated: 2022/01/29 19:14:21 by smun             ###   ########.fr       */
+/*   Updated: 2022/02/02 15:18:14 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,12 +37,36 @@ namespace ft
 		typedef ft::reverse_iterator<iterator>				reverse_iterator;
 		typedef ft::reverse_iterator<const_iterator>		const_reverse_iterator;
 
-	protected:
+	private:
 		pointer			_begin_ptr;
 		pointer			_end_ptr;
 		pointer			_end_cap;
 		size_type		_cap;
 		allocator_type	_allocator;
+
+		struct InsertionTransaction
+		{
+			pointer		_begin_ptr;
+			pointer		_end_ptr;
+			pointer		_end_cap;
+			size_type	_cap;
+
+			InsertionTransaction(vector& v)
+				: _begin_ptr(v._begin_ptr)
+				, _end_ptr(v._end_ptr)
+				, _end_cap(v._end_cap)
+				, _cap(v._cap)
+				{}
+
+			void	Rollback(vector& v)
+			{
+				v._allocator.deallocate(v._begin_ptr, v._cap);
+				v._begin_ptr = _begin_ptr;
+				v._end_ptr = _end_ptr;
+				v._end_cap = _end_cap;
+				v._cap = _cap;
+			}
+		};
 
 	public:
 		/* Default Constructor */
@@ -240,13 +264,33 @@ namespace ft
 		typename enable_if<is_input_iterator<InputIt>::value, void>::type
 		insert(iterator pos, InputIt first, InputIt last)
 		{
-			iterator	dest = PrepareInsertion(pos, first, last);
-			pointer		target = dest.base();
+			pointer old_end = _end_ptr;
 
-			while (first != last)
+			while (_end_ptr != _end_cap && first != last)
 			{
-				_allocator.construct(target++, *(first++));
-				++_end_ptr;
+				ConstructAtEnd(1, *first);
+				++first;
+			}
+			if (first == last)
+				return;
+
+			InsertionTransaction tx(*this);
+			try
+			{
+				iterator	dest = PrepareInsertion(pos, first, last);
+				pointer		target = dest.base();
+
+				while (first != last)
+				{
+					_allocator.construct(target++, *(first++));
+					++_end_ptr;
+				}
+			}
+			catch (...)
+			{
+				tx.Rollback(*this);
+				erase(iterator(old_end), end());
+				throw;
 			}
 		}
 
@@ -300,7 +344,8 @@ namespace ft
 		{
 			if (count > size())
 			{
-				EnsureStorage(count);
+				if (count > capacity())
+					EnsureStorage(RecommendedSize(count));
 				ConstructAtEnd(count - size(), value);
 			}
 			else if (count < size())
@@ -440,6 +485,15 @@ namespace ft
 		return !(lhs < rhs);
 	}
 
+	template<typename T>
+	void	swap(ft::vector<T>& o1, ft::vector<T>& o2)
+	{
+		o1.swap(o2);
+	}
+}
+
+namespace std
+{
 	template<typename T>
 	void	swap(ft::vector<T>& o1, ft::vector<T>& o2)
 	{
