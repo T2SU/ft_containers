@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 22:10:09 by smun              #+#    #+#             */
-/*   Updated: 2022/01/31 18:58:53 by smun             ###   ########.fr       */
+/*   Updated: 2022/02/02 12:05:18 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,10 +65,28 @@ namespace ft
 	template <typename T1, typename T2 = T1>
 	struct less
 	{
-		bool operator()(T1 const& x, T2 const& y) const
-		{
-			return x < y;
-		}
+		bool operator()(T1 const& x, T2 const& y) const { return x < y; }
+		bool operator()(T1 const& x, T1 const& y) const { return x < y; }
+		bool operator()(T2 const& x, T2 const& y) const { return x < y; }
+		bool operator()(T2 const& x, T1 const& y) const { return x < y; }
+	};
+
+	template <typename T1>
+	struct less<T1, T1>
+	{
+		bool operator()(T1 const& x, T1 const& y) const { return x < y; }
+	};
+
+	template <typename T1>
+	struct less<const T1, T1>
+	{
+		bool operator()(T1 const& x, T1 const& y) const { return x < y; }
+	};
+
+	template <typename T1>
+	struct less<T1, const T1>
+	{
+		bool operator()(T1 const& x, T1 const& y) const { return x < y; }
 	};
 
 	template <typename T1, typename T2 = T1>
@@ -80,6 +98,24 @@ namespace ft
 		bool operator()(T2 const& x, T1 const& y) const { return x == y; }
 	};
 
+	template <typename T1>
+	struct equal_to<T1, T1>
+	{
+		bool operator()(T1 const& x, T1 const& y) const { return x == y; }
+	};
+
+	template <typename T1>
+	struct equal_to<const T1, T1>
+	{
+		bool operator()(T1 const& x, T1 const& y) const { return x == y; }
+	};
+
+	template <typename T1>
+	struct equal_to<T1, const T1>
+	{
+		bool operator()(T1 const& x, T1 const& y) const { return x == y; }
+	};
+
 	template <typename Type, class Compare>
 	Type const&	max(Type const& a, Type const& b, Compare comp)
 	{
@@ -89,7 +125,7 @@ namespace ft
 	template <typename Type>
 	Type const&	max(Type const& a, Type const& b)
 	{
-		return max(a, b, less<Type>());
+		return ft::max(a, b, ft::less<Type>());
 	}
 
 	template <typename Type, class Compare>
@@ -101,7 +137,7 @@ namespace ft
 	template <typename Type>
 	Type const&	min(Type const& a, Type const& b)
 	{
-		return min(a, b, less<Type>());
+		return ft::min(a, b, ft::less<Type>());
 	}
 
 	template<typename InputIter>
@@ -134,7 +170,11 @@ namespace ft
 
 	template<typename InputIter1, typename InputIter2, typename BinaryPredicate>
 	bool
-	equal(InputIter1 first1, InputIter1 last1, InputIter2 first2, BinaryPredicate pred)
+	equal(
+		InputIter1 first1,
+		InputIter1 last1,
+		InputIter2 first2,
+		BinaryPredicate pred)
 	{
 		while (first1 != last1)
 		{
@@ -148,22 +188,25 @@ namespace ft
 
 	template<typename InputIter1, typename InputIter2>
 	bool
-	equal(InputIter1 first1, InputIter1 last1, InputIter2 first2)
+	equal(
+		InputIter1 first1,
+		InputIter1 last1,
+		InputIter2 first2)
 	{
-		return equal(
-			first1,
-			last1,
-			first2,
-			equal_to<
-				typename iterator_traits<InputIter1>::value_type,
-				typename iterator_traits<InputIter2>::value_type
-			>()
-		);
+		typedef typename iterator_traits<InputIter1>::value_type v1;
+		typedef typename iterator_traits<InputIter2>::value_type v2;
+
+		return ft::equal(first1, last1, first2, ft::equal_to<v1, v2>());
 	}
 
 	template<typename InputIter1, typename InputIter2, typename Compare>
 	bool
-	lexicographical_compare(InputIter1 first1, InputIter1 last1, InputIter2 first2, InputIter2 last2, Compare comp)
+	lexicographical_compare(
+		InputIter1 first1,
+		InputIter1 last1,
+		InputIter2 first2,
+		InputIter2 last2,
+		Compare comp)
 	{
 		while (first2 != last2)
 		{
@@ -183,14 +226,14 @@ namespace ft
 	bool
 	lexicographical_compare(InputIter1 first1, InputIter1 last1, InputIter2 first2, InputIter2 last2)
 	{
-		return lexicographical_compare(
+		return ft::lexicographical_compare(
 			first1,
 			last1,
 			first2,
 			last2,
-			less<
-				typename iterator_traits<InputIter1>::value_type,
-				typename iterator_traits<InputIter2>::value_type
+			ft::less<
+				typename ft::iterator_traits<InputIter1>::value_type,
+				typename ft::iterator_traits<InputIter2>::value_type
 			>()
 		);
 	}
