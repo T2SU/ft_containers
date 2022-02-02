@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 10:56:57 by smun              #+#    #+#             */
-/*   Updated: 2022/02/02 15:18:14 by smun             ###   ########.fr       */
+/*   Updated: 2022/02/02 15:49:39 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 # include <memory>
 # include "iterator.hpp"
 # include "algorithm.hpp"
+# include "nullptr_t.hpp"
 
 namespace ft
 {

@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 22:10:39 by smun              #+#    #+#             */
-/*   Updated: 2022/02/02 15:45:40 by smun             ###   ########.fr       */
+/*   Updated: 2022/02/02 15:49:17 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,6 @@
 # define UTILITY_HPP
 
 # include "algorithm.hpp"
-
-# if __cplusplus <= 201103L
-	#define nullptr (0)
-# endif
 
 namespace ft
 {
