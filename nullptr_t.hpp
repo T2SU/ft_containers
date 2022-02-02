@@ -6,14 +6,14 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/02 15:47:51 by smun              #+#    #+#             */
-/*   Updated: 2022/02/02 15:49:24 by smun             ###   ########.fr       */
+/*   Updated: 2022/02/02 15:51:11 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef NULLPTR_T_HPP
 # define NULLPTR_T_HPP
 
-# if __cplusplus <= 201103L
+# if __cplusplus < 201103L
 class nullptr_t
 {
 public:
