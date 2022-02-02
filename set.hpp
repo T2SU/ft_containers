@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/31 14:12:03 by smun              #+#    #+#             */
-/*   Updated: 2022/02/02 14:31:33 by smun             ###   ########.fr       */
+/*   Updated: 2022/02/02 16:53:35 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -249,7 +249,7 @@ namespace ft
 	};
 
 	template<typename Key, typename Compare, typename Allocator>
-	void	swap(set<Key, Compare, Allocator>& o1, set<Key, Compare, Allocator>& o2)
+	void	swap(ft::set<Key, Compare, Allocator>& o1, ft::set<Key, Compare, Allocator>& o2)
 	{
 		o1.swap(o2);
 	}
@@ -258,7 +258,7 @@ namespace ft
 namespace std
 {
 	template<typename Key, typename Compare, typename Allocator>
-	void	swap(set<Key, Compare, Allocator>& o1, set<Key, Compare, Allocator>& o2)
+	void	swap(ft::set<Key, Compare, Allocator>& o1, ft::set<Key, Compare, Allocator>& o2)
 	{
 		o1.swap(o2);
 	}

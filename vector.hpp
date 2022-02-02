@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 10:56:57 by smun              #+#    #+#             */
-/*   Updated: 2022/02/02 16:29:31 by smun             ###   ########.fr       */
+/*   Updated: 2022/02/02 16:49:32 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -269,14 +269,6 @@ namespace ft
 		{
 			pointer old_end = _end_ptr;
 
-			while (_end_ptr != _end_cap && first != last)
-			{
-				ConstructAtEnd(1, *first);
-				++first;
-			}
-			if (first == last)
-				return;
-
 			InsertionTransaction tx(*this);
 			try
 			{
@@ -377,7 +369,7 @@ namespace ft
 		void	CallDestroy(pointer p, size_type n)
 		{
 			while(n-- > 0)
-				_allocator.destroy(p);
+				_allocator.destroy(p++);
 		}
 
 		void	EnsureStorage(size_type n)

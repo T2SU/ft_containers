@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/22 19:42:47 by smun              #+#    #+#             */
-/*   Updated: 2022/01/31 12:59:52 by smun             ###   ########.fr       */
+/*   Updated: 2022/02/02 17:22:42 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,8 @@ namespace ft
 		static const Type			value = val;
 		typedef Type				value_type;
 		typedef integral_constant	type;
+
+		operator value_type() const { return value; }
 	};
 
 	typedef integral_constant<bool, true>	true_type;
@@ -42,6 +44,11 @@ namespace ft
 	template <>					struct is_integral<char>				: public true_type {};
 	template <>					struct is_integral<signed char>			: public true_type {};
 	template <>					struct is_integral<unsigned char>		: public true_type {};
+	# if __cplusplus >= 201103L || __APPLE__
+		// char16_t is supported since C++11.
+		// but Apple clang++ can compile it in C++98 standard too.
+	template <>					struct is_integral<char16_t>			: public true_type {};
+	# endif
 	template <>					struct is_integral<wchar_t>				: public true_type {};
 	template <>					struct is_integral<short>				: public true_type {};
 	template <>					struct is_integral<unsigned short>		: public true_type {};

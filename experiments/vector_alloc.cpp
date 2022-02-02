@@ -6,6 +6,8 @@
 
 int main()
 {
+	std::is_integral<int>();
+
 	std::vector<int> vi;
 	std::vector<int> vi2 = vi;
 
