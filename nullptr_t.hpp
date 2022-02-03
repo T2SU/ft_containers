@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/02 15:47:51 by smun              #+#    #+#             */
-/*   Updated: 2022/02/02 15:55:02 by smun             ###   ########.fr       */
+/*   Updated: 2022/02/03 12:09:30 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 
 # if __cplusplus < 201103L
 #  ifndef nullptr
-class nullptr_t
+struct nullptr_t
 {
 public:
 	template<class T>
